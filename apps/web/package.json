@@ -1,22 +1,14 @@
 {
-  "name": "@grantoz/oscar-api",
+  "name": "@grantoz/web",
   "version": "0.0.1",
   "main": "index.js",
-  "workspaces": {
-    "packages": [
-      "apps/*",
-      "packages/*"
-    ]
-  },  
   "scripts": {
+    "build": "tsc",
     "check-types": "tsc --noEmit",
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "Grant Ozolins <grant.ozolins@gmail.com> (https://grantoz.github.io/)",
+  "type": "module",
   "license": "MIT",
   "description": "",
   "devDependencies": {
@@ -29,12 +21,8 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@hapi/hapi": "^21.3.10",
-    "@prisma/client": "^5.19.1"
-  },
-  "packageManager": "npm@10.8.1",
-  "engines": {
-    "node": ">=20.16.0",
-    "npm": ">=10.8.1"
+    "@grantoz/db": "*",
+    "@grantoz/ts-config": "*",
+    "@hapi/hapi": "^21.3.10"
   }
 }

@@ -1,0 +1,25 @@
+{
+  "name": "@grantoz/db",
+  "type": "module",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+      "src/**"
+  ],  
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push --skip-generate",
+    "db:migrate:dev": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.1"
+  },
+  "devDependencies": {
+    "@grantoz/ts-config": "*",
+    "typescript": "^5.5.4",
+    "prisma": "^5.19.1"
+  }
+}
