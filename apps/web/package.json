@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc",
     "check-types": "tsc --noEmit",
+    "lint": "eslint '**/*.{ts,js}'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Grant Ozolins <grant.ozolins@gmail.com> (https://grantoz.github.io/)",

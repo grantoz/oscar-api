@@ -1,5 +1,13 @@
 {
   "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },   
+    "lint": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },     
     "db:generate": {
       "cache": false
     },

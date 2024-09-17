@@ -7,22 +7,24 @@
       "apps/*",
       "packages/*"
     ]
-  },  
+  },
   "scripts": {
     "check-types": "tsc --noEmit",
     "dev": "turbo run dev",
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint"
+    "build": "turbo run build --parallel",
+    "test": "turbo run test --parallel",
+    "lint": "turbo run lint --parallel"
   },
   "keywords": [],
   "author": "Grant Ozolins <grant.ozolins@gmail.com> (https://grantoz.github.io/)",
   "license": "MIT",
   "description": "",
   "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.10.0",
     "@types/node": "^22.5.2",
     "eslint": "^9.10.0",
+    "globals": "^15.9.0",
     "prisma": "^5.19.1",
     "ts-node": "^10.9.2",
     "turbo": "^2.1.2",
