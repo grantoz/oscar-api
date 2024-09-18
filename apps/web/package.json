@@ -3,10 +3,14 @@
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
+    "build-OLD": "tsc",
     "check-types": "tsc --noEmit",
+    "dev": "node --env-file ../../.env dist/src/index.js",
     "lint": "eslint '**/*.{ts,js}'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "glob --cmd \"tsx --env-file ../../.env --test --test-reporter spec \" \"./test/**/*.test.ts\"",
+    "test-BLEH": "glob --cmd \"tsx --env-file ../../.env --env-file ../../.env.test --test --test-reporter spec \" \"./test/**/*.test.ts\"",
+    "test-OLD": "node --test --env-file ../../.env"
   },
   "author": "Grant Ozolins <grant.ozolins@gmail.com> (https://grantoz.github.io/)",
   "type": "module",
@@ -16,14 +20,16 @@
     "@eslint/js": "^9.10.0",
     "@types/node": "^22.5.2",
     "eslint": "^9.10.0",
+    "glob": "^11.0.0",
     "prisma": "^5.19.1",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.19.1",
     "turbo": "^2.1.2",
     "typescript": "^5.5.4"
   },
   "dependencies": {
     "@grantoz/db": "*",
     "@grantoz/ts-config": "*",
+    "@hapi/glue": "^9.0.1",
     "@hapi/hapi": "^21.3.10"
   }
 }

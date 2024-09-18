@@ -1,9 +1,11 @@
 {
   "extends": "@grantoz/ts-config/tsconfig.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src"
+  "compilerOptions": { // These are for shorter, non-relative imports in tests. Completely optional
+    "baseUrl": "./",
+    "paths": {
+        "@src/*": ["./src/*"], 
+    },
+    "noEmit": true, // Avoid compiling by mistake
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["./src/**/*", "./test/**/*"], // Important so tests also benefit from TS support
 }

@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+      "noEmit": false,
+      "outDir": "./dist",
+  },
+  "exclude": [ // This way we avoid compiling tests into JS
+      "**/*.spec.ts",
+      "**/*.test.ts"
+  ]
+}

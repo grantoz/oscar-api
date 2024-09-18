@@ -1,0 +1,14 @@
+// Used for QoL improvements in tests
+{
+  // Base monorepo tsconfig
+	"extends": "@grantoz/ts-config/tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@src/*": ["../src/*"]
+		},
+		"noEmit": true,
+		"allowImportingTsExtensions": true
+	},
+	"include": ["./**/*"]
+}

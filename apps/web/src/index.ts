@@ -10,15 +10,12 @@ const init = async () => {
       return this.toString();
     }
 
+    console.log('can I get an env var?', process.env.DEPLOYMENT);
+
     const server = new Server({
       port: 3000,
       host: 'localhost'
     });
-
-    // const server = Hapi.server({
-    //     port: 3000,
-    //     host: 'localhost'
-    // });
 
     server.route({
       method: 'GET',
