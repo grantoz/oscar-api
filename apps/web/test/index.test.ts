@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, test } from "node:test";
 import assert from "node:assert/strict";
-import Stack from "../../src/stack.ts";
+import Stack from "../src/stack.ts";
 
 test("will pass", () => {
   assert.ok("hello world yeah");

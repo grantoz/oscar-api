@@ -5,14 +5,9 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },   
-    "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
-    },   
-    "lint": {
-      "dependsOn": ["^build"],
-      "outputs": []
-    },     
+    "clean": {
+      "cache": false
+    },       
     "db:generate": {
       "cache": false
     },
@@ -21,6 +16,14 @@
     },
     "db:migrate:dev": {
       "cache": false
-    }
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    }   
   }
 }

@@ -1,93 +1,98 @@
-'use strict';
-
-import { Request, ResponseToolkit, Server} from "@hapi/hapi";
+import Fastify, { FastifyInstance, RouteShorthandOptions } from 'fastify'
+// import { Server, IncomingMessage, ServerResponse } from 'http'
 import { PrismaClient } from '@grantoz/db';
 
-const prisma = new PrismaClient()
+const server: FastifyInstance = Fastify({});
+const prisma = new PrismaClient();
 
-const init = async () => {
-    (BigInt.prototype as any).toJSON = function () { 
-      return this.toString();
-    }
-
-    console.log('can I get an env var?', process.env.DEPLOYMENT);
-
-    const server = new Server({
-      port: 3000,
-      host: 'localhost'
-    });
-
-    server.route({
-      method: 'GET',
-      path: '/',
-      handler: (_req: Request, _h: ResponseToolkit) => {
-          return 'Hello World!';
-      }
-    });
-
-    server.route({
-      method: 'GET',
-      path: '/hello/{user}',
-      handler: (req: Request, _h: ResponseToolkit) => {
-        return `Hello ${req.params.user}!`;
-      }
-    });
-
-    server.route({
-      method: 'GET',
-      path: '/user/all',
-      handler: async (req: Request, _h: ResponseToolkit) => {
-        const user = await prisma.user.findMany();
-        console.dir(user);
-        return JSON.stringify(user);
-      }
-    });
-
-    server.route({
-      method: 'GET',
-      path: '/user/some',
-      handler: async (req: Request, _h: ResponseToolkit) => {
-        // cursor based pagination https://www.prisma.io/docs/orm/prisma-client/queries/pagination
-        const user = await prisma.user.findMany({
-          take: 4,
-          cursor: {
-            id: 2,
-          },
-          orderBy: {
-            id: 'asc',
+const opts: RouteShorthandOptions = {
+  schema: {
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          pong: {
+            type: 'string'
           }
-        });
-        console.dir(user);
-        return JSON.stringify(user);
+        }
       }
-    });
-
-    server.route({
-      method: 'GET',
-      path: '/user/{id}',
-      handler: async (req: Request, _h: ResponseToolkit) => {
-        const user = await prisma.user.findFirst({
-          where: { id: req.params.id }
-        })
-        console.dir(user);
-        return JSON.stringify(user);
-      }
-    });
-    await server.start();
-    console.log('Server running on %s', server.info.uri);
+    }
+  }
 };
 
-process.on('unhandledRejection', async (err) => {
-    console.log(err);
-    await prisma.$disconnect();
-    process.exit(1);
+server.get('/ping', opts, async (req, out) => {
+  out.type('application/json').code(200);
+  return { pong: 'it worked!' }
+})
+
+server.get<{ Params: { user: string } }>('/hello/:user', async (req, out) => {
+    out.type('application/json').code(200);
+    return { reply: `Hello ${req.params.user}!` };
 });
 
-init().then(async () => {
+server.get('/user/all', async (req, out) => {
+  out.type('application/json').code(200);
+  const user = await prisma.user.findMany();
+  console.dir(user);
+  return JSON.stringify(user);
+});
+
+server.get('/user/some', async (req, out) => {
+  out.type('application/json').code(200);
+    // cursor based pagination https://www.prisma.io/docs/orm/prisma-client/queries/pagination
+    const user = await prisma.user.findMany({
+      take: 4,
+      cursor: {
+        id: 2,
+      },
+      orderBy: {
+        id: 'asc',
+      }
+    });
+    console.dir(user);
+    return JSON.stringify(user);
+});
+
+server.get<{ Params: { id: number } }>('/user/:id', async (req, out) => {
+  out.type('application/json').code(200);
+  const user = await prisma.user.findFirst({
+    where: { id: req.params.id }
+  })
+  console.dir(user);
+  return JSON.stringify(user);
+});
+
+const start = async () => {
+  (BigInt.prototype as any).toJSON = function () { 
+    return this.toString();
+  }
+  console.log('can I get an WOO WOO! env var?', process.env.DEPLOYMENT);
+  try {
+    await server.listen({ port: 3000 }); // host?
+
+    const address = server.server.address();
+    const port = typeof address === 'string' ? address : address?.port;
+    console.log('Server listening at', port);
+
+  } catch (err) {
+    server.log.error(err);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
+process.on('unhandledRejection', async (err) => {
+  console.log(err);
   await prisma.$disconnect();
-})
-.catch(async (e) => {
-  console.error(e)
-  await prisma.$disconnect()
-  process.exit(1)
+  process.exit(1);
+});
+
+process.on('SIGINT', async () => {
+  console.log('Received SIGINT, stopping.');
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+start().then(async () => {
+  await prisma.$disconnect();
 });

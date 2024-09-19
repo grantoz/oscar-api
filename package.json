@@ -10,6 +10,7 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit",
+    "clean": "turbo run clean --parallel",
     "dev": "turbo run dev",
     "build": "turbo run build --parallel",
     "test": "turbo run test --parallel",
