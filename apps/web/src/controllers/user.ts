@@ -1,31 +1,45 @@
-import { PrismaClient } from "@prisma/client/extension";
-import { HTTPMethods } from 'fastify';
+import { FastifyRequest, FastifyReply, HTTPMethods, RouteGenericInterface } from 'fastify';
+import { prisma } from '@grantoz/db'; 
 
-// nothing yet
-export const userRoutes = (prisma: PrismaClient) => {
-  return [{
+interface IParams {
+  id: number;
+}
+
+interface RouteGeneric extends RouteGenericInterface {
+  Params: IParams;
+}
+
+export const userRoutes = [{
     method: 'GET' as HTTPMethods,
     url: '/user/all',
     handler: async(_req, out) => {
       out.type('application/json').code(200);
-      const user = await prisma.user.findMany();
-      console.dir(user);
-      return JSON.stringify(user);
+      const users = await prisma.user.findMany();
+      // console.dir(users);
+      return users;
     }
   },
   {
-    // app.get<{ Params: { id: number } }>('/user/:id', async (req, out) => {
     method: 'GET' as HTTPMethods,
     url: '/user/:id',
-    handler: async(req, out) => {
-      out.type('application/json').code(200);
+    schema: {
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' }
+        },  
+        required: ['id']
+      }
+    },
+    handler: async (req: FastifyRequest<RouteGeneric>, reply: FastifyReply) => {
+      reply.type('application/json').code(200);
       const user = await prisma.user.findUnique({
         where: {
           id: req.params.id
         }
       });
-      console.dir(user);
-      return JSON.stringify(user);
+      // console.dir(user);
+      return user;
     }
   },
   {
@@ -33,7 +47,7 @@ export const userRoutes = (prisma: PrismaClient) => {
     url: '/user/some',
     handler: async(_req, out) => {
       out.type('application/json').code(200);
-      const user = await prisma.user.findMany({
+      const users = await prisma.user.findMany({
         take: 4,
         cursor: {
           id: 2,
@@ -42,8 +56,8 @@ export const userRoutes = (prisma: PrismaClient) => {
           id: 'asc',
         }
       });
-      console.dir(user);
-      return JSON.stringify(user);
+      // console.dir(users);
+      return users;
     }
-  }];
-};
+  }
+];

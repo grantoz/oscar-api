@@ -3,10 +3,9 @@
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "build-OLD": "tsc",
+    "build": "swc --strip-leading-paths ./src -d ./dist",
     "check-types": "tsc --noEmit",
-    "clean": "rm -rf build",
+    "clean": "rm -rf dist",
     "dev": "tsx watch --ignore ./test --clear-screen=false --env-file ../../.env src/index.ts",
     "lint": "eslint '**/*.{ts,js}'",
     "test": "glob --cmd \"tsx --env-file ../../.env --test --test-reporter spec \" \"./test/**/*.test.ts\"",
@@ -31,8 +30,6 @@
     "@fastify/type-provider-typebox": "^5.0.0",
     "@grantoz/db": "*",
     "@grantoz/ts-config": "*",
-    "@hapi/glue": "^9.0.1",
-    "@hapi/hapi": "^21.3.10",
     "@sinclair/typebox": "^0.33.12",
     "fastify": "^5.0.0"
   }

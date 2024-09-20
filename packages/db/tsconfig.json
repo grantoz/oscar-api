@@ -1,12 +1,12 @@
 {
   "extends": "@grantoz/ts-config/tsconfig.json",
-  "compilerOptions": {
-    "module": "Node16",
-    "moduleResolution": "Node16",
-    "outDir": "dist",
-    "rootDir": "src",
-    "declaration": true    
+  "compilerOptions": { // These are for shorter, non-relative imports in tests. Completely optional
+    "baseUrl": "./",
+    "paths": {
+        "@src/*": ["./src/*"], 
+    },
+    "allowImportingTsExtensions": false,
+    "noEmit": true, // Avoid compiling by mistake
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["./src/**/*", "./test/**/*"], // Important so tests also benefit from TS support
 }

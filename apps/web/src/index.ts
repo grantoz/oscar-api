@@ -1,5 +1,5 @@
 import Fastify, { FastifyInstance, RouteShorthandOptions } from 'fastify'
-import { PrismaClient } from '@grantoz/db';
+import { prisma } from '@grantoz/db';
 import { userRoutes } from './controllers/index.ts';
 
 // do we want to grab config from a package?
@@ -24,7 +24,7 @@ const envToLogger = {
 const app: FastifyInstance = Fastify({
   logger: envToLogger[process.env.DEPLOYMENT as 'dev' | 'prod' | 'test'] ?? true
 });
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 const opts: RouteShorthandOptions = {
   schema: {
@@ -53,8 +53,7 @@ app.get<{ Params: { user: string } }>('/hello/:user', async (req, out) => {
 });
 
 // TODO typing
-const routes = userRoutes(prisma);
-routes.forEach((route) => {
+userRoutes.forEach((route) => {
   app.route(route);
 });
 
