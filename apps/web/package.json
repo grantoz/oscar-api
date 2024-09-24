@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "build": "swc --strip-leading-paths ./src -d ./dist",
+    "build-OLD": "swc --strip-leading-paths ./src -d ./dist",
+    "build": "swc --strip-leading-paths ./src -d ./dist; npx tsc --emitDeclarationOnly --noEmit false",
     "check-types": "tsc --noEmit",
     "clean": "rm -rf dist",
     "dev": "tsx watch --ignore ./test --clear-screen=false --env-file ../../.env src/index.ts",
@@ -30,6 +31,7 @@
     "@fastify/type-provider-typebox": "^5.0.0",
     "@grantoz/db": "*",
     "@grantoz/ts-config": "*",
+    "@prisma/client": "^5.19.1",
     "@sinclair/typebox": "^0.33.12",
     "fastify": "^5.0.0"
   }

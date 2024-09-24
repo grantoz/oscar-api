@@ -5,7 +5,6 @@
     "paths": {
         "@src/*": ["./src/*"], 
     },
-    "noEmit": true, // Avoid compiling by mistake
   },
   "include": ["./src/**/*", "./test/**/*"], // Important so tests also benefit from TS support
 }

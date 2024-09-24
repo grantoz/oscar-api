@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply, HTTPMethods, RouteGenericInterface } from 'fastify';
-import { prisma } from '@grantoz/db'; 
+import { prisma } from '@grantoz/db';
 
 interface IParams {
   id: number;

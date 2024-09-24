@@ -8,7 +8,7 @@
       "src/**"
   ],  
   "scripts": {
-    "build": "swc --strip-leading-paths ./src -d ./dist",
+    "build": "prisma generate && swc --strip-leading-paths ./src -d ./dist && npx tsc --emitDeclarationOnly --noEmit false",
     "clean": "rm -rf dist",
     "db:generate": "prisma generate",
     "db:push": "prisma db push --skip-generate",
