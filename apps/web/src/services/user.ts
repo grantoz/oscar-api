@@ -1,4 +1,4 @@
-import prisma from '@grantoz/db';
+import { prisma } from '@grantoz/db';
 import { User } from '@prisma/client';
 
 export async function getAllUsers() {

@@ -6,5 +6,6 @@
         "@src/*": ["./src/*"], 
     },
   },
-  "include": ["./src/**/*", "./test/**/*"], // Important so tests also benefit from TS support
+  // "include": ["./src/**/*", "./test/**/*"], // Important so tests also benefit from TS support
+  "include": ["./src/**/*"], // Important so tests also benefit from TS support
 }

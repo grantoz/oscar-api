@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build-OLD": "swc --strip-leading-paths ./src -d ./dist",
-    "build": "swc --strip-leading-paths ./src -d ./dist; npx tsc --emitDeclarationOnly --noEmit false",
+    "build": "swc --strip-leading-paths ./src -d ./dist; npx tsc --emitDeclarationOnly --noEmit false --outdir ./dist",
     "check-types": "tsc --noEmit",
     "clean": "rm -rf dist",
     "dev": "tsx watch --ignore ./test --clear-screen=false --env-file ../../.env src/index.ts",

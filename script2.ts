@@ -3,16 +3,26 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  const someUsers = await prisma.user.findMany({
-    where: {
-      id: { in: [1, 2, 3] },
+  await prisma.user.create({
+    data: {
+      name: 'Tracey',
+      email: 'tracey@grantoz.io',
+      posts: {
+        create: { title: 'Shoes, shoes and more shoes' },
+      },
+      profile: {
+        create: { bio: 'Honestly, shoes are better than either turtles or keyboards' },
+      },
     },
+  })
+
+  const allUsers = await prisma.user.findMany({
     include: {
       posts: true,
       profile: true,
     },
   })
-  console.dir(someUsers, { depth: null })
+  console.dir(allUsers, { depth: null })
 }
 
 main()

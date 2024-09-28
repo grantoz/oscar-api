@@ -5,13 +5,13 @@ const prisma = new PrismaClient()
 async function main() {
   await prisma.user.create({
     data: {
-      name: 'Tracey',
-      email: 'tracey@grantoz.io',
+      name: 'Grant',
+      email: 'grant@grantoz.io',
       posts: {
-        create: { title: 'Shoes, shoes and more shoes' },
+        create: { title: 'Hey, Keyboards are The Stuff!' },
       },
       profile: {
-        create: { bio: 'Honestly, shoes are better than either turtles or keyboards' },
+        create: { bio: 'Synthesizers - better than turtles or dogs for sure' },
       },
     },
   })
