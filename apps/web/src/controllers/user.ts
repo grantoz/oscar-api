@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply, HTTPMethods, RouteGenericInterface } from 'fastify';
 import { prisma } from '@grantoz/db';
+import { getAllUsers } from '@src/services/user.ts';
 
 interface IParams {
   id: number;
@@ -14,8 +15,7 @@ export const userRoutes = [{
     url: '/user/all',
     handler: async(_req, out) => {
       out.type('application/json').code(200);
-      const users = await prisma.user.findMany();
-      // console.dir(users);
+      const users = await getAllUsers();
       return users;
     }
   },
