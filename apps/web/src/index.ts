@@ -26,7 +26,7 @@ const app: FastifyInstance = Fastify({
 });
 // const prisma = new PrismaClient();
 
-const opts: RouteShorthandOptions = {
+const pingOpts: RouteShorthandOptions = {
   schema: {
     response: {
       200: {
@@ -41,15 +41,41 @@ const opts: RouteShorthandOptions = {
   }
 };
 
-app.get('/ping', opts, async (req, res) => {
+app.get('/ping', pingOpts, async (req, res) => {
   res.type('application/json').code(200);
   req.log.info('I have been pinged');
   return { pong: 'it worked!' }
 })
 
+// coerce querystring to array
+// https://www.fastify.io/docs/latest/Validation-and-Serialization/#querystring
+// '/?ids=1&ids=2&ids=3'
+const idParamOpts: RouteShorthandOptions = {
+  schema: {
+    querystring: {
+      type: 'object',
+      properties: {
+        ids: {
+          type: 'array',
+          default: []
+        },
+      },
+    }
+  }
+}
+
+app.get('/', idParamOpts, (request, reply) => {
+  reply.send({ params: request.query }) // echo the querystring
+})
+
 app.get<{ Params: { user: string } }>('/hello/:user', async (req, out) => {
-    out.type('application/json').code(200);
-    return { reply: `Hello ${req.params.user}!` };
+  out.type('application/json').code(200);
+  return { reply: `Hello ${req.params.user}!` };
+});
+
+app.get<{ Params: { user: string, age: number } }>('/hello/:user/:age', async (req, out) => {
+  out.type('application/json').code(200);
+  return { reply: `Hello ${req.params.user}, is your age ${req.params.age}?` };
 });
 
 // TODO typing
@@ -61,7 +87,7 @@ const start = async () => {
   (BigInt.prototype as any).toJSON = function () { 
     return this.toString();
   }
-  console.log('can I get an WOO WOO! env var?', process.env.DEPLOYMENT);
+  // console.log('can I get an WOO WOO! env var?', process.env.DEPLOYMENT);
   try {
     await app.listen({ port: 3000 }); // host?
 
