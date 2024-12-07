@@ -1,3 +1,5 @@
+// note, always load dotenv first so that other imports in the dependency graph can use it
+import "@std/dotenv/load";
 import { db } from "@mod/db"
 import nhttp, { RequestEvent } from "@nhttp/nhttp"
 import logger from "@nhttp/nhttp/logger"
