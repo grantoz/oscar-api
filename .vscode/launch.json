@@ -1,0 +1,41 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "attachSimplePort": 9229,
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "name": "Launch Program",
+      // "program": "${workspaceFolder}/main.ts",
+      "program": "${file}",
+      "request": "launch",
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--inspect-brk",
+        "--allow-all"
+      ],
+      "type": "node",
+    },
+    {
+      "attachSimplePort": 9229,
+      "console": "integratedTerminal", // WE NEED THIS otherwise we don't get the output
+      // "cwd": "${workspaceFolder}",
+      "env": {},
+      "name": "Debug Tests",
+      "program": "${file}", // THIS was required, not the above, otherwise it never finished
+      "request": "launch",
+      // "program": "${workspaceFolder}/main.ts", /* disabled specific entrypoint */
+      "runtimeExecutable": "deno", /* modified: using deno process name from my PATH */
+      "runtimeArgs": [
+        "test",
+        "--inspect-brk",
+        "--allow-all"
+      ],
+      "type": "node",
+    }
+  ]
+}

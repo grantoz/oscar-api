@@ -1,41 +1,26 @@
-// users.js
-import sql from './db.js'
+import db from './db.js'
 
-// SELECT 'CREATE DATABASE oscar_test' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'oscar_test')
+const existingDBs = await db.queryObject('select datname from pg_database')
+const dbName = Deno.env.get('PG_DB');
 
-async function testQuery() {
-  const result = await sql`select 1 as test_output`
-  return result
+if(existingDBs.rows.find(db => db.datname === dbName)) {
+  console.log(`Database '${dbName}' already exists, exiting...`)
+  Deno.exit()
 }
 
-console.log('result: ', await testQuery())
-
-await sql.end()
-Deno.exit();
-
-/*
-async function getUsersOver(age) {
-  const users = await sql`
-    select
-      name,
-      age
-    from users
-    where age > ${ age }
-  `
-  // users = Result [{ name: "Walter", age: 80 }, { name: 'Murray', age: 68 }, ...]
-  return users
+const shouldProceed = confirm(`This will create a new database '${dbName}' for environment '${Deno.env.get("APP_ENV")}' - do you wish to proceed?`)
+if (!shouldProceed) {
+  console.log("Exiting...")
+  Deno.exit()
 }
 
-
-async function insertUser({ name, age }) {
-  const users = await sql`
-    insert into users
-      (name, age)
-    values
-      (${ name }, ${ age })
-    returning name, age
-  `
-  // users = Result [{ name: "Murray", age: 68 }]
-  return users
+const createSql = `CREATE DATABASE ${ dbName }`
+try {
+  await db.queryArray(createSql)
+  console.log(`Database '${dbName}' created successfully`)
+} catch (e) {
+  console.error(`Error creating database '${dbName}': ${e.message} for statement: ${createSql}`)
 }
-*/
+
+await db. end()
+Deno.exit()
