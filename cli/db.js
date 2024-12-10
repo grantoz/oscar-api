@@ -1,14 +1,16 @@
 // note, always load dotenv first so that other imports in the dependency graph can use it
-import "./load_env.js";
+import "jsr:@std/dotenv/load";
 import { Client } from "https://deno.land/x/postgres/mod.ts";
-const { PG_USER, PG_PASS, PG_HOST, PG_PORT } = Deno.env.toObject();
+
+const dbUrl = Deno.env.get('DB_URL')
+const match = dbUrl.match(/postgresql:\/\/(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^:]+):(?<port>\d+)\/(?<db>[^?]+)/)
 
 const db = new Client({
-  user: PG_USER,
-  password: PG_PASS,
+  user: match.groups.user,
+  password: match.groups.pass,
   database: 'postgres',
-  hostname: PG_HOST,
-  port: PG_PORT,
+  hostname: match.groups.host,
+  port: match.groups.port,
 });
 
 try {
@@ -19,4 +21,4 @@ try {
   Deno.exit()
 }
 
-export default db
+export { db, match }

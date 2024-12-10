@@ -1,3 +1,4 @@
+// this file is currently unused.
 import { loadSync } from "@std/dotenv"; 
 
 const appEnv = Deno.env.get("APP_ENV") ?? 'dev'

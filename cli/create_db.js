@@ -1,7 +1,7 @@
-import db from './db.js'
+import { db, match } from './db.js'
 
 const existingDBs = await db.queryObject('select datname from pg_database')
-const dbName = Deno.env.get('PG_DB');
+const dbName = match.groups.db
 
 if(existingDBs.rows.find(db => db.datname === dbName)) {
   console.log(`Database '${dbName}' already exists, exiting...`)

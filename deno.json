@@ -2,7 +2,11 @@
   "tasks": {
     "dev": "deno run -A --watch src/main.ts",
     "db:create": "deno run -A cli/create_db.js",
-    "test": "deno test -A src/"
+    "db:migrate": "deno run -A npm:prisma migrate dev",
+    "test:db:create": "deno run -A --env-file=.env.test cli/create_db.js",
+    "test:db:migrate": "deno run --env-file=.env.test -A npm:prisma migrate dev",
+    "test": "deno test -A src/",
+    "testdddd": "deno test -A --env-file=.env.test src/"
   },
   "imports": {
     "@nhttp/nhttp": "jsr:@nhttp/nhttp@^2.0.2",
@@ -13,7 +17,8 @@
     "generated/": "./node_modules/generated/"
   },
   "fmt": {
-    "semiColons": false
+    "semiColons": false,
+    "singleQuote": true
   },
   "workspace": ["./mod/db"],
   "nodeModulesDir": "auto"
