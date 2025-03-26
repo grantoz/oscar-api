@@ -63,6 +63,7 @@ async function dropDb(db) {
     console.log(`Database '${dbName}' dropped.`)
   } catch (e) {
     console.error(`Error dropping database '${dbName}': ${e.message} for statement: ${dropSql}`)
+    Deno.exit(1)
   }
 }
 

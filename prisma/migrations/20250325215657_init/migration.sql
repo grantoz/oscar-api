@@ -1,0 +1,49 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('super', 'admin', 'staff', 'user');
+
+-- CreateTable
+CREATE TABLE "Post" (
+    "id" BIGSERIAL NOT NULL,
+    "title" VARCHAR(255) NOT NULL,
+    "content" TEXT,
+    "published" BOOLEAN NOT NULL DEFAULT false,
+    "userId" BIGINT NOT NULL,
+    "extId" CHAR(26),
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMPTZ
+);
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" BIGSERIAL NOT NULL,
+    "email" TEXT NOT NULL,
+    "name" VARCHAR(255),
+    "phone" VARCHAR(255),
+    "salt" VARCHAR(255),
+    "hash" VARCHAR(255),
+    "props" JSONB,
+    "role" "Role" NOT NULL DEFAULT 'user',
+    "extId" CHAR(26),
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deletedAt" TIMESTAMPTZ
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Post_id_key" ON "Post"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Post_extId_key" ON "Post"("extId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_id_key" ON "User"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_extId_key" ON "User"("extId");
+
+-- AddForeignKey
+ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

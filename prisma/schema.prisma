@@ -14,26 +14,38 @@ datasource db {
 
 model Post {
   id        BigInt  @db.BigInt @default(autoincrement()) @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   title     String   @db.VarChar(255)
   content   String?
   published Boolean  @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  BigInt  @db.BigInt
+  user      User     @relation(fields: [userId], references: [id])
+  userId  BigInt  @db.BigInt
+
+  extId     String?  @unique @db.Char(26)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @default(now()) @db.Timestamptz
+  deletedAt DateTime? @db.Timestamptz
 }
 
-model Profile {
-  id        BigInt  @db.BigInt @default(autoincrement()) @unique
-  bio    String?
-  user   User    @relation(fields: [userId], references: [id])
-  userId BigInt  @db.BigInt @unique
+enum Role {
+  super
+  admin
+  staff
+  user
 }
 
 model User {
-  id        BigInt  @db.BigInt @default(autoincrement()) @unique
-  email   String   @unique
-  name    String?
-  posts   Post[]
-  profile Profile?
+  id        BigInt    @db.BigInt @default(autoincrement()) @unique
+  email     String    @unique
+  name      String?   @db.VarChar(255)
+  phone     String?   @db.VarChar(255)
+  salt      String?   @db.VarChar(255)
+  hash      String?   @db.VarChar(255)
+  props     Json?
+  role      Role      @default(user)
+  extId     String?   @unique @db.Char(26)
+
+  createdAt DateTime  @default(now()) @db.Timestamptz
+  updatedAt DateTime  @default(now()) @db.Timestamptz
+  deletedAt DateTime? @db.Timestamptz
+  posts     Post[]
 }

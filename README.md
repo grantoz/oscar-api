@@ -13,6 +13,13 @@ And now I can hit F5 in VS Code and it's running the tests before I can blink. L
 So this project is just about building, initially, a CRUD API base using the lightest-weight possible tooling, with the possible exception of Prisma, which I'm using just because I like it.
 
 TODO:
+
 - Queues using Deno
 - Deno KV auth layer
 - OAuth2.0
+
+TODO NEXT GRANT:
+
+move basic routes - / (health), home, login, forgot password to src/api/home
+user query routes to api/user
+hono cors
