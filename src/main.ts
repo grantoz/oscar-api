@@ -1,9 +1,7 @@
 // note, always load dotenv first so that other imports in the dependency graph can use it
 import 'jsr:@std/dotenv/load'
-import { Hono } from '@hono'
+import { Context, Hono } from '@hono'
 import { db } from '@mod/db'
-// import nhttp, { RequestEvent } from '@nhttp/nhttp'
-// import logger from '@nhttp/nhttp/logger'
 // import cors from '@nhttp/nhttp/cors'
 import * as log from '@std/log'
 
@@ -20,7 +18,7 @@ interface pagedQuery {
   _page?: string
   _limit?: string
   _sort?: string
-  _order?: 'ASC' | 'DESC'
+  _order?: 'asc' | 'desc' | 'ASC' | 'DESC'
 }
 
 interface queryOptions {
@@ -44,48 +42,71 @@ const parseSortOptions = (query: pagedQuery): object => {
   return options
 }
 
+// TODO type
+const meta = (records: any[]) => {
+  return {
+    length: records.length,
+    page: 1,
+    perPage: 10,
+    numPages: Math.ceil(records.length / 10)
+  }
+}
+
 const app = new Hono();
 // const app = nhttp()
 // app.use(logger())
 // app.use(cors())
 
+// TODO use middleware to set api version header to v1 IF NOT PRESENT
+
+// TODO move to src/api/user.ts
+const user = new Hono().basePath('/user')
+user.get('/', async (c: Context) => {
+  log.info(c.req.query())
+  log.debug('dummy debug log')
+  const options = parseSortOptions(c.req.query() as pagedQuery)
+  const users = await db.user.findMany(options)
+  c.res.headers.append('cache-control', 'max-age=10')
+  return c.json({ data: users, meta: meta(users) })
+  // return c.text('List Users') // GET /user
+})
+
+user.get('/:id{[0-9]+}', async (c: Context) => {
+  const { id } = c.req.param()
+  console.log('got id', id)
+  const user = await db.user.findUnique({
+    where: {
+      id: Number(id),
+    },
+  })
+  return c.json({ data: user })
+})
+
+// user.post('/', async (c: Context) => {
+//   const { name, email } = c.req.valid('json')
+//   const result = await db.user.create({
+//     data: {
+//       name,
+//       email,
+//     },
+//   })
+//   return c.json({ data: result })
+// })
+
+
+// user.get('/foo', (c: Context) => c.text('Foo')) // GET /user/foo
+
+// user.post('/', (c: Context) => c.text('Create User')) // POST /user
+
+
+app.route('/', user) // Handle /user/* routes
+
 app
-  .get('/', (c: any) => {
-    // log.info('Welcome to the User API!')
+  .get('/', (c: Context) => {
+    log.info('Welcome URL was hit')
+    log.info('dummy log message')
     return c.text('Welcome to the User API!')
   })
-  // .get('/user', async (rev: RequestEvent) => {
-  //   // log.info(rev.query)
-  //   const options = parseSortOptions(rev.query as pagedQuery)
-  //   const users = await db.user.findMany(options)
-  //   rev.response.header().append('x-total-count', users.length.toString())
-  //   rev.response.header().append('cache-control', 'max-age=10')
-  //   return {
-  //     data: users,
-  //     total: users.length,
-  //   }
-  // })
-  // .get('/user/:id', async (rev: RequestEvent) => {
-  //   const { id } = rev.params
-  //   const user = await db.user.findUnique({
-  //     where: {
-  //       id: Number(id),
-  //     },
-  //   })
-  //   return user
-  // })
-  // .post('/user', async (rev: RequestEvent) => {
-  //   const { name, email } = rev.body
-  //   console.log(name, email)
-  //   // return { name, email };
-  //   const result = await db.user.create({
-  //     data: {
-  //       name,
-  //       email,
-  //     },
-  //   })
-  //   return result
-  // })
   // .delete('/user/:id', async (rev: RequestEvent) => {
   //   const { id } = rev.params
   //   const user = await db.user.delete({

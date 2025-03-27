@@ -2,7 +2,6 @@
   "version": "4",
   "specifiers": {
     "jsr:@hono/hono@*": "4.7.5",
-    "jsr:@nhttp/nhttp@^2.0.2": "2.0.2",
     "jsr:@std/assert@1": "1.0.6",
     "jsr:@std/bytes@1": "1.0.4",
     "jsr:@std/bytes@^1.0.2": "1.0.4",
@@ -22,17 +21,16 @@
     "jsr:@std/path@1": "1.0.8",
     "jsr:@std/ulid@*": "1.0.0",
     "jsr:@std/ulid@1": "1.0.0",
+    "npm:@hono/zod-validator@*": "0.4.3_hono@4.7.5_zod@3.24.2",
     "npm:@types/node@*": "22.5.4",
     "npm:create-hono@latest": "0.15.4",
     "npm:path-to-regexp@6.2.1": "6.2.1",
-    "npm:prisma@*": "6.0.1"
+    "npm:prisma@*": "6.0.1",
+    "npm:zod@*": "3.24.2"
   },
   "jsr": {
     "@hono/hono@4.7.5": {
       "integrity": "36a7e1b3db8a58e5dc2bd36a76be53346f0966e04c24c635c4d6f58875575b0a"
-    },
-    "@nhttp/nhttp@2.0.2": {
-      "integrity": "3f792cf5681c56d10e6fafa6c1c5f438b45dcba8037b08d5e593771aa6b3ebf8"
     },
     "@std/assert@1.0.6": {
       "integrity": "1904c05806a25d94fe791d6d883b685c9e2dcd60e4f9fc30f4fc5cf010c72207",
@@ -95,6 +93,13 @@
     }
   },
   "npm": {
+    "@hono/zod-validator@0.4.3_hono@4.7.5_zod@3.24.2": {
+      "integrity": "sha512-xIgMYXDyJ4Hj6ekm9T9Y27s080Nl9NXHcJkOvkXPhubOLj8hZkOL8pDnnXfvCf5xEE8Q4oMFenQUZZREUY2gqQ==",
+      "dependencies": [
+        "hono",
+        "zod"
+      ]
+    },
     "@prisma/debug@6.0.1": {
       "integrity": "sha512-jQylgSOf7ibTVxqBacnAlVGvek6fQxJIYCQOeX2KexsfypNzXjJQSS2o5s+Mjj2Np93iSOQUaw6TvPj8syhG4w=="
     },
@@ -136,6 +141,9 @@
     "fsevents@2.3.3": {
       "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="
     },
+    "hono@4.7.5": {
+      "integrity": "sha512-fDOK5W2C1vZACsgLONigdZTRZxuBqFtcKh7bUQ5cVSbwI2RWjloJDcgFOVzbQrlI6pCmhlTsVYZ7zpLj4m4qMQ=="
+    },
     "path-to-regexp@6.2.1": {
       "integrity": "sha512-JLyh7xT1kizaEvcaXOQwOc2/Yhw6KZOvPf1S8401UyLk86CU79LN3vl7ztXGm/pZ+YjoyAJ4rxmHwbkBXJX+yw=="
     },
@@ -148,6 +156,9 @@
     },
     "undici-types@6.19.8": {
       "integrity": "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="
+    },
+    "zod@3.24.2": {
+      "integrity": "sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ=="
     }
   },
   "redirects": {
@@ -754,11 +765,12 @@
   "workspace": {
     "dependencies": [
       "jsr:@hono/hono@*",
-      "jsr:@nhttp/nhttp@^2.0.2",
       "jsr:@std/assert@1",
       "jsr:@std/dotenv@~0.225.3",
       "jsr:@std/log@~0.224.11",
-      "jsr:@std/ulid@1"
+      "jsr:@std/ulid@1",
+      "npm:@hono/zod-validator@*",
+      "npm:zod@*"
     ]
   }
 }
