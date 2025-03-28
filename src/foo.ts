@@ -15,7 +15,6 @@ if (import.meta.main) {
 const allUsers = await db.user.findMany({
   include: {
     posts: true,
-    profile: true,
   },
 })
 console.dir(allUsers, { depth: null })

@@ -21,9 +21,9 @@ model Post {
   userId  BigInt  @db.BigInt
 
   extId     String?  @unique @db.Char(26)
-  createdAt DateTime @default(now()) @db.Timestamptz
-  updatedAt DateTime @default(now()) @db.Timestamptz
-  deletedAt DateTime? @db.Timestamptz
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  deletedAt DateTime?
 }
 
 enum Role {
@@ -42,10 +42,10 @@ model User {
   hash      String?   @db.VarChar(255)
   props     Json?
   role      Role      @default(user)
-  extId     String?   @unique @db.Char(26)
 
-  createdAt DateTime  @default(now()) @db.Timestamptz
-  updatedAt DateTime  @default(now()) @db.Timestamptz
-  deletedAt DateTime? @db.Timestamptz
+  extId     String?   @unique @db.Char(26)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
   posts     Post[]
 }
