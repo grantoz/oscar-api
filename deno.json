@@ -12,7 +12,8 @@
     "test:db:fresh": "deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno task test:db:migrate",
     "test:db:migrate": "deno run --env-file=.env.test -A npm:prisma migrate dev",
     "test:db:seed": "deno run -A --env-file=.env.test ./prisma/seed/index.ts",
-    "test": "deno test -A --env-file=.env.test src/"
+    "test": "deno test -A --env-file=.env.test src/",
+    "sendemail": "deno run -A --env-file=.env src/send_email.ts"
   },
   "imports": {
     "generated/": "./node_modules/generated/",

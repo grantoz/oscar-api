@@ -1,7 +1,7 @@
 // @ts-types="../../node_modules/generated/index.d.ts"
 import { PrismaClient } from 'generated/index.js'
 // @ts-types="../../node_modules/generated/deno/index.d.ts"
-import { Prisma as Model } from 'generated/deno/edge.js'
+import { Prisma as Model, type User } from 'generated/deno/edge.js'
 import { ulid } from "@std/ulid";
 // https://docs.deno.com/examples/ulid/
 
@@ -47,3 +47,4 @@ const db = new PrismaClient({
 // query [Function: query]
 
 export { db, Model }
+export type { User }

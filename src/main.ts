@@ -6,6 +6,9 @@ import { log } from './util/mod.ts'
 import user from './api/user.ts'
 const app = new Hono();
 
+// TODO start api, queue or event
+// TODO app secret and storage
+
 app.route('/', user) // Handle /user/* routes
 
 app

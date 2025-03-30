@@ -33,17 +33,76 @@ const userPost = z.object({
 })
 
 user.post('/', zValidator('json', userPost), async (c: Context) => {
-  const bleh = await c.req.json()
+  // const bleh = await c.req.json()
   const { name, email } = c.req.valid('json' as never)
-  log.info('Creating user', bleh)
-  const result = await db.user.create({
-    data: {
-      name,
-      email,
-    },
-  })
-  return c.json({ data: result })
+  log.info('Creating user', name, email)
+  try {
+    const result = await db.user.create({
+      data: {
+        name,
+        email,
+      },
+    })
+    log.info('Created user', result)
+    return c.json({ data: result })
+    
+  // deno-lint-ignore no-explicit-any
+  } catch (err: any) {
+    if (err.code === 'P2002') {
+      // err.target === ['email']
+      log.error('Create user: Unique constraint failed', err)
+      return c.json({ error: 'Unique constraint failed' }, 429)
+    }
+    log.error('Error creating user', err)
+    throw(err)
+    // return c.json({ error: 'Error creating user' }, 500)
+  }
 })
+
+const userPatchSchema = z.object({
+  exitId: z.string(),
+  name: z.string().optional(),
+  // email: z.string().optional(),
+  phone: z.string().optional(),
+  password: z.string().optional(),
+  passwordConfirm: z.string().optional(),
+}).refine(schema => {
+  schema.password === schema.passwordConfirm
+}, {
+  message: 'Password and password confirmation must match', 
+})
+
+type userPatch = z.infer<typeof userPatchSchema>
+
+user.patch('/', zValidator('json', userPatchSchema), async (c: Context) => {
+  const payload: userPatch = c.req.valid('json' as never)
+  log.info('Updating user', payload)
+  try {
+    const result = await db.user.update({
+      where: {
+        extId: payload.exitId,
+      },
+      data: {
+        name: payload.name,
+        phone: payload.phone,
+      },
+    })
+    log.info('Created user', result)
+    return c.json({ data: result })
+    
+  // deno-lint-ignore no-explicit-any
+  } catch (err: any) {
+    if (err.code === 'P2002') {
+      // err.target === ['email']
+      log.error('Create user: Unique constraint failed', err)
+      return c.json({ error: 'Unique constraint failed' }, 429)
+    }
+    log.error('Error creating user', err)
+    throw(err)
+    // return c.json({ error: 'Error creating user' }, 500)
+  }
+})
+
 
 // TODO emit 400 with non-zod error when validation fails
 // TODO is it worth using the hono zod validator?

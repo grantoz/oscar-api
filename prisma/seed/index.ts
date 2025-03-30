@@ -2,12 +2,13 @@ import { db, Model } from '@mod/db'
 import "jsr:@std/dotenv/load";
 import { faker } from "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts";
 import { ulid } from '@std/ulid/ulid'
+import { genSalt, genHash } from '../../src/service/user.ts';
 
 const userData: Model.UserCreateInput[] = [
   {
     name: "Super",
     email: "super@grantoz.io",
-    role: "super"
+    role: "super",
   },
   {
     name: "Admin",
@@ -49,6 +50,8 @@ const userData: Model.UserCreateInput[] = [
     name: faker.name.findName(),
     email: faker.internet.email(),
     phone: faker.phone.phoneNumber(),
+    salt: genSalt(),
+    hash: getHashes()[0],
   },
 ];
 
