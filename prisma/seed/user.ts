@@ -1,8 +1,8 @@
-import { db, Model } from '@mod/db'
+import { db, Prisma } from '@mod/db'
 import "jsr:@std/dotenv/load";
 import { faker } from "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts";
-import { ulid } from '@std/ulid/ulid'
-import { Prisma } from 'generated/deno/edge.js'
+// import { ulid } from '@std/ulid/ulid'
+
 // import { genSalt, hashPassword } from '../../src/service/user.ts';
 
 // TODO seeds for different environments
@@ -10,12 +10,18 @@ import { Prisma } from 'generated/deno/edge.js'
 
 export default async () => {
 
-  const userData = [
+  const userData: Prisma.UserCreateInput[] = [
     {
       name: "Super",
       email: "super@grantoz.io",
       role: "super",
-      props: Prisma.JsonNull,
+      props: Prisma.JsonNull
+    },
+    {
+      name: faker.name.findName(),
+      email: faker.internet.email(),
+      phone: faker.phone.phoneNumber(),
+      props: {},
     },
   ];
 

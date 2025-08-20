@@ -1,8 +1,6 @@
 // @ts-types="../../node_modules/generated/index.d.ts"
-import { PrismaClient } from 'generated/index.js'
-// @ts-types="../../node_modules/generated/deno/index.d.ts"
-import { Prisma as Model } from 'generated/deno/edge.js'
-// import { Prisma as Model, type User } from 'generated/deno/edge.js'
+import { PrismaClient, Prisma } from 'generated/index.js'
+
 // import { ulid } from "@std/ulid";
 // https://docs.deno.com/examples/ulid/
 
@@ -23,5 +21,5 @@ const db = new PrismaClient({
 // https://www.prisma.io/docs/orm/prisma-client/client-extensions
 // https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
 
-export { db, Model }
+export { db, Prisma }
 export type { User, Country, Post } from 'generated/index.js'

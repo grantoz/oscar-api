@@ -42,7 +42,7 @@ model User {
   phone     String?   @db.VarChar(255)
   salt      String?   @db.VarChar(32)
   hash      String?   @db.VarChar(255)
-  props     Json // ?
+  props     Json?
   role      Role      @default(user)
   extId     String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime  @default(now())

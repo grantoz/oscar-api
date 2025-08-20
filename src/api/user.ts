@@ -1,5 +1,5 @@
 import { Context, Hono } from '@hono'
-import { db } from '@mod/db'
+import { db, Prisma } from '@mod/db'
 import { log, meta, paged, pageOptions } from '../util/mod.ts'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
@@ -41,6 +41,7 @@ user.post('/', async (c: Context) => {
       data: {
         name,
         email,
+        props: Prisma.JsonNull, // or {} if you prefer
       },
     })
     log.info('Created user', result)

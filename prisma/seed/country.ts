@@ -1,4 +1,4 @@
-import { db, Model } from '@mod/db'
+import { db, Prisma } from '@mod/db'
 import "jsr:@std/dotenv/load";
 import { parse } from "jsr:@std/csv";
 
@@ -10,7 +10,7 @@ export default async () => {
     strip: true,
   });
 
-  const countryData: Model.CountryCreateInput[] = csvData.map(row => ({
+  const countryData: Prisma.CountryCreateInput[] = csvData.map(row => ({
     id: row.id,
     name: row.name,
     alpha3: row.alpha3,
