@@ -27,14 +27,14 @@ user.get('/:id{[0-9]+}', async (c: Context) => {
   return c.json({ data: user })
 })
 
-const userPost = z.object({
-  name: z.string(),
-  email: z.string(),
-})
+// const userPost = z.object({
+//   name: z.string(),
+//   email: z.string(),
+// })
 
-user.post('/', zValidator('json', userPost), async (c: Context) => {
-  // const bleh = await c.req.json()
-  const { name, email } = c.req.valid('json' as never)
+// TODO OK this works, what's wrong with the validator?
+user.post('/', async (c: Context) => {
+  const { name, email } = await c.req.json()
   log.info('Creating user', name, email)
   try {
     const result = await db.user.create({
@@ -49,7 +49,6 @@ user.post('/', zValidator('json', userPost), async (c: Context) => {
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
     if (err.code === 'P2002') {
-      // err.target === ['email']
       log.error('Create user: Unique constraint failed', err)
       return c.json({ error: 'Unique constraint failed' }, 429)
     }
@@ -58,6 +57,31 @@ user.post('/', zValidator('json', userPost), async (c: Context) => {
     // return c.json({ error: 'Error creating user' }, 500)
   }
 })
+
+// user.post('/', zValidator('json', userPost), async (c: Context) => {
+//   const { name, email } = c.req.valid('json' as never)
+//   log.info('Creating user', name, email)
+//   try {
+//     const result = await db.user.create({
+//       data: {
+//         name,
+//         email,
+//       },
+//     })
+//     log.info('Created user', result)
+//     return c.json({ data: result })
+    
+//   // deno-lint-ignore no-explicit-any
+//   } catch (err: any) {
+//     if (err.code === 'P2002') {
+//       log.error('Create user: Unique constraint failed', err)
+//       return c.json({ error: 'Unique constraint failed' }, 429)
+//     }
+//     log.error('Error creating user', err)
+//     throw(err)
+//     // return c.json({ error: 'Error creating user' }, 500)
+//   }
+// })
 
 const userPatchSchema = z.object({
   exitId: z.string(),

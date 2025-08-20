@@ -1,20 +1,22 @@
 // note, always load dotenv first so that other imports in the dependency graph can use it
 import 'jsr:@std/dotenv/load'
 import { Context, Hono } from '@hono'
+import { logger } from '@hono/logger'
 import { db } from '@mod/db'
 import { log } from './util/mod.ts'
 import user from './api/user.ts'
 const app = new Hono();
-
+app.use(logger())
 // TODO start api, queue or event
 // TODO app secret and storage
+// TODO validate app config / env vars
+// TODO use middleware to set api version header to v1 IF NOT PRESENT
 
 app.route('/', user) // Handle /user/* routes
 
 app
   .get('/', (c: Context) => {
     log.info('Welcome URL was hit')
-    log.info('dummy log message')
     return c.text('Welcome to the User API!')
   })
   // .options("*", (rev: RequestEvent) => {

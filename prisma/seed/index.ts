@@ -1,70 +1,13 @@
-import { db, Model } from '@mod/db'
+import { db } from '@mod/db'
 import "jsr:@std/dotenv/load";
-import { faker } from "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts";
-import { ulid } from '@std/ulid/ulid'
-import { genSalt, genHash } from '../../src/service/user.ts';
+import userSeed from './user.ts';
+import countrySeed from './country.ts';
 
-const userData: Model.UserCreateInput[] = [
-  {
-    name: "Super",
-    email: "super@grantoz.io",
-    role: "super",
-  },
-  {
-    name: "Admin",
-    email: "admin@grantoz.io",
-    role: "admin"
-  },
-  {
-    name: "Staff",
-    email: "staff@grantoz.io",
-    role: "staff"
-  },
-  {
-    name: "Aardonyx",
-    email: "aardonyx@grantoz.io",
-    phone: faker.phone.phoneNumber(),
-    posts: {
-      create: [{
-        title: "Aardonyx Facts",
-        content: "Aardonyx was a prosauropod dinosaur that lived in the Early Jurassic period.",
-        published: true,
-        extId: ulid()
-      }]
-    },
-  },
-  {
-    name: "Abelisaurus",
-    email: "Abelisaurus@grantoz.io",
-    phone: faker.phone.phoneNumber(),
-    posts: {
-      create: [{
-        title: "Abelisaurus Info",
-        content: "Abel's lizard has been reconstructed from a single skull.",
-        published: true,
-        extId: ulid()
-      }]
-    },
-  },
-  {
-    name: faker.name.findName(),
-    email: faker.internet.email(),
-    phone: faker.phone.phoneNumber(),
-    salt: genSalt(),
-    hash: getHashes()[0],
-  },
-];
+// TODO seeds for different environments
+// TODO secret storage for super passwords for stage/uat/sandbox/prod
 
-/**
- * Seed the database.
- */
+userSeed()
+countrySeed()
 
-for (const u of userData) {
-  const user = await db.user.create({
-    data: u,
-  });
-  console.log(`Created user with id: ${user.id}`);
-}
 console.log(`Seeding finished.`);
-
 await db.$disconnect();

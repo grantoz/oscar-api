@@ -27,5 +27,7 @@ So this project is just about building, initially, a CRUD API base using the lig
 **TODO NEXT:**
 
 move basic routes - / (health), home, login, forgot password to src/api/home
-user query routes to api/user
+user routes to api/user
+user auth, password IN PROGRESS
 hono cors
+view model - perhaps class based with declarative properties e.g. `publicFields`, map transform field:function

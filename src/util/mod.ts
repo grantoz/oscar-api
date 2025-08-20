@@ -1,9 +1,6 @@
 import { z } from '@zod'
 import * as logger from '@std/log'
 
-// TODO use middleware to set api version header to v1 IF NOT PRESENT
-// TODO move user stuff to src/api/user.ts
-
 logger.setup({
   handlers: {
     default: new logger.ConsoleHandler('DEBUG', {

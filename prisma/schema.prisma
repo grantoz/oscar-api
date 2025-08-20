@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["deno"]
+  previewFeatures = ["deno", "relationJoins"]
   output          = "../node_modules/generated"
 }
 
@@ -33,19 +33,33 @@ enum Role {
   user
 }
 
+// https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
+
 model User {
   id        BigInt    @db.BigInt @default(autoincrement()) @unique
   email     String    @unique
   name      String?   @db.VarChar(255)
   phone     String?   @db.VarChar(255)
-  salt      String?   @db.VarChar(255)
+  salt      String?   @db.VarChar(32)
   hash      String?   @db.VarChar(255)
-  props     Json?
+  props     Json // ?
   role      Role      @default(user)
-
-  extId     String?   @unique @db.Char(26)
+  extId     String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   deletedAt DateTime?
   posts     Post[]
 }
+
+model Country {
+  id String @db.VarChar(2) @unique
+  name             String    @db.VarChar(64)
+  alpha3           String   @db.VarChar(3)
+  countryCode      Int
+  region           String?   @db.VarChar(255)
+  subRegion        String?   @db.VarChar(255)
+  regionCode       Int?
+  subRegionCode    Int?
+  extId            String?  @unique @db.Char(26)
+}
+
