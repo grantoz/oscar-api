@@ -50,10 +50,11 @@ user.post('/', async (c: Context) => {
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
     if (err.code === 'P2002') {
-      log.error('Create user: Unique constraint failed', err)
-      return c.json({ error: 'Unique constraint failed' }, 429)
+      log.warn('Create user: Unique constraint failed', err)
+      // console.warn('Create user: Unique constraint failed', err)
+      return c.json({ error: 'Unique constraint failed' }, 422)
     }
-    log.error('Error creating user', err)
+    log.warn('Error creating user', err)
     throw(err)
     // return c.json({ error: 'Error creating user' }, 500)
   }

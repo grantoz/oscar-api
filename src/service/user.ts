@@ -50,7 +50,6 @@ export const hashPassword = async function (password: string, salt: string) {
     salt: encodedSalt,
     variant: Variant.Argon2id,
     version: Version.V13,
-    memoryCost: 67108.9, // 64MiB
     timeCost: 10,
     lanes: 4,
     hashLength: 64,

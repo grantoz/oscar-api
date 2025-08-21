@@ -1,5 +1,4 @@
 import { db, Prisma } from '@mod/db'
-import "jsr:@std/dotenv/load";
 import { faker } from "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts";
 // import { ulid } from '@std/ulid/ulid'
 

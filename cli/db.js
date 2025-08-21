@@ -15,7 +15,8 @@ const db = new Client({
 
 try {
   await db.connect();
-  await db.queryObject('SELECT 1 as result');
+  const result = await db.queryObject('SELECT 1 as result');
+  console.log('Connected to Postgres:', result.rows[0].result);
 } catch (e) {
   console.error(`Error connecting to postgres:`, e.message)
   Deno.exit()

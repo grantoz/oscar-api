@@ -1,5 +1,4 @@
 import { db, Prisma } from '@mod/db'
-import "jsr:@std/dotenv/load";
 import { parse } from "jsr:@std/csv";
 
 export default async () => {

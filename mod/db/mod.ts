@@ -5,13 +5,23 @@ import { PrismaClient, Prisma } from 'generated/index.js'
 // https://docs.deno.com/examples/ulid/
 
 const dbUrl = Deno.env.get('DB_URL')
-console.log('databaseUrl', dbUrl)
 
 // TODO: observability, metrics, logging
 // https://www.prisma.io/docs/orm/prisma-client/observability-and-logging
 
+const log: Prisma.LogDefinition[] = [
+  { emit: 'stdout', level: 'warn' },
+  { emit: 'stdout', level: 'error' },
+];
+if (Deno.env.get('LOG_DB_QUERY') === 'true') {
+  log.push({ emit: 'stdout', level: 'query' });
+}
+if (Deno.env.get('LOG_DB_INFO') === 'true') {
+  log.push({ emit: 'stdout', level: 'info' });
+}
+
 const db = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
+  log,
   datasources: {
     db: {
       url: dbUrl,
