@@ -1,7 +1,7 @@
 import { assertEquals } from '@std/assert'
 import { describe, it, beforeEach, afterEach } from '@std/testing/bdd'
 // import { beforeAll, afterAll } from '@std/testing/bdd'
-import { add, testArgon2 } from './deno_test_utils.ts'
+import { add, testArgon2 } from './deno_utils.ts'
 
 Deno.test(function addTest() {
   const args: [number, number] = [112, 3]

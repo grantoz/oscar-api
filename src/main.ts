@@ -4,15 +4,18 @@ import { Context, Hono } from '@hono'
 import { logger } from '@hono/logger'
 import { db } from '@mod/db'
 import { log } from './util/mod.ts'
-import user from './api/user.ts'
+
+// import user from './api/user.ts'
+import { api } from './api/mod.ts'
+
 const app = new Hono();
 app.use(logger())
 // TODO start api, queue or event
 // TODO app secret and storage
 // TODO validate app config / env vars
 // TODO use middleware to set api version header to v1 IF NOT PRESENT
+app.route('/api', api) // Handle /user/* routes
 
-app.route('/', user) // Handle /user/* routes
 
 app
   .get('/', (c: Context) => {
@@ -37,6 +40,7 @@ const start = async () => {
     return this.toString()
   }
   try {
+    console.log(app.routes)
     Deno.serve(app.fetch)
   } catch (err) {
     log.error(err)

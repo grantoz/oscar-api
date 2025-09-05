@@ -12,14 +12,6 @@ if (import.meta.main) {
   console.log('Add 4 + 13 =', add(4, 13))
 }
 
-// TODO this ends up logging all users during test run, as this file is imported in deno.test.ts
-// const allUsers = await db.user.findMany({
-//   include: {
-//     posts: true,
-//   },
-// })
-// console.dir(allUsers, { depth: null })
-
 import { hash, Variant, verify, Version } from "@felix/argon2";
 
 export const testArgon2 = async () => {

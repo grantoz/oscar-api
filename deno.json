@@ -7,17 +7,19 @@
     "db:fresh": "deno run -A cli/alter_db.js --drop --create && deno task db:migrate",
     "db:migrate": "deno run -A npm:prisma migrate dev",
     "db:seed": "deno run -A ./prisma/seed/index.ts",
-    "db:test": "deno run -A cli/db.js",
+    "prisma": "deno run -A npm:prisma",
+    "db:generate": "deno task prisma generate --schema ./prisma/schema.prisma",
     "test:db:create": "deno run -A --env-file=.env.test cli/alter_db.js --create",
     "test:db:drop": "deno run -A --env-file=.env.test cli/alter_db.js --drop",
     "test:db:fresh": "deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno task test:db:migrate",
     "test:db:migrate": "deno run --env-file=.env.test -A npm:prisma migrate dev",
     "test:db:seed": "deno run -A --env-file=.env.test ./prisma/seed/index.ts",
     "test": "deno test -A src/",
-    "DISABLEDtest": "deno test -A --env-file=.env.test src/",
-    "sendemail": "deno run -A --env-file=.env src/send_email.ts"
+    "test-disabled": "deno test -A --env-file=.env.test src/",
+    "sendmail": "deno run -A --env-file=.env src/send_email.ts"
   },
   "imports": {
+    "@db/postgres": "jsr:@db/postgres@^0.19.5",
     "@felix/argon2": "jsr:@felix/argon2@^3.0.2",
     "@std/testing": "jsr:@std/testing@^1.0.15",
     "generated/": "./node_modules/generated/",

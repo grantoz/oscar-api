@@ -1,7 +1,7 @@
 import { db, User } from '@mod/db'
 import { verify } from "@felix/argon2";
 import { assertEquals, assertExists } from '@std/assert'
-import { genSalt, hashPassword, savePasswordSaltAndHash } from './user.ts';
+import { genSalt, hashPassword } from './user.ts';
 
 
 Deno.test("generates salt and hashes password", async function() {
@@ -13,5 +13,12 @@ Deno.test("generates salt and hashes password", async function() {
   assertEquals(isValid, true)
 })
 
-
-// TODO tests for user service
+Deno.test("Finds seeded users", async function() {
+  const allUsers = await db.user.findMany({
+    include: {
+      posts: true,
+    },
+  })
+  console.dir(allUsers, { depth: null })
+  assertEquals(allUsers.length > 0, true)
+})

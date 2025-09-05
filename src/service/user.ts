@@ -16,7 +16,6 @@ export const savePasswordSaltAndHash = async (user: User, password: string) => {
   const salt = genSalt()
   const hash = await hashPassword(password, salt)
   try {
-    // TODO would it be so bad to create a small a
     const result = await db.user.update({
       where: {
         id: user.id,
@@ -67,14 +66,6 @@ export const genSalt = () => {
     return acc + String.fromCharCode((curr % 95) + 32);
   }, '');
 }
-
-// export const genSalt = () => {
-//   const array = new Uint16Array(16);
-//   self.crypto.getRandomValues(array);
-//   return array.reduce((acc, curr) => {
-//     return acc + String.fromCharCode((curr % 95) + 32);
-//   }, '');
-// }
 
 // export const genHash = function (pass: string, salt: string)
 // {

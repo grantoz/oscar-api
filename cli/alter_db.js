@@ -1,5 +1,6 @@
 import { db, match } from './db.js'
 
+const test = Deno.args.includes('--test')
 const drop = Deno.args.includes('--drop')
 const create = Deno.args.includes('--create')
 let force = Deno.args.includes('--force')
@@ -9,7 +10,11 @@ if (!create && !drop) {
   Deno.exit()
 }
 
-const dbName = match?.groups?.db
+let dbName = match?.groups?.db
+if (test) {
+  dbName = `test_${dbName}`
+  console.log(`Running in test mode, using database name: ${dbName}`)
+}
 
 if (create && drop && !force) {
   force = confirm(`This will drop the old database and create a new instance for '${dbName}' in environment '${Deno.env.get("APP_ENV")}' - do you wish to proceed?`)
