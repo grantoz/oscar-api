@@ -1,5 +1,3 @@
-// import { db } from "../db.ts"
-// import * as foo from "@mod/db"
 import 'jsr:@std/dotenv/load'
 import { db } from '@mod/db'
 

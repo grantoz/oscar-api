@@ -5,17 +5,29 @@ import { logger } from '@hono/logger'
 import { db } from '@mod/db'
 import { log } from './util/mod.ts'
 
-// import user from './api/user.ts'
 import { api } from './api/mod.ts'
+import { auth, validateJwtMiddleware } from './auth/mod.ts'
+
+const fooMiddleware = async (_c: Context, next: () => Promise<void>) => {
+  log.info('foo middleware invoked')
+  await next()
+}
 
 const app = new Hono();
 app.use(logger())
+app.use(fooMiddleware)
 // TODO start api, queue or event
 // TODO app secret and storage
 // TODO validate app config / env vars
 // TODO use middleware to set api version header to v1 IF NOT PRESENT
-app.route('/api', api) // Handle /user/* routes
+app.use(validateJwtMiddleware) // Apply validateJwt middleware to /api/* routes
+app.route('/api', api)
+app.route('/auth', auth)
 
+log.info('a');
+
+// TODO hono openapi middleware
+// https://hono.dev/examples/hono-openapi
 
 app
   .get('/', (c: Context) => {
@@ -39,6 +51,10 @@ const start = async () => {
   ;(BigInt.prototype as any).toJSON = function () {
     return this.toString()
   }
+
+  // TODO add checks for required env vars
+  // TODO add a check that the db is connected
+
   try {
     console.log(app.routes)
     Deno.serve(app.fetch)

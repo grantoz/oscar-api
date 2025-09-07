@@ -6,7 +6,9 @@
   "editor.defaultFormatter": "denoland.vscode-deno",
   "cSpell.words": [
     "autoincrement",
+    "Creds",
     "dbgenerated",
-    "mailpit"
+    "mailpit",
+    "uuidv"
   ]
 }

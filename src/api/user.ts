@@ -15,7 +15,7 @@ const userPatchSchema = z.object({
 }).refine(schema => {
   schema.password === schema.passwordConfirm
 }, {
-  message: 'Password and password confirmation must match', 
+  message: 'Password and password confirmation must match',
 })
 type userPatch = z.infer<typeof userPatchSchema>
 const userPostSchema = userPatchSchema.omit({ extId: true }).extend({email: z.email()})
@@ -66,7 +66,7 @@ export const user = new Hono()
     await db.user.create({data: userData})
     log.info('Created user', logData)
     return c.json({ data: logData })
-    
+
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
     if (err.code === 'P2002') {
@@ -93,7 +93,7 @@ export const user = new Hono()
     })
     log.info('Created user', result)
     return c.json({ data: result })
-    
+
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
     if (err.code === 'P2002') {

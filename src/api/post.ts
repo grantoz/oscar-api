@@ -1,27 +1,19 @@
 import { Context, Hono } from '@hono'
-import { db, Prisma, Post } from '@mod/db'
+import { db, Post, User } from '@mod/db'
 import { log, meta, paged, pageOptions } from '../util/mod.ts'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 
-const userPatchSchema = z.object({
-  extId: z.string(),
-  name: z.string().optional(),
-  phone: z.string().optional(),
-  password: z.string().optional(),
-  passwordConfirm: z.string().optional(),
-}).refine(schema => {
-  schema.password === schema.passwordConfirm
-}, {
-  message: 'Password and password confirmation must match', 
+const postPatchSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+  extId: z.uuidv4(),
 })
-type userPatch = z.infer<typeof userPatchSchema>
-
+type postPatch = z.infer<typeof postPatchSchema>
 
 const postPostSchema = z.object({
   title: z.string(),
   content: z.string(),
-  userId: z.int(),
 })
 type postPost = z.infer<typeof postPostSchema>
 
@@ -52,22 +44,29 @@ export const post = new Hono()
 
   const payload: postPost = c.req.valid('json' as never)
   log.info('creating post', payload)
+
+  const user = c.get('authUser') as User
+  log.info('creating post for user', user?.email, user?.id)
+  if (!user?.id) {
+    log.warn('create post: no user in context')
+    return c.json({ error: 'Not Authorized' }, 401)
+  }
+
   try {
     const result = await db.post.create({
       data: {
         title: payload.title,
         content: payload.content,
-        userId: payload.userId,
+        userId: user.id,
       },
     })
-  
+    log.info('created post', result)
     return c.json({ data: result })
-    
+
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
     if (err.code === 'P2002') {
       log.warn('create post: unique constraint failed', err)
-      // console.warn('Create user: Unique constraint failed', err)
       return c.json({ error: 'unique constraint failed' }, 422)
     }
     log.warn('error creating post', err)
@@ -75,30 +74,25 @@ export const post = new Hono()
   }
 })
 
-.patch('/', zValidator('json', userPatchSchema), async (c: Context) => {
-  const payload: userPatch = c.req.valid('json' as never)
-  log.info('Updating user', payload)
+.patch('/', zValidator('json', postPatchSchema), async (c: Context) => {
+  const payload: postPatch = c.req.valid('json' as never)
+  log.info('updating post', payload)
   try {
-    const result = await db.user.update({
+    const result = await db.post.update({
       where: {
         extId: payload.extId,
       },
       data: {
-        name: payload.name,
-        phone: payload.phone,
+        title: payload.title,
+        content: payload.content,
       },
     })
-    log.info('Created user', result)
+    log.info('updated post', result)
     return c.json({ data: result })
-    
+
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
-    if (err.code === 'P2002') {
-      // err.target === ['email']
-      log.error('Create user: Unique constraint failed', err)
-      return c.json({ error: 'Unique constraint failed' }, 429)
-    }
-    log.error('Error creating user', err)
+    log.error('error updating post', err)
     throw(err)
     // return c.json({ error: 'Error creating user' }, 500)
   }
