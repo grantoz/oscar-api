@@ -24,8 +24,6 @@ app.use(validateJwtMiddleware) // Apply validateJwt middleware to /api/* routes
 app.route('/api', api)
 app.route('/auth', auth)
 
-log.info('a');
-
 // TODO hono openapi middleware
 // https://hono.dev/examples/hono-openapi
 

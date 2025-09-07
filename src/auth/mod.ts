@@ -76,6 +76,8 @@ const auth = new Hono().post('/login', async (c: Context) => {
   const userData = Object.assign({}, user);
   userData.hash = null
   userData.salt = null
+
+  // store the logged-in user in the kv store with an expiry matching the token
   const kv = await Deno.openKv()
   await kv.set(['login', user.extId], userData, { expireIn: expiry * 1000 })
   kv.close()
@@ -87,7 +89,6 @@ const auth = new Hono().post('/login', async (c: Context) => {
 
 // export const validateJwt = createMiddleware(async (c, next) => {
 const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
-  log.info('validateJwt middleware invoked XXX GRANT')
   if (c.req.path.startsWith('/api')) {
     const auth = c.req.header('Authorization');
 
@@ -102,7 +103,7 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
       const decodedPayload = await verify(token, jwtSecret, jwtAlgo);
       log.info('JWT is valid:', decodedPayload);
 
-      // now check if the token is in the kv store
+      // check whether the token is in the kv store
       const kv = await Deno.openKv()
       const res = await kv.get(['login', decodedPayload.sub as string])
       kv.close()
@@ -112,8 +113,6 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
       }
 
       log.info('logged-in user found in store:', res.value);
-      // TODO check if token is expired based on stored timestamp
-      // TODO implement token revocation list or blacklist if needed
 
       // store user info in context for use in app components
       c.set('authUser', res.value)
@@ -130,6 +129,7 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
 export { auth, validateJwtMiddleware }
 export type { jwtUser }
 
+// TODO implement token revocation from KV
 // TODO implement register endpoint
 // TODO implement forgot password endpoint
 // TODO implement reset password endpoint
