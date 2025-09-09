@@ -34,7 +34,6 @@ export const user = new Hono()
 
 .get('/:id{[0-9]+}', async (c: Context) => {
   const { id } = c.req.param()
-  log.info('got id', id)
   const user = await db.user.findUnique({
     where: {
       id: Number(id),

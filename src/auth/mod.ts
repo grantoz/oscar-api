@@ -38,25 +38,29 @@ const auth = new Hono().post('/login', async (c: Context) => {
   // Split into username and password
   const [email, password] = decodedCreds.split(':');
 
-  log.info('login attempt: ', email)
   const user = await db.user.findUnique({
     where: {
       email: email
     },
   })
 
+  if (!user) {
+    log.warn('login: user not found', { email }) // not a PII leak as user does not exist
+    return c.json({ error: 'Invalid email or password' }, 401)
+  }
+
   // todo test that this really works for user record not found
   if (!user?.salt || !user?.hash) {
-    log.warn('login: user not found', email)
+    log.warn('login: user has no auth set up', { extId: user.extId })
     return c.json({ error: 'Invalid email or password' }, 401)
   }
 
   const hash = await hashPassword(password, user?.salt || '')
   if (hash !== user?.hash) {
-    log.warn('login: incorrect password', email)
+    log.warn('login: bad password', { extId: user.extId })
     return c.json({ error: 'Invalid email or password' }, 401)
   }
-  log.info('login: authorised', email)
+  log.info('login: authorised', { extId: user.extId })
 
   const token = await sign(
     {
@@ -71,7 +75,7 @@ const auth = new Hono().post('/login', async (c: Context) => {
       iss: Deno.env.get('JWT_ISSUER') || 'oscar-localhost',
     }, jwtSecret, jwtAlgo
   )
-  log.info('login: generated JWT', email, user.extId)
+  log.info('login: generated JWT', { email, extId: user.extId })
 
   const userData = Object.assign({}, user);
   userData.hash = null
@@ -98,10 +102,10 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
 
     // Extract the token part
     const token = auth.substring(7);
-    log.info('validateJwt: token found', token)
+    log.debug('validateJwt: token found in auth header', { token })
     try {
       const decodedPayload = await verify(token, jwtSecret, jwtAlgo);
-      log.info('JWT is valid:', decodedPayload);
+      log.debug('JWT is valid:', decodedPayload);
 
       // check whether the token is in the kv store
       const kv = await Deno.openKv()
@@ -112,12 +116,12 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
         return c.json({ error: 'Not Authorized' }, 401);
       }
 
-      log.info('logged-in user found in store:', res.value);
+      log.debug('logged-in user found in KV', { kvUser: res.value });
 
       // store user info in context for use in app components
       c.set('authUser', res.value)
     } catch (error) {
-      log.warn('Invalid JWT:', error);
+      log.warn('Invalid JWT:', { error });
       return c.json({ error: 'Not Authorized' }, 401);
     }
 

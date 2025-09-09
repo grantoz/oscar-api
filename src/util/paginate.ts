@@ -48,8 +48,8 @@ export const parseIntOrDefault = (value: string | undefined, defaultValue: numbe
 export const pageOptions = (query: paged): object => {
   const result = querySchema.safeParse(query)
   if (!result.success) {
-    log.error('Invalid query parameters', result.error)
-    throw new Error('Invalid query parameters')
+    log.error('paginator: invalid params', { error: result.error })
+    throw new Error('paginator: invalid params')
   }
   const parsed = result.data
   log.info('Parsed query', parsed)

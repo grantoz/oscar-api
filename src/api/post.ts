@@ -28,7 +28,6 @@ export const post = new Hono()
 
 .get('/:id{[0-9]+}', async (c: Context) => {
   const { id } = c.req.param()
-  log.info('got id', id)
   const item: Post|null = await db.post.findUnique({
     where: {
       id: Number(id),
@@ -46,7 +45,7 @@ export const post = new Hono()
   log.info('creating post', payload)
 
   const user = c.get('authUser') as User
-  log.info('creating post for user', user?.email, user?.id)
+  log.info('creating post for user', { user }) // TODO PII LEAK
   if (!user?.id) {
     log.warn('create post: no user in context')
     return c.json({ error: 'Not Authorized' }, 401)

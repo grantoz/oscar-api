@@ -26,11 +26,13 @@ So this project is just about building, initially, a CRUD API base using lightwe
 
 - API tests
 - Hono CORS middleware
+- Hono / Zod OpenApi generation
 - View models (AKA transformers / presenters) - perhaps class based with declarative properties e.g. `publicFields`, map transform field:function
 - JWT refresh
 - ACL system for API components
 - Queue for async I/O (probably using Deno KV Queue)
 - OAuth2.0
+- CI testing
 - Postmark integration
 - Varnish in front of all GET by default, with per-calling=user and per-resource tagging to allow for invalidation
 - Invalidation strategies for all listable entities to account for pagination

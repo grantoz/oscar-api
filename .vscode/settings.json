@@ -8,6 +8,7 @@
     "autoincrement",
     "Creds",
     "dbgenerated",
+    "logtape",
     "mailpit",
     "uuidv"
   ]

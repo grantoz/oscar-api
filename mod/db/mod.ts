@@ -19,7 +19,7 @@ if (Deno.env.get('LOG_DB_QUERY') === 'true') {
 if (Deno.env.get('LOG_DB_INFO') === 'true') {
   log.push({ emit: 'stdout', level: 'info' });
 }
-
+console.log('HERE I AM IN MOD DB', log);
 const db = new PrismaClient({
   log,
   datasources: {

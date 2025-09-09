@@ -57,14 +57,14 @@ const start = async () => {
     console.log(app.routes)
     Deno.serve(app.fetch)
   } catch (err) {
-    log.error(err)
+    log.error('start: error', { err })
     await db.$disconnect()
     Deno.exit(1)
   }
 }
 
 globalThis.addEventListener('unhandledRejection', async (err) => {
-  log.error(err)
+  log.error('unhandledRejection', { err })
   await db.$disconnect()
   Deno.exit(1)
 })

@@ -22,6 +22,8 @@
   "imports": {
     "@db/postgres": "jsr:@db/postgres@^0.19.5",
     "@felix/argon2": "jsr:@felix/argon2@^3.0.2",
+    "@logtape/logtape": "jsr:@logtape/logtape@^1.0.5",
+    "@std/expect": "jsr:@std/expect@^1.0.17",
     "@std/testing": "jsr:@std/testing@^1.0.15",
     "generated/": "./node_modules/generated/",
     "@hono": "npm:hono@4.9.2",

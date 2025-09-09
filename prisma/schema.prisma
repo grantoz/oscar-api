@@ -3,8 +3,9 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["deno", "relationJoins"]
+  previewFeatures = ["relationJoins"]
   output          = "../node_modules/generated"
+  runtime         = "deno"
 }
 
 datasource db {

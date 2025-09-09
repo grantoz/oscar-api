@@ -1,15 +1,18 @@
-// TODO @std/log is deprecated, use logtape or similar
-import * as logger from '@std/log'
+import { configure, getConsoleSink, getLogger, jsonLinesFormatter } from "@logtape/logtape";
+import { type LogLevel } from "@logtape/logtape";
 
-const logLevel = Deno.env.get('LOG_LEVEL') as logger.LevelName || 'INFO'
+const logLevel = (Deno.env.get('LOG_LEVEL') as LogLevel) || 'info'
 
-logger.setup({
-  handlers: {
-    default: new logger.ConsoleHandler(logLevel, {
-      formatter: logger.formatters.jsonFormatter,
-      useColors: true,
-    }),
+await configure({
+  sinks: { console: getConsoleSink({
+      formatter: jsonLinesFormatter
+    })
   },
-})
+  loggers: [
+    // { category: "oscar", lowestLevel: logLevel, sinks: ["console"] }
+    { category: [], lowestLevel: logLevel, sinks: ["console"] }
+  ]
+});
 
-export const log = logger.getLogger();
+// export const log = getLogger(["oscar", "my-module"]);
+export const log = getLogger(["oscar"]);
