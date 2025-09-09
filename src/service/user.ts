@@ -1,4 +1,3 @@
-// import type { User } from 'generated/deno/edge.ts'
 import { db, User } from '@mod/db'
 import { hash, Variant, Version } from "@felix/argon2";
 import { log } from '../util/mod.ts'
@@ -16,7 +15,7 @@ export const savePasswordSaltAndHash = async (user: User, password: string) => {
   const salt = genSalt()
   const hash = await hashPassword(password, salt)
   try {
-    const result = await db.user.update({
+    await db.user.update({
       where: {
         id: user.id,
       },
@@ -25,11 +24,10 @@ export const savePasswordSaltAndHash = async (user: User, password: string) => {
         hash
       },
     })
-    // TODO entity success / fail logger
-    log.info('Updated password for ', result)
+    log.info('user: updated password', { extId: user.extId })
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
-    log.error('Failed to update user password', err)
+    log.error('user: failed to update password', err)
     throw err
   }
 }

@@ -1,5 +1,4 @@
 import 'jsr:@std/dotenv/load'
-import { db } from '@mod/db'
 
 export function add(a: number, b: number): number {
   return a + b

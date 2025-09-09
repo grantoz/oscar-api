@@ -1,4 +1,4 @@
-import { db, User } from '@mod/db'
+import { db } from '@mod/db'
 import { verify } from "@felix/argon2";
 import { assertEquals, assertExists } from '@std/assert'
 import { genSalt, hashPassword } from './user.ts';
@@ -19,6 +19,6 @@ Deno.test("Finds seeded users", async function() {
       posts: true,
     },
   })
-  console.dir(allUsers, { depth: null })
+  // console.dir(allUsers, { depth: null })
   assertEquals(allUsers.length > 0, true)
 })
