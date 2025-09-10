@@ -62,7 +62,7 @@ async function dropDb(db) {
     }
   }
 
-  const dropSql = `DROP DATABASE ${ dbName }`
+  const dropSql = `DROP DATABASE IF EXISTS ${ dbName }`
   try {
     await db.queryArray(dropSql)
     console.log(`Database '${dbName}' dropped.`)

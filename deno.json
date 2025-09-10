@@ -5,6 +5,7 @@
     "db:create": "deno run -A cli/alter_db.js --create",
     "db:drop": "deno run -A cli/alter_db.js --drop",
     "db:fresh": "deno run -A cli/alter_db.js --drop --create && deno task db:migrate",
+    "db:fresh:seeded": "deno run -A cli/alter_db.js --drop --create && deno task db:migrate && deno task db:seed",
     "db:migrate": "deno run -A npm:prisma migrate dev",
     "db:seed": "deno run -A ./prisma/seed/index.ts",
     "prisma": "deno run -A npm:prisma",
