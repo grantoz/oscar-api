@@ -26,5 +26,4 @@ export default async () => {
     });
     console.log(`Created country with id: ${country.id}`);
   }
-  console.log('Blah blah blah');
 }
