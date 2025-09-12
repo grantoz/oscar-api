@@ -1,5 +1,5 @@
 // note, always load dotenv first so that other imports in the dependency graph can use it
-import 'jsr:@std/dotenv/load'
+import '@std/dotenv/load'
 import { Context, Hono } from '@hono'
 import { logger } from '@hono/logger'
 import { db } from '@mod/db'

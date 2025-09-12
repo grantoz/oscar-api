@@ -1,3 +1,4 @@
+import "@std/dotenv/load";
 import { db } from '@mod/db'
 import { verify } from "@felix/argon2";
 import { assertEquals, assertExists } from '@std/assert'
@@ -19,6 +20,7 @@ Deno.test("Finds seeded users", async function() {
       posts: true,
     },
   })
+  await db.$disconnect()
   // console.dir(allUsers, { depth: null })
   assertEquals(allUsers.length > 0, true)
 })

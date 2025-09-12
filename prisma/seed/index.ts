@@ -1,5 +1,5 @@
+import "@std/dotenv/load";
 import { db } from '@mod/db'
-import "jsr:@std/dotenv/load";
 import userSeed from './user.ts';
 import countrySeed from './country.ts';
 

@@ -1,13 +1,17 @@
-// @ts-types="../../node_modules/generated/index.d.ts"
-import { PrismaClient, Prisma } from 'generated/index.js'
+import { PrismaClient } from '../../prisma/generated/client.ts'
+import { Prisma } from '../../prisma/generated/client.ts'
+import { PrismaPg } from "@prisma/adapter-pg";
 
-// import { ulid } from "@std/ulid";
-// https://docs.deno.com/examples/ulid/
+const dbUrl: string = Deno.env.get('DB_URL') || ''
 
-const dbUrl = Deno.env.get('DB_URL')
-
-// TODO: observability, metrics, logging
+// TODO: observability, metrics (DONE: logging)
 // https://www.prisma.io/docs/orm/prisma-client/observability-and-logging
+
+if (!dbUrl) {
+  console.error('DB_URL environment variable is not set')
+  Deno.exit(1)
+}
+
 
 const log: Prisma.LogDefinition[] = [
   { emit: 'stdout', level: 'warn' },
@@ -19,17 +23,15 @@ if (Deno.env.get('LOG_DB_QUERY') === 'true') {
 if (Deno.env.get('LOG_DB_INFO') === 'true') {
   log.push({ emit: 'stdout', level: 'info' });
 }
-console.log('HERE I AM IN MOD DB', log);
-const db = new PrismaClient({
+
+const adapter: PrismaPg = new PrismaPg({ connectionString: dbUrl! });
+
+const db: PrismaClient = new PrismaClient({
+  adapter,
   log,
-  datasources: {
-    db: {
-      url: dbUrl,
-    },
-  },
 })
 // https://www.prisma.io/docs/orm/prisma-client/client-extensions
 // https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
 
 export { db, Prisma }
-export type { User, Country, Post } from 'generated/index.js'
+export type { User, Country, Post } from '../../prisma/generated/client.ts'

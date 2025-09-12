@@ -23,10 +23,9 @@
   "imports": {
     "@db/postgres": "jsr:@db/postgres@^0.19.5",
     "@felix/argon2": "jsr:@felix/argon2@^3.0.2",
-    "@logtape/logtape": "jsr:@logtape/logtape@^1.0.5",
+    "@logtape/logtape": "jsr:@logtape/logtape@^1.1.0",
     "@std/expect": "jsr:@std/expect@^1.0.17",
     "@std/testing": "jsr:@std/testing@^1.0.15",
-    "generated/": "./node_modules/generated/",
     "@hono": "npm:hono@4.9.2",
     "@hono/logger": "npm:hono@4.9.2/logger",
     "@hono/zod-validator": "npm:@hono/zod-validator@0.7.2",
@@ -39,6 +38,11 @@
     "indentWidth": 2,
     "semiColons": false,
     "singleQuote": true
+  },
+  "lint": {
+    "exclude": [
+      "prisma/generated/**"
+    ]
   },
   "workspace": ["./mod/db"],
   "nodeModulesDir": "auto"
