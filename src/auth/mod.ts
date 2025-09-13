@@ -7,11 +7,10 @@ import { log } from '../util/mod.ts'
 import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa';
 import { verify } from '@hono/jwt';
 
-
-  // TODO improve this
 const jwtAlgo = Deno.env.get('JWT_ALGORITHM') as SignatureAlgorithm
 const jwtSecret = Deno.env.get('JWT_SECRET') as string
 const expiry = parseInt(Deno.env.get('JWT_EXPIRY') || '3600') // default to 1 hour
+const issuer = Deno.env.get('JWT_ISSUER') || 'oscar'
 
 type jwtUser = {
   sub: string
@@ -72,7 +71,7 @@ const auth = new Hono().post('/login', async (c: Context) => {
       // but keep it minimal to avoid large tokens
       // and avoid sensitive info
       exp: Math.floor(Date.now() / 1000) + expiry,
-      iss: Deno.env.get('JWT_ISSUER') || 'oscar-localhost',
+      iss: issuer,
     }, jwtSecret, jwtAlgo
   )
   log.info('login: generated JWT', { email, extId: user.extId })
