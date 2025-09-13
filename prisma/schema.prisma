@@ -5,7 +5,7 @@ generator client {
   // provider        = "prisma-client-js"
   provider   = "prisma-client" // ESM-first
   engineType = "client"        // No rust engines
-  previewFeatures = ["relationJoins", "driverAdapters"]
+  previewFeatures = ["relationJoins"]
   output          = "./generated"
   runtime         = "deno"
 }
