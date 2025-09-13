@@ -32,8 +32,9 @@
       "runtimeExecutable": "deno", /* modified: using deno process name from my PATH */
       "runtimeArgs": [
         "test",
+        "-A",
         "--inspect-brk",
-        "--allow-all"
+        // "--allow-all"
       ],
       "type": "node",
     }

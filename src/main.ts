@@ -1,5 +1,5 @@
 // note, always load dotenv first so that other imports in the dependency graph can use it
-import 'jsr:@std/dotenv/load'
+import '@std/dotenv/load'
 import { Context, Hono } from '@hono'
 import { logger } from '@hono/logger'
 import { db } from '@mod/db'
@@ -53,9 +53,12 @@ const start = async () => {
   // TODO add checks for required env vars
   // TODO add a check that the db is connected
 
+  const port = Number(Deno.env.get('PORT') || 8000)
+  log.info(`Starting server on port ${port}...`)
+
   try {
-    console.log(app.routes)
-    Deno.serve(app.fetch)
+    // console.log(app.routes)
+    Deno.serve({ port }, app.fetch)
   } catch (err) {
     log.error('start: error', { err })
     await db.$disconnect()

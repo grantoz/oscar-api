@@ -27,7 +27,7 @@ export default async () => {
       name: "Super",
       email: "super@grantoz.io",
       role: "super",
-      props: Prisma.JsonNull,
+      props: Prisma.DbNull,
       hash: superAuth.hash,
       salt: superAuth.salt,
     },

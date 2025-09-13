@@ -2,9 +2,11 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
+  // provider        = "prisma-client-js"
+  provider   = "prisma-client" // ESM-first
+  engineType = "client"        // No rust engines
   previewFeatures = ["relationJoins"]
-  output          = "../node_modules/generated"
+  output          = "./generated"
   runtime         = "deno"
 }
 
