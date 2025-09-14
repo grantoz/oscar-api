@@ -46,6 +46,7 @@ export default async () => {
    */
 
   for (const u of userData) {
+    // TODO upsert to avoid duplicates
     const user = await db.user.create({
       data: u,
     });

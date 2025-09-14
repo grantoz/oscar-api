@@ -10,7 +10,8 @@
     "jsr:@std/async@^1.0.13": "1.0.14",
     "jsr:@std/bytes@1": "1.0.4",
     "jsr:@std/bytes@^1.0.2": "1.0.4",
-    "jsr:@std/bytes@^1.0.5": "1.0.5",
+    "jsr:@std/bytes@^1.0.5": "1.0.6",
+    "jsr:@std/bytes@^1.0.6": "1.0.6",
     "jsr:@std/crypto@1": "1.0.3",
     "jsr:@std/crypto@^1.0.4": "1.0.5",
     "jsr:@std/csv@*": "1.0.5",
@@ -19,6 +20,7 @@
     "jsr:@std/dotenv@~0.225.5": "0.225.5",
     "jsr:@std/encoding@*": "1.0.10",
     "jsr:@std/encoding@1": "1.0.10",
+    "jsr:@std/encoding@^1.0.10": "1.0.10",
     "jsr:@std/encoding@^1.0.5": "1.0.5",
     "jsr:@std/encoding@^1.0.9": "1.0.10",
     "jsr:@std/expect@^1.0.17": "1.0.17",
@@ -38,6 +40,7 @@
     "jsr:@std/path@1": "1.1.2",
     "jsr:@std/path@^1.0.8": "1.1.2",
     "jsr:@std/path@^1.1.1": "1.1.2",
+    "jsr:@std/streams@^1.0.12": "1.0.12",
     "jsr:@std/streams@^1.0.8": "1.0.9",
     "jsr:@std/testing@^1.0.15": "1.0.15",
     "npm:@hono/zod-validator@0.7.2": "0.7.2_hono@4.9.2_zod@4.0.17",
@@ -95,6 +98,9 @@
     "@std/bytes@1.0.5": {
       "integrity": "4465dd739d7963d964c809202ebea6d5c6b8e3829ef25c6a224290fbb8a1021e"
     },
+    "@std/bytes@1.0.6": {
+      "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
+    },
     "@std/crypto@1.0.3": {
       "integrity": "a2a32f51ddef632d299e3879cd027c630dcd4d1d9a5285d6e6788072f4e51e7f"
     },
@@ -104,7 +110,7 @@
     "@std/csv@1.0.5": {
       "integrity": "02006ffd77e84b2bf01968d4e792f0b5cba057c73dc6a89accb96d803493675f",
       "dependencies": [
-        "jsr:@std/streams"
+        "jsr:@std/streams@^1.0.8"
       ]
     },
     "@std/data-structures@1.0.9": {
@@ -178,6 +184,12 @@
       "integrity": "a9d26b1988cdd7aa7b1f4b51e1c36c1557f3f252880fa6cc5b9f37078b1a5035",
       "dependencies": [
         "jsr:@std/bytes@^1.0.5"
+      ]
+    },
+    "@std/streams@1.0.12": {
+      "integrity": "ae925fa1dc459b1abf5cbaa28cc5c7b0485853af3b2a384b0dc22d86e59dfbf4",
+      "dependencies": [
+        "jsr:@std/bytes@^1.0.6"
       ]
     },
     "@std/testing@1.0.15": {
@@ -1106,8 +1118,10 @@
       "jsr:@logtape/logtape@^1.1.0",
       "jsr:@std/assert@^1.0.14",
       "jsr:@std/dotenv@~0.225.5",
+      "jsr:@std/encoding@^1.0.10",
       "jsr:@std/expect@^1.0.17",
       "jsr:@std/log@~0.224.14",
+      "jsr:@std/streams@^1.0.12",
       "jsr:@std/testing@^1.0.15",
       "npm:@hono/zod-validator@0.7.2",
       "npm:hono@4.9.2",
