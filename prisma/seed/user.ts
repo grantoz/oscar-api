@@ -12,12 +12,12 @@ const superAuth = {
   hash: superHash
 }
 
-const testSalt = genSalt()
-const testHash = await hashPassword("test", testSalt) // todo random strong password generator
-const testAuth = {
-  salt: testSalt,
-  hash: testHash
-}
+// const testSalt = genSalt()
+// const testHash = await hashPassword("test", testSalt) // todo random strong password generator
+// const testAuth = {
+//   salt: testSalt,
+//   hash: testHash
+// }
 
 
 export default async () => {
@@ -31,24 +31,25 @@ export default async () => {
       hash: superAuth.hash,
       salt: superAuth.salt,
     },
-    {
-      name: faker.name.findName(),
-      email: faker.internet.email(),
-      phone: faker.phone.phoneNumber(),
-      props: {},
-      hash: testAuth.hash,
-      salt: testAuth.salt,
-    },
+    // {
+    //   name: faker.name.findName(),
+    //   email: faker.internet.email(),
+    //   phone: faker.phone.phoneNumber(),
+    //   props: {},
+    //   hash: testAuth.hash,
+    //   salt: testAuth.salt,
+    // },
   ];
 
   /**
    * Seed the database.
+   * Use upsert to avoid duplicates if run multiple times.
    */
-
   for (const u of userData) {
-    // TODO upsert to avoid duplicates
-    const user = await db.user.create({
-      data: u,
+    const user = await db.user.upsert({
+      where: { email: u.email },
+      update: {},
+      create: u,
     });
     console.log(`Created user with id: ${user.id}`);
   }

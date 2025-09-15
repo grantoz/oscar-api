@@ -20,9 +20,15 @@ export default async () => {
     subRegionCode: parseInt(row.subRegionCode),
   }));
 
+   /**
+   * Seed the database.
+   * Use upsert to avoid duplicates if run multiple times.
+   */
   for (const d of countryData) {
-    const country = await db.country.create({
-      data: d,
+    const country = await db.country.upsert({
+      where: { id: d.id },
+      update: d,
+      create: d,
     });
     console.log(`Created country with id: ${country.id}`);
   }
