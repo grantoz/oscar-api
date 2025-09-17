@@ -4,6 +4,7 @@ import { log, meta, paged, pageOptions } from '../util/mod.ts'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 import { genSalt, hashPassword } from '../service/user.ts'
+import { userView } from '../view/user.ts'
 
 const userPatchSchema = z.object({
   extId: z.string(),
@@ -23,15 +24,13 @@ type userPost = z.infer<typeof userPostSchema>
 
 export const user = new Hono()
 .get('/', async (c: Context) => {
-  log.info(c.req.query())
-  log.debug('dummy debug log')
   const options = pageOptions(c.req.query() as paged)
   const users = await db.user.findMany(options)
-  c.res.headers.append('cache-control', 'max-age=10')
-  return c.json({ data: users, meta: meta(users) })
-  // return c.text('List Users') // GET /user
+  // TODO cache headers, etag etc
+  return c.json({ data: users.map(userView), meta: meta(users) })
 })
 
+// TODO declarative approach to single item routes
 .get('/:id{[0-9]+}', async (c: Context) => {
   const { id } = c.req.param()
   const user = await db.user.findUnique({
@@ -39,7 +38,10 @@ export const user = new Hono()
       id: Number(id),
     },
   })
-  return c.json({ data: user })
+  if (!user) {
+    return c.json({ error: 'User not found' }, 404)
+  }
+  return c.json({ data: userView(user) })
 })
 
 .post('/', zValidator('json', userPostSchema), async (c: Context) => {
@@ -74,7 +76,6 @@ export const user = new Hono()
     }
     log.warn('Error creating user', err)
     throw(err)
-    // return c.json({ error: 'Error creating user' }, 500)
   }
 })
 .patch('/', zValidator('json', userPatchSchema), async (c: Context) => {
@@ -90,8 +91,9 @@ export const user = new Hono()
         phone: payload.phone,
       },
     })
-    log.info('Created user', result)
-    return c.json({ data: result })
+    const userPatchResult = userView(result)
+    log.info('Created user', userPatchResult)
+    return c.json({ data: userPatchResult })
 
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
@@ -102,6 +104,7 @@ export const user = new Hono()
     }
     log.error('Error creating user', err)
     throw(err)
+    // TODO test various error conditions, logging and output for failure modes
     // return c.json({ error: 'Error creating user' }, 500)
   }
 })
