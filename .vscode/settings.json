@@ -11,6 +11,6 @@
     "dbgenerated",
     "logtape",
     "mailpit",
-    "uuidv"
+    "Uncapitalize"
   ]
 }

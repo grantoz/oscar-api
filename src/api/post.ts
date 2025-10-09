@@ -5,9 +5,9 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 
 const postPatchSchema = z.object({
+  id: z.uuidv7(),
   title: z.string(),
   content: z.string(),
-  extId: z.uuidv4(),
 })
 type postPatch = z.infer<typeof postPatchSchema>
 
@@ -19,7 +19,7 @@ type postPost = z.infer<typeof postPostSchema>
 
 export const post = new Hono()
 .get('/', async (c: Context) => {
-  log.info(c.req.query())
+  // log.info(c.req.query())
   const options = pageOptions(c.req.query() as paged)
   const items: Post[] = await db.post.findMany(options)
   c.res.headers.append('cache-control', 'max-age=10')
@@ -79,7 +79,7 @@ export const post = new Hono()
   try {
     const result = await db.post.update({
       where: {
-        extId: payload.extId,
+        id: payload.id,
       },
       data: {
         title: payload.title,

@@ -86,7 +86,6 @@ export default async () => {
     //       title: "Abelisaurus Info",
     //       content: "Abel's lizard has been reconstructed from a single skull.",
     //       published: true,
-    //       extId: ulid()
     //     }]
     //   },
     // },

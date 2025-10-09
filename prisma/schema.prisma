@@ -16,13 +16,12 @@ datasource db {
 }
 
 model Post {
-  id        BigInt   @db.BigInt @default(autoincrement()) @unique
-  title     String   @db.VarChar(255)
+  id        String    @unique @default(dbgenerated("uuidv7()")) @db.Uuid
+  title     String    @db.VarChar(255)
   content   String?
-  published Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id])
-  userId    BigInt   @db.BigInt
-  extId     String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  published Boolean   @default(false)
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String    @db.Uuid
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   deletedAt DateTime?
@@ -38,7 +37,7 @@ enum Role {
 // https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
 
 model User {
-  id        BigInt    @db.BigInt @default(autoincrement()) @unique
+  id        String    @unique @default(dbgenerated("uuidv7()")) @db.Uuid
   email     String    @unique
   name      String?   @db.VarChar(255)
   phone     String?   @db.VarChar(255)
@@ -46,7 +45,6 @@ model User {
   hash      String?   @db.VarChar(255)
   props     Json?
   role      Role      @default(user)
-  extId     String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   deletedAt DateTime?
@@ -54,13 +52,59 @@ model User {
 }
 
 model Country {
-  id String @db.VarChar(2) @unique
-  name             String    @db.VarChar(64)
-  alpha3           String   @db.VarChar(3)
-  countryCode      Int
-  region           String?   @db.VarChar(255)
-  subRegion        String?   @db.VarChar(255)
-  regionCode       Int?
-  subRegionCode    Int?
+  id              String  @db.VarChar(2) @unique
+  name            String  @db.VarChar(64)
+  alpha3          String  @db.VarChar(3)
+  countryCode     Int
+  region          String? @db.VarChar(255)
+  subRegion       String? @db.VarChar(255)
+  regionCode      Int?
+  subRegionCode   Int?
 }
+
+// enum AddressType {
+//   personal
+//   school
+//   business
+//   government
+//   organisation
+//   street
+//   postal
+// }
+
+// model Address {
+//   id        BigInt    @db.BigInt @default(autoincrement()) @unique
+//   line1     String?   @db.VarChar(255)
+//   line2     String?   @db.VarChar(255)
+//   suburb    String?   @db.VarChar(255) // locality, town
+//   postCode  String?   @db.VarChar(255)
+//   state     String?   @db.VarChar(255) // region, province
+//   country   Country   @relation(fields: [countryCode], references: [id])
+//   countryCode String  @db.VarChar(2)
+//   userId    BigInt    @db.BigInt
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @default(now())
+//   deletedAt DateTime?
+// }
+
+// // will require at least one teacher as contact
+// model School {
+//   id        BigInt    @db.BigInt @default(autoincrement()) @unique
+//   name      String?   @db.VarChar(255)
+//   role      Role      @default(user)
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @default(now())
+//   deletedAt DateTime?
+//   teachers  Teacher[]
+// }
+
+// model Teacher {
+//   id        BigInt    @db.BigInt @default(autoincrement()) @unique
+//   name      String?   @db.VarChar(255)
+//   role      Role      @default(user)
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @default(now())
+//   deletedAt DateTime?
+//   teachers  Teacher[]
+// }
 

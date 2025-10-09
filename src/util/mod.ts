@@ -1,4 +1,5 @@
-import { log as logger } from './log.ts'
+// import { log as logger } from './log.ts'
+import { log as logger } from './log_std.ts'
 import * as pager from './paginate.ts'
 
 export const meta = pager.meta

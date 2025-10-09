@@ -34,4 +34,4 @@ const db: PrismaClient = new PrismaClient({
 // https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
 
 export { db, Prisma }
-export type { User, Country, Post } from '../../prisma/generated/client.ts'
+export type { User, Country, Post, PrismaClient } from '../../prisma/generated/client.ts'

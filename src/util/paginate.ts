@@ -1,6 +1,6 @@
 import { z } from '@zod'
 
-import { log } from './log.ts'
+import { log } from './mod.ts'
 
 // deno-lint-ignore no-explicit-any
 export const meta = (records: any[]) => {

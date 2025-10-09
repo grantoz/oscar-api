@@ -6,8 +6,17 @@ import { z } from '@zod'
 import { genSalt, hashPassword } from '../service/user.ts'
 import { userView } from '../view/user.ts'
 
+// TODO add email verification, phone verification etc
+// TODO add role based access control, admin user etc
+
+const uuidIdSchema = z.object({
+  id: z.uuidv7(),
+})
+
+
+// schema for validating user update payload
 const userPatchSchema = z.object({
-  extId: z.string(),
+  id: z.string(),
   name: z.string().optional(),
   // email: z.string().optional(),
   phone: z.string().optional(),
@@ -19,9 +28,12 @@ const userPatchSchema = z.object({
   message: 'Password and password confirmation must match',
 })
 type userPatch = z.infer<typeof userPatchSchema>
-const userPostSchema = userPatchSchema.omit({ extId: true }).extend({email: z.email()})
+const userPostSchema = userPatchSchema.omit({ id: true }).extend({email: z.email()})
 type userPost = z.infer<typeof userPostSchema>
 
+// TODO generalise get(all) routes for entities
+// TODO middleware to check permissions, roles etc
+// TODO filtering
 export const user = new Hono()
 .get('/', async (c: Context) => {
   const options = pageOptions(c.req.query() as paged)
@@ -30,12 +42,28 @@ export const user = new Hono()
   return c.json({ data: users.map(userView), meta: meta(users) })
 })
 
-// TODO declarative approach to single item routes
-.get('/:id{[0-9]+}', async (c: Context) => {
-  const { id } = c.req.param()
+// TODO generalise ID fetch routes
+.get('/:id', zValidator('param', uuidIdSchema), async (c: Context) => {
+  const { id } = c.req.valid('param' as never);
   const user = await db.user.findUnique({
     where: {
-      id: Number(id),
+      id,
+    },
+  })
+  if (!user) {
+    return c.json({ error: 'User not found' }, 404)
+  }
+  return c.json({ data: userView(user) })
+})
+
+.get('/:id/post', zValidator('param', uuidIdSchema), async (c: Context) => {
+  const { id } = c.req.valid('param' as never);
+  const user = await db.user.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      posts: true, // Include all posts related to this user
     },
   })
   if (!user) {
@@ -84,7 +112,7 @@ export const user = new Hono()
   try {
     const result = await db.user.update({
       where: {
-        extId: payload.extId,
+        id: payload.id,
       },
       data: {
         name: payload.name,
@@ -97,12 +125,11 @@ export const user = new Hono()
 
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
-    if (err.code === 'P2002') {
-      // err.target === ['email']
-      log.error('patch user: unique constraint failed', err)
+    if (err.code === 'P2002') { // err.target === ['email']
+      log.info('patch user: unique constraint failed', err)
       return c.json({ error: 'Unique constraint failed' }, 429)
     }
-    log.error('Error creating user', err)
+    log.warn('Error creating user', err)
     throw(err)
     // TODO test various error conditions, logging and output for failure modes
     // return c.json({ error: 'Error creating user' }, 500)

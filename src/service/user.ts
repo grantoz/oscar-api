@@ -24,7 +24,7 @@ export const savePasswordSaltAndHash = async (user: User, password: string) => {
         hash
       },
     })
-    log.info('user: updated password', { extId: user.extId })
+    log.info('user: updated password', { id: user.id })
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
     log.error('user: failed to update password', err)

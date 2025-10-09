@@ -1,13 +1,12 @@
-import { User, Prisma } from '@mod/db'
+import { User, Post } from '@mod/db'
 
-export type UserView = Omit<User, 'id' | 'extId' | 'hash' | 'salt' | 'props'>
-  & { id: string, props: Record<string, unknown> }
+export type UserView = Omit<User, 'hash' | 'salt' | 'props'>
+  & { props: Record<string, unknown>, posts?: Post[] }
 
-// transform a User model instance to a UserView
-// TODO this is a privileged view, filter based on requester's role/permissions
-const userView = (user: User): UserView => {
+
+const userView = (user: User & { posts?: Post[] }): UserView => {
   return {
-    id: user.extId,
+    id: user.id,
     name: user.name,
     email: user.email,
     phone: user.phone,
@@ -16,6 +15,7 @@ const userView = (user: User): UserView => {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     deletedAt: user.deletedAt,
+    posts: user.posts
   }
 }
 
