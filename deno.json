@@ -1,26 +1,39 @@
 {
   "tasks": {
-    "dev": "deno run -A --watch src/main.ts",
+    "dev":      "deno run -A --watch src/main.ts",
+    "dev:test": "deno run -A --env-file=.env.test src/main.ts",
     "dev:otel": "OTEL_DENO=true deno run --unstable-otel -A --watch src/main.ts",
-    "db:create": "deno run -A cli/alter_db.js --create",
-    "db:drop": "deno run -A cli/alter_db.js --drop",
-    "db:generate": "rm -rf ./prisma/generated && deno task prisma generate --schema ./prisma/schema.prisma",
-    "db:generateOLD": "deno task prisma generate --schema ./prisma/schema.prisma",
-    "db:migrate": "deno run -A npm:prisma migrate dev",
-    "db:new": "deno run -A cli/alter_db.js --drop --create && deno task db:migrate",
-    "db:new:seed": "deno run -A cli/alter_db.js --drop --create && deno task db:migrate && deno task db:seed",
-    "db:seed": "deno run -A ./prisma/seed/index.ts",
-    "prisma": "deno run -A npm:prisma",
-    "setup:env": "deno run -A cli/setup_env.js",
-    "setup:all": "deno run -A cli/setup_env.js && deno task db:new:seed && deno task db:generate",
-    "test:db:create": "deno run -A --env-file=.env.test cli/alter_db.js --create",
-    "test:db:drop": "deno run -A --env-file=.env.test cli/alter_db.js --drop",
-    "test:db:fresh": "deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno task test:db:migrate",
-    "test:db:migrate": "deno run --env-file=.env.test -A npm:prisma migrate dev",
-    "test:db:seed": "deno run -A --env-file=.env.test ./prisma/seed/index.ts",
-    "test": "deno test -A src/",
-    "test-disabled": "deno test -A --env-file=.env.test src/",
-    "sendmail": "deno run -A --env-file=.env src/send_email.ts"
+
+    "db:create":        "deno run -A cli/alter_db.js --create",
+    "db:create:test":   "deno run -A --env-file=.env.test cli/alter_db.js --create",
+
+    "db:drop":          "deno run -A cli/alter_db.js --drop",
+    "db:drop:test":     "deno run -A --env-file=.env.test cli/alter_db.js --drop",
+
+    "db:generate":      "rm -rf prisma/generated && deno task prisma generate --schema ./prisma/schema.prisma",
+
+    "db:migrate":       "deno run -A npm:prisma migrate dev",
+    "db:migrate:test":  "deno run -A --env-file=.env.test npm:prisma migrate dev",
+
+    "db:new":           "deno run -A cli/alter_db.js --drop --create && deno task db:migrate",
+    "db:new:test":      "deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno task db:migrate:test",
+
+    "db:new:seed":      "deno run -A cli/alter_db.js --drop --create && deno task db:migrate && deno task db:seed",
+    "db:new:seed:test": "deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno task db:migrate:test && deno task db:seed:test",
+
+    "db:seed":          "deno run -A ./prisma/seed/index.ts",
+    "db:seed:test":     "deno run -A --env-file=.env.test ./prisma/seed/index.ts --test",
+
+    "prisma":           "deno run -A npm:prisma",
+
+    "setup:env":        "deno run -A cli/setup_env.js",
+    "setup:env:test":   "deno run -A cli/setup_env.js --test",
+
+    "setup:all":        "deno task setup:env && deno task db:generate && deno task db:new:seed",
+    "setup:all:test":   "deno task setup:env:test && deno task db:generate && deno task db:new:seed:test",
+
+    "test":             "deno test -A src/",
+    "sendmail":         "deno run -A --env-file=.env src/send_email.ts"
   },
   "unstable": ["kv", "otel"],
   "imports": {

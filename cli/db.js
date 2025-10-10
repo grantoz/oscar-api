@@ -2,15 +2,15 @@
 import "@std/dotenv/load";
 import { Client } from "@db/postgres";
 
-const test = Deno.args.includes('--test')
+// const test = Deno.args.includes('--test')
 const dbUrl = Deno.env.get('DB_URL')
 const match = dbUrl.match(/postgresql:\/\/(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^:]+):(?<port>\d+)\/(?<db>[^?]+)/)
 
-let dbName = match?.groups?.db
-if (test) {
-  dbName = `test_${dbName}`
-  console.log(`Running in test mode, using database name: ${dbName}`)
-}
+// let dbName = match?.groups?.db
+// if (test) {
+//   dbName = `test_${dbName}`
+//   console.log(`Running in test mode, using database name: ${dbName}`)
+// }
 
 
 const db = new Client({

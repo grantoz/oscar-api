@@ -1,13 +1,14 @@
 import "@std/dotenv/load";
-import { db } from '@mod/db'
+import { getDB } from '@mod/db'
 import userSeed from './user.ts';
 import countrySeed from './country.ts';
 
-// TODO seeds for different environments
-// TODO secret storage for super passwords for stage/uat/sandbox/prod
+Deno.env.set('LOG_DB_QUERY', 'false')
+Deno.env.set('LOG_DB_INFO', 'false')
+const db = getDB()
 
-await userSeed()
-await countrySeed()
+await userSeed(db)
+await countrySeed(db)
 
 console.log(`Seeding finished.`);
 await db.$disconnect().then(() => {

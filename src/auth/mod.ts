@@ -43,6 +43,8 @@ const auth = new Hono().post('/login', async (c: Context) => {
     },
   })
 
+  // log.info('USER XXX', { user })
+
   if (!user) {
     log.warn('login: user not found', { email }) // not a PII leak as user does not exist
     return c.json({ error: 'Invalid email or password' }, 401)
@@ -50,20 +52,20 @@ const auth = new Hono().post('/login', async (c: Context) => {
 
   // todo test that this really works for user record not found
   if (!user?.salt || !user?.hash) {
-    log.warn('login: user has no auth set up', { extId: user.extId })
+    log.warn('login: user has no auth set up', { id: user.id })
     return c.json({ error: 'Invalid email or password' }, 401)
   }
 
   const hash = await hashPassword(password, user?.salt || '')
   if (hash !== user?.hash) {
-    log.warn('login: bad password', { extId: user.extId })
+    log.warn('login: bad password', { id: user.id })
     return c.json({ error: 'Invalid email or password' }, 401)
   }
-  log.info('login: authorised', { extId: user.extId })
+  log.info('login: authorised', { id: user.id })
 
   const token = await sign(
     {
-      sub: user.extId,
+      sub: user.id,
       email: user.email,
       role: user.role,
       // TODO add more user info to JWT payload?
@@ -74,7 +76,7 @@ const auth = new Hono().post('/login', async (c: Context) => {
       iss: issuer,
     }, jwtSecret, jwtAlgo
   )
-  log.info('login: generated JWT', { email, extId: user.extId })
+  log.info('login: generated JWT', { email, id: user.id })
 
   const userData = Object.assign({}, user);
   userData.hash = null
@@ -82,7 +84,7 @@ const auth = new Hono().post('/login', async (c: Context) => {
 
   // store the logged-in user in the kv store with an expiry matching the token
   const kv = await Deno.openKv()
-  await kv.set(['login', user.extId], userData, { expireIn: expiry * 1000 })
+  await kv.set(['login', user.id], userData, { expireIn: expiry * 1000 })
   kv.close()
 
   // TODO emit metric for successful login

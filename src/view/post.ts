@@ -1,6 +1,6 @@
 import { Post } from '@mod/db'
 
-export type PostView = Omit<Post, 'id' | 'extId' | 'userId' >
+export type PostView = Omit<Post, 'id' | 'userId' >
   & { id: string }
 
 const postView = (post: Post): PostView => {

@@ -1,7 +1,7 @@
-import { db, Prisma } from '@mod/db'
+import { Prisma, PrismaClient } from '@mod/db'
 import { parse } from "jsr:@std/csv";
 
-export default async () => {
+export default async (db: PrismaClient) => {
   const text = Deno.readTextFileSync(Deno.cwd() + "/prisma/seed/countries.csv")
 
   const csvData = parse(text, {
@@ -20,16 +20,16 @@ export default async () => {
     subRegionCode: parseInt(row.subRegionCode),
   }));
 
-   /**
-   * Seed the database.
-   * Use upsert to avoid duplicates if run multiple times.
-   */
+   // Seed db, use upsert to avoid duplicates if run multiple times.
+  let count = 0
   for (const d of countryData) {
-    const country = await db.country.upsert({
+    await db.country.upsert({
       where: { id: d.id },
       update: d,
       create: d,
     });
-    console.log(`Created country with id: ${country.id}`);
+    count ++
+    // console.log(`Created country with id: ${country.id}`);
   }
+  console.log(`Created ${count} countries`)
 }

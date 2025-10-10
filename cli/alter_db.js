@@ -1,29 +1,22 @@
 import { db, match } from './db.js'
 
-const test = Deno.args.includes('--test')
+// const test = Deno.args.includes('--test')
 const drop = Deno.args.includes('--drop')
 const create = Deno.args.includes('--create')
-let force = Deno.args.includes('--force')
 
 if (!create && !drop) {
   console.error("No action specified, exiting...")
   Deno.exit()
 }
 
-let dbName = match?.groups?.db
-if (test) {
-  dbName = `test_${dbName}`
-  console.log(`Running in test mode, using database name: ${dbName}`)
-}
-
-if (create && drop && !force) {
-  force = confirm(`This will drop the old database and create a new instance for '${dbName}' in environment '${Deno.env.get("APP_ENV")}' - do you wish to proceed?`)
-}
+const dbName = match?.groups?.db
 
 if (!dbName) {
   console.error("No database name found in DB_URL env var, exiting...")
   Deno.exit()
 }
+
+let proceed = false
 
 async function createDb(db) {
   console.log(`Creating database '${dbName}'...`)
@@ -31,14 +24,14 @@ async function createDb(db) {
   const existingDBs = await db.queryObject('select datname from pg_database')
   if(existingDBs.rows.find(db => db.datname === dbName)) {
     console.log(`Database '${dbName}' already exists, exiting...`)
-    Deno.exit()
+    Deno.exit(1)
   }
 
-  if (!force) {
-    const prompt = confirm(`This will create a new database '${dbName}' for environment '${Deno.env.get("APP_ENV")}' - do you wish to proceed?`)
-    if (!prompt) {
+  if (!proceed) {
+    proceed = confirm(`This will create a new database '${dbName}' for environment '${Deno.env.get("APP_ENV")}' - do you wish to proceed?`)
+    if (!proceed) {
       console.log("Exiting...")
-      Deno.exit()
+      Deno.exit(1)
     }
   }
 
@@ -54,11 +47,11 @@ async function createDb(db) {
 
 async function dropDb(db) {
   console.log(`Dropping database '${dbName}'...`)
-  if (!force) {
-    const prompt = confirm(`This will drop the database '${dbName}' for environment '${Deno.env.get("APP_ENV")}' - do you wish to proceed?`)
-    if (!prompt) {
+  if (!proceed) {
+    proceed = confirm(`This will drop the database '${dbName}' for environment '${Deno.env.get("APP_ENV")}' - do you wish to proceed?`)
+    if (!proceed) {
       console.log("Exiting...")
-      Deno.exit()
+      Deno.exit(1)
     }
   }
 
@@ -70,6 +63,15 @@ async function dropDb(db) {
     console.error(`Error dropping database '${dbName}': ${e.message} for statement: ${dropSql}`)
     Deno.exit(1)
   }
+}
+
+if (create && drop && !proceed) {
+  proceed = confirm(`This will drop the old database and create a new instance for '${dbName}' in environment '${Deno.env.get("APP_ENV")}' - do you wish to proceed?`)
+}
+
+if (!proceed) {
+  console.log("Exiting...")
+  Deno.exit(1)
 }
 
 if (drop) { await dropDb(db) }

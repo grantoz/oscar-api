@@ -6,14 +6,19 @@ const randomBytes = crypto.getRandomValues(new Uint8Array(64));
 
 // Encode the random bytes to a Base64 string
 const jwtSecret = encodeBase64(randomBytes);
-console.log(jwtSecret);
+// console.log(jwtSecret);
 
+let outFileName = '.env'
+const test = Deno.args.includes('--test')
+if (test) {
+  outFileName = '.env.test'
+}
 
 async function processEnvFile() {
   const cwd = Deno.cwd();
   console.log(`Current working directory: ${cwd}`);
   const inFile = await Deno.open(cwd + '/env/.env.dev');
-  const outFile = await Deno.create(cwd + '/.env');
+  const outFile = await Deno.create(cwd + '/' + outFileName); // .env or .env.test
   const writer = outFile.writable.getWriter();
 
   try {
@@ -28,9 +33,25 @@ async function processEnvFile() {
         line = `JWT_SECRET=${jwtSecret}`;
       }
 
+      if (test) {
+        if (line.startsWith('DB_DB=')) {
+          // Replace the line with the new JWT_SECRET value
+          line = line + '_test';
+        }
+        if (line.startsWith('DB_URL=')) {
+          if (line.includes('?')) {
+            line = line.replace('?', '_test?')
+          } else {
+            line = line + '_test';
+          }
+        }
+        if (line.startsWith('LOG_DB')) {
+          line = line.replace('true', 'false')
+        }
+      }
+
       await writer.write(new TextEncoder().encode(line + '\n'));
-      // Process each line here
-      console.log(line);
+      // console.log(line);
     }
   } finally {
     // Only close if it hasn't been closed already
