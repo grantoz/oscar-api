@@ -49,6 +49,7 @@
     "npm:@types/node@*": "22.5.4",
     "npm:create-hono@latest": "0.15.4",
     "npm:hono@4.9.2": "4.9.2",
+    "npm:ky@^1.11.0": "1.11.0",
     "npm:path-to-regexp@6.2.1": "6.2.1",
     "npm:prisma@*": "6.16.1",
     "npm:prisma@^6.16.1": "6.16.1",
@@ -372,6 +373,9 @@
     "jiti@2.5.1": {
       "integrity": "sha512-twQoecYPiVA5K/h6SxtORw/Bs3ar+mLUtoPSc7iMXzQzK8d7eJ/R09wmTwAjiamETn1cXYPGfNnu7DMoHgu12w==",
       "bin": true
+    },
+    "ky@1.11.0": {
+      "integrity": "sha512-NEyo0ICpS0cqSuyoJFMCnHOZJILqXsKhIZlHJGDYaH8OB5IFrGzuBpEwyoMZG6gUKMPrazH30Ax5XKaujvD8ag=="
     },
     "node-fetch-native@1.6.7": {
       "integrity": "sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q=="
@@ -1131,6 +1135,7 @@
       "dependencies": [
         "npm:@prisma/adapter-pg@^6.16.1",
         "npm:@prisma/client@^6.16.1",
+        "npm:ky@^1.11.0",
         "npm:prisma@^6.16.1"
       ]
     }

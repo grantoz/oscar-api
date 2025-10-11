@@ -1,7 +1,16 @@
-import { assertEquals } from '@std/assert'
-import { describe, it, beforeEach, afterEach } from '@std/testing/bdd'
-import { beforeAll, afterAll } from '@std/testing/bdd'
+import { load } from "@std/dotenv";
+import { assertEquals, assertGreater } from '@std/assert'
+import { describe, it, beforeEach, afterEach, beforeAll, afterAll } from '@std/testing/bdd'
 import { add, testArgon2 } from './deno_utils.ts'
+import ky from 'ky'
+import { superEmail, superPass } from '../prisma/seed/user.ts'
+import { encodeBase64 } from "@std/encoding/base64";
+
+await load({
+  envPath: '.env.test',
+  export: true
+});
+const port = Deno.env.get('PORT') || 8000
 
 Deno.test(function addTest() {
   const args: [number, number] = [112, 3]
@@ -38,12 +47,24 @@ describe("BDD style tests", () => {
   })
 
   it("should complete test 1", () => {
-    console.log('Running test 1')
     assertEquals(1 + 1, 2)
   })
 
-  it("should complete test 2", () => {
-    console.log('Running test 2')
-    assertEquals(2 * 2, 4)
+  it("should get JSON using ky", async () => {
+    const data: any = await ky('https://jsonplaceholder.typicode.com/posts/1/comments').json()
+    // assertInstanceOf(data, Object)
+    assertGreater(data.length, 0)
+    assertEquals(data[0].id, 1)
+    console.log(data)
+  })
+
+  it("should log super user in", async () => {
+    const auth = encodeBase64(superEmail + ':' + superPass)
+    const login: object = await ky.post(`http://localhost:${port}/auth/login`, {
+      headers: {
+        Authorization: 'Basic ' + auth
+      }
+    }).json()
+    console.log(login)
   })
 })

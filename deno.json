@@ -32,8 +32,8 @@
     "setup:all":        "deno task setup:env && deno task db:generate && deno task db:new:seed",
     "setup:all:test":   "deno task setup:env:test && deno task db:generate && deno task db:new:seed:test",
 
-    "test":             "deno test -A src/",
-    "sendmail":         "deno run -A --env-file=.env src/send_email.ts"
+    "test":             "deno test -A --env-file=.env.test src/",
+    "sendmail":         "deno run -A src/send_email.ts"
   },
   "unstable": ["kv", "otel"],
   "imports": {

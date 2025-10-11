@@ -37,6 +37,8 @@ const auth = new Hono().post('/login', async (c: Context) => {
   // Split into username and password
   const [email, password] = decodedCreds.split(':');
 
+  console.log('XXX', email, password)
+
   const user = await db.user.findUnique({
     where: {
       email: email

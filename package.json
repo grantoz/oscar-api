@@ -4,6 +4,7 @@
   },
   "dependencies": {
     "@prisma/adapter-pg": "^6.16.1",
-    "@prisma/client": "^6.16.1"
+    "@prisma/client": "^6.16.1",
+    "ky": "^1.11.0"
   }
 }

@@ -16,7 +16,7 @@ if (test) {
 
 async function processEnvFile() {
   const cwd = Deno.cwd();
-  console.log(`Current working directory: ${cwd}`);
+  // console.log(`Current working directory: ${cwd}`);
   const inFile = await Deno.open(cwd + '/env/.env.dev');
   const outFile = await Deno.create(cwd + '/' + outFileName); // .env or .env.test
   const writer = outFile.writable.getWriter();
@@ -47,6 +47,9 @@ async function processEnvFile() {
         }
         if (line.startsWith('LOG_DB')) {
           line = line.replace('true', 'false')
+        }
+        if (line.startsWith('APP_ENV')) {
+          line = 'APP_ENV=test'
         }
       }
 
