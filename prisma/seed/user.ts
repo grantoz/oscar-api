@@ -1,6 +1,6 @@
 // import { db, Prisma } from '@mod/db'
 import { Prisma, PrismaClient } from '@mod/db'
-import { faker } from "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts";
+// import { faker } from "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts";
 import { genSalt, hashPassword } from '../../src/service/user.ts';
 import { encodeBase64 } from "@std/encoding/base64";
 
@@ -13,7 +13,6 @@ const userLogins = () => {
   const testEnv = Deno.args.includes('--test') || (Deno.env.get('APP_ENV') == 'test')
 
   if (!testEnv) {
-    console.log('IN USER SEEDER I AM NOT IN TEST ENV XXX')
     if (superPass === 'super') {
       superPass = encodeBase64(crypto.getRandomValues(new Uint8Array(20)));
       console.info(`SUPER password is ${superPass} - YOU WILL NOT SEE THIS AGAIN`)

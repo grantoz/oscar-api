@@ -51,8 +51,13 @@ describe("BDD style tests", () => {
   })
 
   it("should get JSON using ky", async () => {
-    const data: any = await ky('https://jsonplaceholder.typicode.com/posts/1/comments').json()
-    // assertInstanceOf(data, Object)
+    type postComment = {
+      userId: number,
+      id: number,
+      title: string,
+      body: string
+    }
+    const data: Array<postComment> = await ky('https://jsonplaceholder.typicode.com/posts/1/comments').json()
     assertGreater(data.length, 0)
     assertEquals(data[0].id, 1)
     console.log(data)

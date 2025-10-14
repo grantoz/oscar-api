@@ -16,7 +16,7 @@ const uuidIdSchema = z.object({
 
 // schema for validating user update payload
 const userPatchSchema = z.object({
-  id: z.string(),
+  id: z.uuidv7(),
   name: z.string().optional(),
   // email: z.string().optional(),
   phone: z.string().optional(),

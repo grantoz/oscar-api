@@ -25,12 +25,12 @@
 **TODO:**
 
 - Some more meaningful entities
-- Session invalidation via CLI
+- JWT invalidation via CLI
+- JWT refresh
 - API tests
 - Hono CORS middleware
 - Hono / Zod OpenApi generation
 - View models (AKA transformers / presenters) - perhaps class based with declarative properties e.g. `publicFields`, map transform field:function
-- JWT refresh
 - ACL system for API components
 - Queue for async I/O (probably using Deno KV Queue)
 - OAuth2.0

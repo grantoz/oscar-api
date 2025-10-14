@@ -4,6 +4,10 @@ import { log, meta, paged, pageOptions } from '../util/mod.ts'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 
+const uuidIdSchema = z.object({
+  id: z.uuidv7(),
+})
+
 const postPatchSchema = z.object({
   id: z.uuidv7(),
   title: z.string(),
@@ -26,11 +30,11 @@ export const post = new Hono()
   return c.json({ data: items, meta: meta(items) })
 })
 
-.get('/:id{[0-9]+}', async (c: Context) => {
-  const { id } = c.req.param()
+.get('/:id', zValidator('param', uuidIdSchema), async (c: Context) => {
+  const { id } = c.req.valid('param' as never);
   const item: Post|null = await db.post.findUnique({
     where: {
-      id: Number(id),
+      id,
     },
   })
   if (!item) {
@@ -45,11 +49,7 @@ export const post = new Hono()
   log.info('creating post', payload)
 
   const user = c.get('authUser') as User
-  log.info('creating post for user', { user }) // TODO PII LEAK
-  if (!user?.id) {
-    log.warn('create post: no user in context')
-    return c.json({ error: 'Not Authorized' }, 401)
-  }
+  log.info('creating post for user', { userId: user.id }) // TODO PII LEAK
 
   try {
     const result = await db.post.create({
@@ -93,6 +93,5 @@ export const post = new Hono()
   } catch (err: any) {
     log.error('error updating post', err)
     throw(err)
-    // return c.json({ error: 'Error creating user' }, 500)
   }
 })

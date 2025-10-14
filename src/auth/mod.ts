@@ -9,7 +9,7 @@ import { verify } from '@hono/jwt';
 
 const jwtAlgo = Deno.env.get('JWT_ALGORITHM') as SignatureAlgorithm
 const jwtSecret = Deno.env.get('JWT_SECRET') as string
-const expiry = parseInt(Deno.env.get('JWT_EXPIRY') || '3600') // default to 1 hour
+const expiry = parseInt(Deno.env.get('JWT_EXPIRY') || '3600') * 1000 // default to 1 hour in ms
 const issuer = Deno.env.get('JWT_ISSUER') || 'oscar'
 
 type jwtUser = {
@@ -37,15 +37,11 @@ const auth = new Hono().post('/login', async (c: Context) => {
   // Split into username and password
   const [email, password] = decodedCreds.split(':');
 
-  console.log('XXX', email, password)
-
   const user = await db.user.findUnique({
     where: {
       email: email
     },
   })
-
-  // log.info('USER XXX', { user })
 
   if (!user) {
     log.warn('login: user not found', { email }) // not a PII leak as user does not exist
@@ -65,20 +61,22 @@ const auth = new Hono().post('/login', async (c: Context) => {
   }
   log.info('login: authorised', { id: user.id })
 
-  const token = await sign(
-    {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-      // TODO add more user info to JWT payload?
-      // e.g. permissions, settings, profile info
-      // but keep it minimal to avoid large tokens
-      // and avoid sensitive info
-      exp: Math.floor(Date.now() / 1000) + expiry,
-      iss: issuer,
-    }, jwtSecret, jwtAlgo
-  )
-  log.info('login: generated JWT', { email, id: user.id })
+  const jwtPayload: jwtUser = {
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+    exp: Date.now() + expiry,
+    iss: issuer,
+  }
+  const jwt = await sign(jwtPayload, jwtSecret, jwtAlgo)
+  log.debug('login: generated JWT', jwtPayload)
+
+  // const refreshPayload = {
+  //   sub: user.id,
+  //   iss: issuer,
+  // }
+
+  // const refreshToken = await sign(refreshPayload, jwtSecret, jwtAlgo)
 
   const userData = Object.assign({}, user);
   userData.hash = null
@@ -86,15 +84,19 @@ const auth = new Hono().post('/login', async (c: Context) => {
 
   // store the logged-in user in the kv store with an expiry matching the token
   const kv = await Deno.openKv()
-  await kv.set(['login', user.id], userData, { expireIn: expiry * 1000 })
+  await kv.set(['login', user.id], userData, { expireIn: expiry })
+
+  // TODO store hash of refresh token
   kv.close()
 
   // TODO emit metric for successful login
-  return c.json({ token })
+  return c.json({ token: jwt })
 })
 
+// TODO remove login token from KV on user update
+// this will force revalidation using refresh token
+// and if successful, we will store the updated user object into kv login
 
-// export const validateJwt = createMiddleware(async (c, next) => {
 const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
   if (c.req.path.startsWith('/api')) {
     const auth = c.req.header('Authorization');
@@ -106,16 +108,27 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
     // Extract the token part
     const token = auth.substring(7);
     log.debug('validateJwt: token found in auth header', { token })
+
     try {
-      const decodedPayload = await verify(token, jwtSecret, jwtAlgo);
-      log.debug('JWT is valid:', decodedPayload);
+      const decoded = await verify(token, jwtSecret, jwtAlgo) as jwtUser;
+
+      if (!decoded.sub || !decoded.email || !decoded.role || !decoded.exp) {
+        log.warn('invalid JWT payload', decoded)
+        return c.json({ error: 'Not Authorized' }, 401);
+      }
+      log.debug('JWT is valid:', decoded);
+
+      if (decoded.exp < Date.now()) {
+        // TODO look for refresh token in header and storage, use that
+        return c.json({ error: 'Not Authorized' }, 401);
+      }
 
       // check whether the token is in the kv store
       const kv = await Deno.openKv()
-      const res = await kv.get(['login', decodedPayload.sub as string])
+      const res = await kv.get(['login', decoded.sub as string])
       kv.close()
       if (!res.value) {
-        log.info('logged-in user not found in store (logged out?):', decodedPayload);
+        log.info('logged-in user not found in store (logged out?):', decoded);
         return c.json({ error: 'Not Authorized' }, 401);
       }
 

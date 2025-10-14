@@ -8,15 +8,13 @@
       "attachSimplePort": 9229,
       "cwd": "${workspaceFolder}",
       "env": {},
-      "name": "Launch Program",
-      // "program": "${workspaceFolder}/main.ts",
-      "program": "${file}",
+      "name": "Debug Server",
+      // "program": "${workspaceFolder}/src/main.ts",
       "request": "launch",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
-        "run",
-        "--inspect-brk",
-        "--allow-all"
+        "task",
+        "dev:test:inspect",
       ],
       "type": "node",
     },
@@ -34,7 +32,6 @@
         "test",
         "-A",
         "--inspect-brk",
-        // "--allow-all"
       ],
       "type": "node",
     }

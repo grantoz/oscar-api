@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@mod/db'
-import { parse } from "jsr:@std/csv";
+import { parse } from "@std/csv";
 
 export default async (db: PrismaClient) => {
   const text = Deno.readTextFileSync(Deno.cwd() + "/prisma/seed/countries.csv")
