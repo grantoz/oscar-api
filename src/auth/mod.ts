@@ -1,11 +1,11 @@
 import { Hono } from '@hono'
 import { sign } from '@hono/jwt';
-import { hashPassword } from '../service/user.ts'
 import { Context } from '@hono'
-import { db } from '@mod/db'
+import { db, User } from '@mod/db'
 import { log } from '../util/mod.ts'
 import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa';
 import { verify } from '@hono/jwt';
+import { authoriseLogin } from '../service/auth.ts';
 
 const jwtAlgo = Deno.env.get('JWT_ALGORITHM') as SignatureAlgorithm
 const jwtSecret = Deno.env.get('JWT_SECRET') as string
@@ -37,29 +37,12 @@ const auth = new Hono().post('/login', async (c: Context) => {
   // Split into username and password
   const [email, password] = decodedCreds.split(':');
 
-  const user = await db.user.findUnique({
-    where: {
-      email: email
-    },
-  })
-
-  if (!user) {
-    log.warn('login: user not found', { email }) // not a PII leak as user does not exist
-    return c.json({ error: 'Invalid email or password' }, 401)
+  let user: User
+  try {
+    user = await authoriseLogin(email, password)
+  } catch (_e) {
+    return c.json({ error: 'Invalid login' }, 401)
   }
-
-  // todo test that this really works for user record not found
-  if (!user?.salt || !user?.hash) {
-    log.warn('login: user has no auth set up', { id: user.id })
-    return c.json({ error: 'Invalid email or password' }, 401)
-  }
-
-  const hash = await hashPassword(password, user?.salt || '')
-  if (hash !== user?.hash) {
-    log.warn('login: bad password', { id: user.id })
-    return c.json({ error: 'Invalid email or password' }, 401)
-  }
-  log.info('login: authorised', { id: user.id })
 
   const jwtPayload: jwtUser = {
     sub: user.id,

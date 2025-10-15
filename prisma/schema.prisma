@@ -48,6 +48,7 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   deletedAt DateTime?
+  verifiedAt DateTime?
   posts     Post[]
 }
 
@@ -57,8 +58,8 @@ model Country {
   alpha3          String  @db.VarChar(3)
   countryCode     Int
   region          String? @db.VarChar(255)
-  subRegion       String? @db.VarChar(255)
   regionCode      Int?
+  subRegion       String? @db.VarChar(255)
   subRegionCode   Int?
 }
 

@@ -51,7 +51,7 @@ export const user = new Hono()
     },
   })
   if (!user) {
-    return c.json({ error: 'User not found' }, 404)
+    return c.notFound()
   }
   return c.json({ data: userView(user) })
 })
@@ -67,13 +67,12 @@ export const user = new Hono()
     },
   })
   if (!user) {
-    return c.json({ error: 'User not found' }, 404)
+    return c.notFound()
   }
   return c.json({ data: userView(user) })
 })
 
 .post('/', zValidator('json', userPostSchema), async (c: Context) => {
-  // const { name, email } = await c.req.json()
   const payload: userPost = c.req.valid('json' as never)
   const userData: Prisma.UserCreateInput = {
     name: payload.name,

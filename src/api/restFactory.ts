@@ -52,7 +52,7 @@ async function genericFindMany<T extends Prisma.ModelName>(
 //       },
 //     })
 //     if (!user) {
-//       return c.json({ error: 'User not found' }, 404)
+//       return c.notFound()
 //     }
 //     return c.json({ data: userView(user) })
 //   })
@@ -67,13 +67,14 @@ async function genericFindMany<T extends Prisma.ModelName>(
 // Example usage:
 async function main() {
   // Find a user by ID
-  const user = await genericFindUnique('User', { id: 1 });
+  const uuid = '0199e526-c2e4-774c-89f9-9445169b4d30'
+  const user = await genericFindUnique('User', { id: uuid });
   if (user) {
     console.log('Found user:', user);
   } else {
     console.log('User not found.');
   }
-  const users = await genericFindMany('User', { id: 1 });
+  const users = await genericFindMany('User', {});
   if (users) {
     console.log('Found user:', users);
   } else {

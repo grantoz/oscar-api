@@ -2,7 +2,7 @@
   "tasks": {
     "dev":      "deno run -A --watch src/main.ts",
     "dev:test:inspect": "deno run -A --inspect --env-file=.env.test src/main.ts",
-    "dev:test": "deno run -A --env-file=.env.test src/main.ts",
+    "dev:test": "deno run -A --watch --env-file=.env.test src/main.ts",
     "dev:otel": "OTEL_DENO=true deno run --unstable-otel -A --watch src/main.ts",
 
     "db:create":        "deno run -A cli/alter_db.js --create",
