@@ -1,6 +1,6 @@
 import { Context, Hono } from '@hono'
 import { db, Prisma } from '@mod/db'
-import { log, meta, paged, pageOptions } from '../util/mod.ts'
+import { log, meta, page, pageOptions, queryOptions } from '../util/mod.ts'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 import { genSalt, hashPassword } from '../service/user.ts'
@@ -36,7 +36,8 @@ type userPost = z.infer<typeof userPostSchema>
 // TODO filtering
 export const user = new Hono()
 .get('/', async (c: Context) => {
-  const options = pageOptions(c.req.query() as paged)
+  const options = pageOptions(c.req.query() as page)
+  options.where = { name: { contains: "Admin"}}
   const users = await db.user.findMany(options)
   // TODO cache headers, etag etc
   return c.json({ data: users.map(userView), meta: meta(users) })

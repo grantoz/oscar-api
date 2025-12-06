@@ -7,8 +7,8 @@ Deno.env.set('LOG_DB_QUERY', 'false')
 Deno.env.set('LOG_DB_INFO', 'false')
 const db = getDB()
 
-await userSeed(db)
 await countrySeed(db)
+await userSeed(db)
 
 console.log(`Seeding finished.`);
 await db.$disconnect().then(() => {

@@ -2,7 +2,7 @@ import '@std/dotenv/load'
 import { Context, Hono } from '@hono'
 import { db, Prisma } from '@mod/db'
 import { type PrismaClient } from '@mod/db';
-import { log, meta, paged, pageOptions } from '../util/mod.ts'
+import { log, meta, page, pageOptions } from '../util/mod.ts'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 import { userView } from '../view/user.ts'
@@ -38,7 +38,7 @@ async function genericFindMany<T extends Prisma.ModelName>(
 // const restFactory = (modelName: Prisma.ModelName) => {
 //   const app = new Hono()
 //   .get('/', async (c: Context) => {
-//     const options = pageOptions(c.req.query() as paged)
+//     const options = pageOptions(c.req.query() as page)
 //     const users = await genericFindMany(modelName, options)
 //     // TODO cache headers, etag etc
 //     return c.json({ data: users.map(userView), meta: meta(users) })

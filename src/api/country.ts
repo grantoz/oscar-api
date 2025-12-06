@@ -1,6 +1,6 @@
 import { Context, Hono } from '@hono'
 import { db } from '@mod/db'
-import { meta, paged, pageOptions } from '../util/mod.ts'
+import { meta, page, pageOptions } from '../util/mod.ts'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 import { countryCodes } from '../service/country.ts'
@@ -14,10 +14,9 @@ const countryCodeSchema = z.string()
 
 export const country = new Hono()
 .get('/', async (c: Context) => {
-  // const options = pageOptions(c.req.query() as paged)
+  // const options = pageOptions(c.req.query() as page)
   // const countries = await db.country.findMany(options)
   const countries = await db.country.findMany()
-  // TODO cache headers, etag etc
   c.header('max-age', '86400')
   return c.json({ data: countries, meta: meta(countries) })
 })

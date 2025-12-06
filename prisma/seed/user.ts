@@ -18,9 +18,9 @@ const genRandomStr = (length: number): string => {
 }
 
 const userLogins = () => {
-  const testEnv = Deno.args.includes('--test') || (Deno.env.get('APP_ENV') == 'test')
-
-  if (!testEnv) {
+  const env = Deno.env.get('APP_ENV') ?? ''
+  const live = ['prod', 'uat', 'sandbox'].includes(env)
+  if (live) {
     superPass = genRandomStr(20)
     console.info(`SUPER password is ${superPass} - YOU WILL NOT SEE THIS AGAIN`)
     adminPass = genRandomStr(20)
