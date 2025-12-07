@@ -5,6 +5,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 import { genSalt, hashPassword } from '../service/user.ts'
 import { userView } from '../view/user.ts'
+import { getLastModified, setLastModified } from './lastModified.ts'
 
 // TODO add email verification, phone verification etc
 // TODO add role based access control, admin user etc
@@ -13,12 +14,10 @@ const uuidIdSchema = z.object({
   id: z.uuidv7(),
 })
 
-
-// schema for validating user update payload
 const userPatchSchema = z.object({
   id: z.uuidv7(),
   name: z.string().optional(),
-  // email: z.string().optional(),
+  // email: z.string().optional(), // TODO how do we update email?
   phone: z.string().optional(),
   password: z.string().optional(),
   passwordConfirm: z.string().optional(),
@@ -28,6 +27,7 @@ const userPatchSchema = z.object({
   message: 'Password and password confirmation must match',
 })
 type userPatch = z.infer<typeof userPatchSchema>
+
 const userPostSchema = userPatchSchema.omit({ id: true }).extend({email: z.email()})
 type userPost = z.infer<typeof userPostSchema>
 
@@ -37,9 +37,9 @@ type userPost = z.infer<typeof userPostSchema>
 export const user = new Hono()
 .get('/', async (c: Context) => {
   const options = pageOptions(c.req.query() as page)
-  options.where = { name: { contains: "Admin"}}
   const users = await db.user.findMany(options)
-  // TODO cache headers, etag etc
+  // TODO cache headers
+  c.header('last-modified', await getLastModified('user'))
   return c.json({ data: users.map(userView), meta: meta(users) })
 })
 
@@ -92,9 +92,13 @@ export const user = new Hono()
   log.info('creating user', logData)
 
   try {
-    await db.user.create({data: userData})
-    log.info('Created user', logData)
-    return c.json({ data: logData })
+    const result = await db.user.create({data: userData})
+    const userPostResultView = userView(result)
+    log.info('Created user', userPostResultView)
+    // const lastModified = await setLastModified('user', result.updatedAt)
+    const lastModified = await setLastModified('user')
+    c.header('Last-Modified', lastModified)
+    return c.json({ data: userPostResultView })
 
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
@@ -119,9 +123,14 @@ export const user = new Hono()
         phone: payload.phone,
       },
     })
-    const userPatchResult = userView(result)
-    log.info('Created user', userPatchResult)
-    return c.json({ data: userPatchResult })
+    const userPatchResultView = userView(result)
+    log.info('Created user', userPatchResultView)
+    // todo get value and set header
+
+    log.info('xxx delete me', typeof result.createdAt)
+
+    await setLastModified('user')
+    return c.json({ data: userPatchResultView })
 
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {

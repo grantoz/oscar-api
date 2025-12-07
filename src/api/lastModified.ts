@@ -1,0 +1,48 @@
+import { log } from '../util/mod.ts'
+
+// todo move these to util/locale
+const locale = new Intl.Locale('UTC', { hourCycle: 'h23' })
+const lastModified = new Intl.DateTimeFormat(locale, {
+  year: 'numeric',
+  month: 'short',
+  day: '2-digit',
+  weekday: 'short',
+  // hour: '2-digit', // seems to not work for h23 hourCycle now that TZ is set, alas!
+  // minute: '2-digit',
+  // second: '2-digit',
+  // timeZoneName: 'short',
+  // timeZone: 'GMT'
+});
+
+// const formatLastModified = (date: Temporal.Instant) => {
+const formatLastModified = (date: Date): string => {
+  const fmtDat = lastModified.format(date) // e.g. "Sat, 06 Dec 2025"
+  const time = date.toISOString().substring(11, 19) // as we can't reliable 24 hour formatting, it seems
+  const ret = `${fmtDat} ${time} GMT`
+  return ret
+}
+
+const setLastModified = async (entity: string, date?: Date): Promise<string> => {
+    // store the logged-in user in the kv store with an expiry matching the token
+  const kv = await Deno.openKv()
+  const updatedAt = date ?? new Date()
+  const key = ['lastModified', entity]
+  await kv.set(key, updatedAt)
+  kv.close();
+  const lastModified = formatLastModified(updatedAt)
+  log.debug(`new lastModified date for ${entity}: ${lastModified}`)
+  return lastModified
+}
+
+const getLastModified = async (entity: string): Promise<string> => {
+  const kv = await Deno.openKv()
+  const key = ['lastModified`', entity]
+  const result = await kv.get(key)
+  if (result.value) {
+    log.debug(`typeof lastModified from `, typeof result.value);
+  }
+  kv.close();
+  return formatLastModified(new Date())
+}
+
+export { setLastModified, getLastModified, formatLastModified }

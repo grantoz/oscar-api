@@ -3,25 +3,27 @@ import '@std/dotenv/load'
 import { Context, Hono } from '@hono'
 import { logger } from '@hono/logger'
 import { db } from '@mod/db'
-import { log } from './util/mod.ts'
-
 import { api } from './api/mod.ts'
-import { auth, validateJwtMiddleware } from './auth/mod.ts'
+import { auth } from './auth/mod.ts'
+import { log } from './util/mod.ts'
+import process from "node:process"
 
-const fooMiddleware = async (_c: Context, next: () => Promise<void>) => {
-  log.info('foo middleware invoked')
-  await next()
-}
+process.env.TZ = Deno.env.get("TZ")
+
+// const fooMiddleware = async (_c: Context, next: () => Promise<void>) => {
+//   log.info('foo middleware invoked')
+//   await next()
+// }
+
 
 const app = new Hono();
 app.use(logger())
-app.use(fooMiddleware)
+// app.use(fooMiddleware)
 // TODO start api, queue or event
 // TODO app secret and storage
 // TODO validate app config / env vars
 // TODO use middleware to set api version header to v1 IF NOT PRESENT
-app.use(validateJwtMiddleware) // Apply validateJwt middleware to /api/* routes
-app.route('/api', api)
+app.route('/api', api)///.use(etag())
 app.route('/auth', auth)
 
 // TODO hono openapi middleware

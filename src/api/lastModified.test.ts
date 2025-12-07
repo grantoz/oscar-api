@@ -1,0 +1,31 @@
+import { formatLastModified, getLastModified, setLastModified } from './lastModified.ts'
+import { assertEquals, assertMatch } from '@std/assert'
+import process from "node:process"
+import { tuple } from '@zod'
+
+process.env.TZ = Deno.env.get("TZ")
+
+Deno.test("lastModified::formatLastModified", function() {
+  const d = new Date('2025-12-07 09:01:02');
+  // const d = Temporal.ZonedDateTime.from('2025-12-07 T 15:01:02.000000000 Z')
+  const s = formatLastModified(d)
+  assertEquals(s, 'Sun, 07 Dec 2025 09:01:02 GMT')
+})
+
+Deno.test("lastModified::setLastModified with no date arg", async function() {
+  const s = await setLastModified('test-entity')
+  assertMatch(s, /(Mon|Tue|Wed|Thu|Fri|Sat|Sun), [0-3]\d Dec \d{4} [0-2]\d:[0-5]\d:[0-5]\d GMT/)
+})
+
+Deno.test("lastModified::setLastModified with date arg", async function() {
+  const d = new Date('2025-12-07 09:01:02');
+  const s = await setLastModified('test-entity', d)
+  console.log(s)
+  assertEquals(s, 'Sun, 07 Dec 2025 09:01:02 GMT')
+})
+
+Deno.test("lastModified::getLastModified returns same date as set with setLastModified", async function() {
+  const s = await setLastModified('test-entity')
+  const g = await getLastModified('test-entity')
+  assertEquals(s, g)
+})

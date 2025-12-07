@@ -73,6 +73,7 @@ export const post = new Hono()
   }
 })
 
+// TODO move ID to the path parameter
 .patch('/', zValidator('json', postPatchSchema), async (c: Context) => {
   const payload: postPatch = c.req.valid('json' as never)
   log.info('updating post', payload)
