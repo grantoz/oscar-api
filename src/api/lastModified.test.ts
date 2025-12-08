@@ -1,7 +1,6 @@
 import { formatLastModified, getLastModified, setLastModified } from './lastModified.ts'
 import { assertEquals, assertMatch } from '@std/assert'
 import process from "node:process"
-import { tuple } from '@zod'
 
 process.env.TZ = Deno.env.get("TZ")
 
