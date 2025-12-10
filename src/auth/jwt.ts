@@ -62,7 +62,6 @@ export { validateJwtMiddleware }
 
 // TODO implement token revocation from KV
 // TODO implement register endpoint
-// TODO implement forgot password endpoint
 // TODO implement reset password endpoint
 // TODO implement email verification endpoint
 // TODO implement refresh token endpoint

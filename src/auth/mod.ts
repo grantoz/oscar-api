@@ -1,4 +1,4 @@
-import { validateJwtMiddleware } from './validateJwt.ts'
+import { validateJwtMiddleware } from './jwt.ts'
 import { auth } from './auth.ts'
 import { jwtUser } from './types.ts'
 

@@ -31,9 +31,6 @@ type userPatch = z.infer<typeof userPatchSchema>
 const userPostSchema = userPatchSchema.omit({ id: true }).extend({email: z.email()})
 type userPost = z.infer<typeof userPostSchema>
 
-// TODO generalise get(all) routes for entities
-// TODO middleware to check permissions, roles etc
-// TODO filtering
 export const user = new Hono()
 .get('/', async (c: Context) => {
   const options = pageOptions(c.req.query() as page)
@@ -86,6 +83,7 @@ export const user = new Hono()
     userData.hash = await hashPassword(payload.password, userData.salt)
   }
 
+  // TODO build log redaction layer instead (could this be async?)
   const logData = Object.assign({}, userData);
   delete logData.salt;
   delete logData.hash;
