@@ -17,17 +17,20 @@
 **DONE:**
 
 - JWT issuance and middleware
+- JWT refresh token and flow
 - Deno KV session validation and easy invalidation
 - Pagination (10, 25, 50, 100)
 - DB setup and migration CLI tools
 - Easy project setup
+- Last-Modified header for individual and collection entity endpoints
+- Emit etag for API resources
 
 **TODO:**
 
+- Only emit etag for GET-type routes
 - Some more meaningful entities
 - JWT invalidation via CLI
-- JWT refresh
-- API tests
+- API tests (in progres...)
 - Hono CORS middleware
 - Hono / Zod OpenApi generation
 - View models (AKA transformers / presenters) - perhaps class based with declarative properties e.g. `publicFields`, map transform field:function
