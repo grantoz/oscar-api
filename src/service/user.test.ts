@@ -1,6 +1,6 @@
 import "@std/dotenv/load";
 import { db } from '@mod/db'
-import { verify } from "@felix/argon2";
+import { hash, Variant, verify, Version } from "@felix/argon2";
 import { assertEquals, assertExists } from '@std/assert'
 import { genSalt, hashPassword } from './user.ts';
 
@@ -23,4 +23,38 @@ Deno.test("Finds seeded users", async function() {
   await db.$disconnect()
   // console.dir(allUsers, { depth: null })
   assertEquals(allUsers.length > 0, true)
+})
+
+
+export const testArgon2 = async () => {
+  const salt = crypto.getRandomValues(
+  	new Uint8Array(20),
+  );
+
+  const encoder = new TextEncoder();
+  const password = "this-could_be/your-password";
+  const secret = encoder.encode("my-super-secret");
+  const data = {
+  	hashedAt: Date.now(),
+  	requestId: crypto.randomUUID(),
+  };
+
+  const hashed = await hash(password, {
+  	salt,
+  	secret,
+  	variant: Variant.Argon2id,
+  	version: Version.V13,
+  	memoryCost: 8192,
+  	timeCost: 10,
+  	lanes: 4,
+  	hashLength: 32,
+  	data,
+  });
+
+  return await verify(hashed, password, secret, data);
+}
+
+Deno.test("test argon2 hash", async function() {
+  const result = await testArgon2()
+  assertEquals(result, true)
 })

@@ -1,9 +1,6 @@
-//import "@std/dotenv/load";
-// import "jsr:@std/dotenv";
-import { defineConfig, env } from "prisma/config";
-
-// TODO why prisma env() doesn't work here, nor Deno env
-const DB_URL = 'postgresql://user:pass@localhost:5432/oscar?schema=public'
+// NB can't use deno module @jsr/dotenv here, so use:
+import process from "node:process"
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',
@@ -12,8 +9,6 @@ export default defineConfig({
     seed: 'deno run prisma/seed.ts',
   },
   datasource: {
-    url: DB_URL
-    // url: env('DB_URL')
-    // url: Deno.env.get('DB_URL') ?? ''
+    url: process.env.DB_URL ?? ''
   }
 });

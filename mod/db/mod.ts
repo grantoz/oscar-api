@@ -35,7 +35,7 @@ const getDB = () => {
   // https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
 }
 
-const db = getDB()
+const db = await getDB()
 
 export { db, Prisma, getDB }
 export type { User, Country, Post, PrismaClient } from '../../prisma/generated/client.ts'

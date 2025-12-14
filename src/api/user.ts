@@ -6,6 +6,7 @@ import { z } from '@zod'
 import { genSalt, hashPassword } from '../service/user.ts'
 import { userView } from '../view/user.ts'
 import { getLastModified, setLastModified } from './lastModified.ts'
+import { validate } from '@util'
 
 // TODO add email verification, phone verification etc
 // TODO add role based access control, admin user etc
@@ -25,7 +26,7 @@ const userPatchSchema = z.object({
   schema.password === schema.passwordConfirm
 }, {
   message: 'Password and password confirmation must match',
-})
+}).strict()
 type userPatch = z.infer<typeof userPatchSchema>
 
 const userPostSchema = userPatchSchema.omit({ id: true }).extend({email: z.email()})
@@ -41,7 +42,7 @@ export const user = new Hono()
 })
 
 // TODO generalise ID fetch routes
-.get('/:id', zValidator('param', uuidIdSchema), async (c: Context) => {
+.get('/:id', validate('param', uuidIdSchema), async (c: Context) => {
   const { id } = c.req.valid('param' as never);
   const user = await db.user.findUnique({
     where: {

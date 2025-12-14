@@ -51,6 +51,9 @@ async function processEnvFile() {
         if (line.startsWith('APP_ENV')) {
           line = 'APP_ENV=test'
         }
+        if (line.startsWith('PORT')) {
+          line = 'PORT=8001'
+        }
       }
 
       await writer.write(new TextEncoder().encode(line + '\n'));
@@ -76,17 +79,15 @@ async function processEnvFile() {
   }
 }
 
-
-
 // const name = prompt("What is your name?", "oscar");
 // if (name) {
 //   console.log(`Hello, ${name}!`);
 // }
 
-const confirmed = confirm("Are you sure you want to proceed?");
+const confirmed = confirm("Please confirm creating a new copy of ", outFileName);
 if (confirmed) {
-  console.log("Proceeding...");
+  console.log("Creating new copy of ", outFileName);
   await processEnvFile();
 } else if (confirmed === false) {
-  console.log("Aborting.");
+  console.log("Will not create new ", outFileName);
 }
