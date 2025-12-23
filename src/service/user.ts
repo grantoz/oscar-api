@@ -1,6 +1,6 @@
 import { db, User } from '@mod/db'
 import { hash, Variant, Version } from "@felix/argon2";
-import { log } from '../util/mod.ts'
+import { log } from '@util'
 // https://jsr.io/@felix/argon2/doc
 
 // TODO

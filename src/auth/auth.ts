@@ -1,15 +1,13 @@
-import { Hono } from '@hono'
-import { sign } from '@hono/jwt';
-import { Context } from '@hono'
+import { Hono, Context } from '@hono'
+import { sign, verify } from '@hono/jwt';
 import { User } from '@mod/db'
-import { log } from '../util/mod.ts'
+import { kv, log } from '@util'
 import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa';
 import { authoriseLogin } from '../service/auth.ts';
 import { jwtUser, refreshUser } from './types.ts';
-import { jwt, z } from '@zod'
+import { z } from '@zod'
 import { zValidator } from '@hono/zod-validator'
-import { verify } from '@hono/jwt';
-import { db, Prisma } from '@mod/db'
+import { db } from '@mod/db'
 import { HTTPException } from '@hono/http-exception'
 import { getCookie, setCookie } from '@hono/cookie';
 
@@ -20,6 +18,7 @@ const jwtExpiry = parseInt(Deno.env.get('JWT_EXPIRY') || '3600') * 1000 // defau
 const refreshExpiry = parseInt(Deno.env.get('REFRESH_EXPIRY') || '604800') * 1000 // default to 1 week in ms
 const refreshCookieExpiry = parseInt(Deno.env.get('REFRESH_EXPIRY') || '604800') // default to 1 week in s
 const issuer = Deno.env.get('JWT_ISSUER') || 'oscar'
+const port = parseInt(Deno.env.get('PORT') || '8000')
 
 // grant_type: This parameter must be set to refresh_token.
 // refresh_token: This parameter contains the actual refresh token value previously issued by the authorization server.
@@ -113,9 +112,7 @@ const auth = new Hono()
     }
 
     // check whether the refresh token is in the kv store
-    const kv = await Deno.openKv()
-    const res = await kv.get(['refresh', decoded.sub as string])
-    kv.close()
+    const res = await kv.get(['refresh', port, decoded.sub as string])
     if (!res.value) {
       log.info('refresh token for user not found in kv:', decoded);
       return c.json({ error: 'Not Authorized' }, 401);
@@ -182,10 +179,10 @@ const createAndStoreTokens = async (user: User) => {
   userData.salt = null
 
   // store the logged-in user in the kv store with an expiry matching the token
-  const kv = await Deno.openKv()
-  await kv.set(['login', user.id], userData, { expireIn: jwtExpiry })
-  await kv.set(['refresh', user.id], userData, { expireIn: refreshExpiry })
-  kv.close()
+  await Promise.all([
+    kv.set(['login', port, user.id], userData, { expireIn: jwtExpiry }),
+    kv.set(['refresh', port, user.id], userData, { expireIn: refreshExpiry })
+  ])
 
   // TODO emit metric for token generation
   return { token: jwt, refresh: refreshToken }

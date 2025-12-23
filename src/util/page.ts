@@ -1,5 +1,5 @@
 import { z } from '@zod'
-import { log } from './mod.ts'
+import { log } from "@util"
 
 // deno-lint-ignore no-explicit-any
 const meta = (records: any[]) => {
@@ -12,11 +12,11 @@ const meta = (records: any[]) => {
 }
 
 const pageSchema = z.object({
-  p: z.string()
+  p: z.string() // page
     .optional()
     .transform(val => parseIntOrDefault(val, 1))
     .refine(num => num > 0, { message: 'p (page) must be a positive integer' }),
-  pp: z.string()
+  pp: z.string() // per page
     .optional()
     .transform(val => parseIntOrDefault(val, 10))
     .refine(num => num >= 1 && num <= 100, { message: 'pp (per-page) must be between 1 and 100' }),
@@ -31,6 +31,7 @@ export interface page {
   dir?: 'asc' | 'desc' | 'ASC' | 'DESC'
 }
 
+// translation of the above "page" interface into Prisma params
 export interface queryOptions {
   orderBy?: { [key: string]: string }
   skip?: number
@@ -51,8 +52,10 @@ const pageOptions = (query: any): queryOptions => {
     return {}
   }
   const parsed = result.data
-  log.debug('Parsed query', parsed)
+  log.debug('parsed query string for pageOptions', parsed)
   const options: queryOptions = {}
+  options.skip = (parsed.p - 1) * parsed.pp
+  options.take = parsed.pp
   if (parsed.sort) {
     options.orderBy = {
       [parsed.sort]: parsed.dir?.toLowerCase() || 'asc'
@@ -60,8 +63,7 @@ const pageOptions = (query: any): queryOptions => {
   }
   // const limit = parseIntOrDefault(query.limit, 10)
   // const page = parseIntOrDefault(query.page, 1)
-  options.skip = (parsed.p - 1) * parsed.pp
-  options.take = parsed.pp
+  // TODO - options.where // TODO GRANT YOU ARE HERE
   return options
 }
 

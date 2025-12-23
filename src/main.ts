@@ -3,9 +3,9 @@ import '@std/dotenv/load'
 import { Context, Hono } from '@hono'
 import { logger } from '@hono/logger'
 import { db } from '@mod/db'
-import { api } from './api/mod.ts'
-import { auth } from './auth/mod.ts'
-import { log } from './util/mod.ts'
+import { api } from './api/mod.ts'   // api  routes
+import { auth } from './auth/mod.ts' // auth routes
+import { log, kv } from '@util'
 import process from "node:process"
 
 process.env.TZ = Deno.env.get("TZ")
@@ -51,10 +51,7 @@ const start = async () => {
     return this.toString()
   }
 
-  // TODO add checks for required env vars
-  // TODO add a check that the db is connected
-
-  const port = Number(Deno.env.get('PORT') || 8000)
+  const port = parseInt(Deno.env.get('PORT') || '8000')
   log.info(`Starting server on port ${port}...`)
 
   try {
@@ -67,16 +64,25 @@ const start = async () => {
   }
 }
 
+const exit = async (status: number) => {
+  await db.$disconnect()
+  await kv.close()
+  Deno.exit(status)
+}
+
 globalThis.addEventListener('unhandledRejection', async (err) => {
   log.error('unhandledRejection', { err })
-  await db.$disconnect()
-  Deno.exit(1)
+  await exit(1)
 })
 
 Deno.addSignalListener('SIGINT', async () => {
   log.info('Received SIGINT, stopping.')
-  await db.$disconnect()
-  Deno.exit()
+  await exit(0)
+})
+
+Deno.addSignalListener('SIGTERM', async () => {
+  log.info('Received SIGTERM, stopping.')
+  await exit(0)
 })
 
 start().then(async () => {

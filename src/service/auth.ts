@@ -1,5 +1,5 @@
 import { db, User } from '@mod/db'
-import { log } from '../util/mod.ts'
+import { log } from '@util'
 import { hashPassword } from '../service/user.ts'
 
 const authoriseLogin = async (email: string, password: string): Promise<User> => {

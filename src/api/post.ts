@@ -1,6 +1,6 @@
 import { Context, Hono } from '@hono'
 import { db, Post, User } from '@mod/db'
-import { log, meta, page, pageOptions } from '../util/mod.ts'
+import { log, meta, page, pageOptions } from '@util'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 

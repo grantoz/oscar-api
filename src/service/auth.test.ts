@@ -38,5 +38,5 @@ Deno.test("authoriseLogin succeeds with valid email and password and returns Use
 
   assert(isUser, "Result should conform to User model shape");
 
-  await db.$disconnect()
+  // await db.$disconnect()
 })

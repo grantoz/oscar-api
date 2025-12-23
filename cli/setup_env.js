@@ -54,6 +54,12 @@ async function processEnvFile() {
         if (line.startsWith('PORT')) {
           line = 'PORT=8001'
         }
+        if (line.startsWith('LOG_COLORS')) {
+          line = 'LOG_COLORS=false'
+        }
+        if (line.startsWith('REFRESH_COOKIE_OPTIONS')) {
+          line = 'REFRESH_COOKIE_OPTIONS="SameSite=Strict"'
+        }
       }
 
       await writer.write(new TextEncoder().encode(line + '\n'));

@@ -1,6 +1,6 @@
 import { Context, Hono } from '@hono'
 import { db, Prisma } from '@mod/db'
-import { log, meta, page, pageOptions, queryOptions } from '../util/mod.ts'
+import { log, meta, page, pageOptions, queryOptions } from '@util'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 import { genSalt, hashPassword } from '../service/user.ts'
@@ -43,6 +43,12 @@ export const user = new Hono()
 
 // TODO generalise ID fetch routes
 .get('/:id', validate('param', uuidIdSchema), async (c: Context) => {
+  /**
+   * Extracts the validated `id` parameter from the request.
+   * The `as never` type assertion bypasses TypeScript's strict type checking for the validator target,
+   * allowing the zValidator to properly infer and validate the parameter against the defined schema.
+   * This is a common pattern in Hono when using zValidator to ensure the validation result is correctly typed.
+   */
   const { id } = c.req.valid('param' as never);
   const user = await db.user.findUnique({
     where: {
@@ -55,21 +61,21 @@ export const user = new Hono()
   return c.json({ data: userView(user) })
 })
 
-.get('/:id/post', zValidator('param', uuidIdSchema), async (c: Context) => {
-  const { id } = c.req.valid('param' as never);
-  const user = await db.user.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      posts: true, // Include all posts related to this user
-    },
-  })
-  if (!user) {
-    return c.notFound()
-  }
-  return c.json({ data: userView(user) })
-})
+// .get('/:id/post', zValidator('param', uuidIdSchema), async (c: Context) => {
+//   const { id } = c.req.valid('param' as never);
+//   const user = await db.user.findUnique({
+//     where: {
+//       id,
+//     },
+//     include: {
+//       posts: true, // Include all posts related to this user
+//     },
+//   })
+//   if (!user) {
+//     return c.notFound()
+//   }
+//   return c.json({ data: userView(user) })
+// })
 
 .post('/', zValidator('json', userPostSchema), async (c: Context) => {
   const payload: userPost = c.req.valid('json' as never)
@@ -93,8 +99,7 @@ export const user = new Hono()
   try {
     const result = await db.user.create({data: userData})
     const userPostResultView = userView(result)
-    log.info('Created user', userPostResultView)
-    // const lastModified = await setLastModified('user', result.updatedAt)
+    log.info('created user', userPostResultView)
     const lastModified = await setLastModified('user')
     c.header('Last-Modified', lastModified)
     return c.json({ data: userPostResultView })
@@ -111,7 +116,7 @@ export const user = new Hono()
 })
 .patch('/', zValidator('json', userPatchSchema), async (c: Context) => {
   const payload: userPatch = c.req.valid('json' as never)
-  log.info('Updating user', payload)
+  log.info('updating user', payload)
   try {
     const result = await db.user.update({
       where: {
@@ -123,10 +128,8 @@ export const user = new Hono()
       },
     })
     const userPatchResultView = userView(result)
-    log.info('Created user', userPatchResultView)
+    log.info('created user', userPatchResultView)
     // todo get value and set header
-
-    log.info('xxx delete me', typeof result.createdAt)
 
     await setLastModified('user')
     return c.json({ data: userPatchResultView })
