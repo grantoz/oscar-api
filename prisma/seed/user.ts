@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from '@mod/db'
 import { faker } from "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts";
-import { genSalt, hashPassword } from "@/service/user.ts";
+import { genSalt, hashPassword } from "@util";
 import { encodeBase64 } from "@std/encoding/base64";
 
 const superEmail = 'super@grantoz.io'

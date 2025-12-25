@@ -3,7 +3,7 @@ import { sign, verify } from '@hono/jwt';
 import { User } from '@mod/db'
 import { kv, log } from '@util'
 import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa';
-import { authoriseLogin } from '../service/auth.ts';
+import { authoriseLogin } from '@/util/auth.ts';
 import { jwtUser, refreshUser } from './types.ts';
 import { z } from '@zod'
 import { zValidator } from '@hono/zod-validator'

@@ -3,9 +3,9 @@ import { db, Prisma } from '@mod/db'
 import { log, meta, page, pageOptions } from '@util'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
-import { genSalt, hashPassword } from '../service/user.ts'
-import { userView } from '../view/user.ts'
-import { getLastModified, setLastModified } from './lastModified.ts'
+import { genSalt, hashPassword } from '@/util/user.ts'
+import { userView } from '@/view/user.ts'
+import { getLastModified, setLastModified } from '@/util/lastModified.ts'
 import { validate } from '@util'
 
 // TODO add email verification, phone verification etc

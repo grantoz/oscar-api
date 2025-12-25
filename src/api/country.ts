@@ -1,11 +1,10 @@
 import { Context, Hono } from '@hono'
 import { db } from '@mod/db'
-// import { meta, page, pageOptions } from '@util' // do I even want pagination for getall?
 import { meta } from '@util'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 // TODO use this as part of validation for get/:id
-// import { countryCodes } from 'service/country.ts'
+// import { countryCodes } from 'util/country.ts'
 
 const countryCodeSchema = z.string()
   .length(2, { message: "Invalid country code. Please use valid ISO 3166-1 alpha-2 code." })
