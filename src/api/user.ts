@@ -1,6 +1,6 @@
 import { Context, Hono } from '@hono'
 import { db, Prisma } from '@mod/db'
-import { log, meta, page, pageOptions, queryOptions } from '@util'
+import { log, meta, page, pageOptions } from '@util'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 import { genSalt, hashPassword } from '../service/user.ts'

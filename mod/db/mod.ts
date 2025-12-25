@@ -2,7 +2,7 @@ import { PrismaClient } from '../../prisma/generated/client.ts'
 import { Prisma } from '../../prisma/generated/client.ts'
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const getDB = () => {
+const getDB = (): PrismaClient => {
 
   const dbUrl: string = Deno.env.get('DB_URL') || ''
 
@@ -35,7 +35,7 @@ const getDB = () => {
   // https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
 }
 
-const db = await getDB()
+const db: PrismaClient = await getDB()
 
 export { db, Prisma, getDB }
 export type { User, Country, Post, PrismaClient } from '../../prisma/generated/client.ts'

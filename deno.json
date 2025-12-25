@@ -11,7 +11,7 @@
     "db:drop":          "deno run -A --env-file cli/alter_db.js --drop",
     "db:drop:test":     "deno run -A --env-file=.env.test cli/alter_db.js --drop",
 
-    "db:generate":      "rm -rf prisma/generated && deno task prisma generate --schema ./prisma/schema.prisma",
+    "db:generate":      "rm -rf prisma/generated && rm -rf prisma/zod && node --help && deno task prisma generate --schema ./prisma/schema.prisma && deno run -A cli/patchPrismaZodGeneratorOutput.ts",
 
     "db:migrate":       "deno run -A --env-file npm:prisma migrate dev",
     "db:migrate:test":  "deno run -A --env-file=.env.test npm:prisma migrate dev",
@@ -48,6 +48,7 @@
     "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
     "@std/encoding": "jsr:@std/encoding@^1.0.10",
     "@std/expect": "jsr:@std/expect@^1.0.17",
+    "@std/path": "jsr:@std/path@^1.1.4",
     "@std/streams": "jsr:@std/streams@^1.0.14",
     "@std/testing": "jsr:@std/testing@^1.0.16",
     "@zod": "npm:zod@4.1.13",
@@ -62,7 +63,8 @@
   },
   "lint": {
     "exclude": [
-      "prisma/generated/**"
+      "prisma/generated/**",
+      "prisma/zod/**"
     ]
   },
   "workspace": ["./mod/db"],

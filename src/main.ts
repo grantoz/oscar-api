@@ -46,6 +46,7 @@ app
 // Other middleware here?
 
 const start = async () => {
+  // TODO move this into a general utils file that is always included for runtime and non-runtime tests
   // deno-lint-ignore no-explicit-any
   ;(BigInt.prototype as any).toJSON = function () {
     return this.toString()

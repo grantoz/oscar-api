@@ -4,7 +4,6 @@ import { hash, Variant, verify, Version } from "@felix/argon2";
 import { assertEquals, assertExists } from '@std/assert'
 import { genSalt, hashPassword } from './user.ts';
 
-
 Deno.test("generates salt and hashes password", async function() {
   const salt = genSalt()
   assertExists(salt)

@@ -2,8 +2,6 @@ import "@std/dotenv/load";
 import { superEmail, superPass } from '../../prisma/seed/user.ts'
 import { authoriseLogin } from './auth.ts'
 import { assert, assertEquals, assertExists, assertRejects } from '@std/assert'
-import { db } from '@mod/db'
-
 
 Deno.test("authoriseLogin fails with bad email", function() {
   assertRejects(

@@ -38,6 +38,7 @@ async function processEnvFile() {
           // Replace the line with the new JWT_SECRET value
           line = line + '_test';
         }
+        else
         if (line.startsWith('DB_URL=')) {
           if (line.includes('?')) {
             line = line.replace('?', '_test?')
@@ -45,18 +46,23 @@ async function processEnvFile() {
             line = line + '_test';
           }
         }
+        else
         if (line.startsWith('LOG_DB')) {
           line = line.replace('true', 'false')
         }
+        else
         if (line.startsWith('APP_ENV')) {
           line = 'APP_ENV=test'
         }
+        else
         if (line.startsWith('PORT')) {
           line = 'PORT=8001'
         }
+        else
         if (line.startsWith('LOG_COLORS')) {
           line = 'LOG_COLORS=false'
         }
+        else
         if (line.startsWith('REFRESH_COOKIE_OPTIONS')) {
           line = 'REFRESH_COOKIE_OPTIONS="SameSite=Strict"'
         }
