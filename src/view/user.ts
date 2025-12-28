@@ -1,6 +1,6 @@
 import { User, Post } from '@mod/db'
 
-export type UserView = Omit<User, 'hash' | 'salt' | 'props'>
+export type UserView = Omit<User, 'hash' | 'salt' | 'props' | 'verifiedAt'>
   & { props: Record<string, unknown>, posts?: Post[] }
 
 

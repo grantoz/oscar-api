@@ -7,6 +7,8 @@ import { genSalt, hashPassword } from '@/util/user.ts'
 import { userView } from '@/view/user.ts'
 import { getLastModified, setLastModified } from '@/util/lastModified.ts'
 import { validate } from '@util'
+import { etag } from '@hono/etag'
+
 
 // TODO add email verification, phone verification etc
 // TODO add role based access control, admin user etc
@@ -16,24 +18,28 @@ const uuidIdSchema = z.object({
 })
 
 const userPatchSchema = z.object({
-  id: z.uuidv7(),
+  // id: z.uuidv7(),
   name: z.string().optional(),
-  // email: z.string().optional(), // TODO how do we update email?
+  email: z.string().optional(), // TODO email update validation loop
   phone: z.string().optional(),
   password: z.string().optional(),
   passwordConfirm: z.string().optional(),
-}).refine(schema => {
-  schema.password === schema.passwordConfirm
+}).refine((schema) => {
+  if (schema.password || schema.passwordConfirm) {
+    return  schema.password === schema.passwordConfirm
+  }
+  return true
 }, {
   message: 'Password and password confirmation must match',
 }).strict()
-type userPatch = z.infer<typeof userPatchSchema>
+type userPatchPayload = z.infer<typeof userPatchSchema>
 
-const userPostSchema = userPatchSchema.omit({ id: true }).extend({email: z.email()})
-type userPost = z.infer<typeof userPostSchema>
+// user post must have an email, so re-create is as non-optional
+const userPostSchema = userPatchSchema.omit({ email: true }).extend({email: z.email()})
+type userPostPayload = z.infer<typeof userPostSchema>
 
 export const user = new Hono()
-.get('/', async (c: Context) => {
+.get('/', etag(), async (c: Context) => {
   const options = pageOptions(c.req.query() as page)
   const users = await db.user.findMany(options)
   // TODO cache headers
@@ -42,7 +48,7 @@ export const user = new Hono()
 })
 
 // TODO generalise ID fetch routes
-.get('/:id', validate('param', uuidIdSchema), async (c: Context) => {
+.get('/:id', etag(), validate('param', uuidIdSchema), async (c: Context) => {
   /**
    * Extracts the validated `id` parameter from the request.
    * The `as never` type assertion bypasses TypeScript's strict type checking for the validator target,
@@ -58,27 +64,12 @@ export const user = new Hono()
   if (!user) {
     return c.notFound()
   }
+  c.header('last-modified', user.updatedAt.toUTCString())
   return c.json({ data: userView(user) })
 })
 
-// .get('/:id/post', zValidator('param', uuidIdSchema), async (c: Context) => {
-//   const { id } = c.req.valid('param' as never);
-//   const user = await db.user.findUnique({
-//     where: {
-//       id,
-//     },
-//     include: {
-//       posts: true, // Include all posts related to this user
-//     },
-//   })
-//   if (!user) {
-//     return c.notFound()
-//   }
-//   return c.json({ data: userView(user) })
-// })
-
 .post('/', zValidator('json', userPostSchema), async (c: Context) => {
-  const payload: userPost = c.req.valid('json' as never)
+  const payload: userPostPayload = c.req.valid('json' as never)
   const userData: Prisma.UserCreateInput = {
     name: payload.name,
     email: payload.email,
@@ -90,7 +81,6 @@ export const user = new Hono()
     userData.hash = await hashPassword(payload.password, userData.salt)
   }
 
-  // TODO build log redaction layer instead (could this be async?)
   const logData = Object.assign({}, userData);
   delete logData.salt;
   delete logData.hash;
@@ -114,35 +104,73 @@ export const user = new Hono()
     throw(err)
   }
 })
-.patch('/', zValidator('json', userPatchSchema), async (c: Context) => {
-  const payload: userPatch = c.req.valid('json' as never)
-  log.info('updating user', payload)
+// .patch('/', zValidator('json', userPatchSchema), async (c: Context) => {
+
+.patch('/:id', validate('param', uuidIdSchema), zValidator('json', userPatchSchema), async (c: Context) => {
+  const { id } = c.req.valid('param' as never);
+  const payload: userPatchPayload = c.req.valid('json' as never)
+  log.info('updating user', { id, payload })
+
+  const userData: Prisma.UserUpdateInput = {
+    name: payload.name,
+    email: payload.email,
+    phone: payload.phone,
+    props: {}, // Prisma.JsonNull, // or {} if you prefer
+  }
+  if (payload.password) {
+    userData.salt = genSalt()
+    userData.hash = await hashPassword(payload.password, userData.salt)
+  }
+
+  const logData = Object.assign({}, userData);
+  delete logData.salt;
+  delete logData.hash;
+  logData.id = id
+  log.info('updating user', logData)
+
   try {
     const result = await db.user.update({
       where: {
-        id: payload.id,
+        id,
       },
-      data: {
-        name: payload.name,
-        phone: payload.phone,
-      },
+      data: userData,
     })
     const userPatchResultView = userView(result)
-    log.info('created user', userPatchResultView)
-    // todo get value and set header
-
-    await setLastModified('user')
+    log.info('updated user', userPatchResultView)
+    await setLastModified('user') // TODO this could be rolled into metric emission
     return c.json({ data: userPatchResultView })
 
   // deno-lint-ignore no-explicit-any
   } catch (err: any) {
+    if (err.code === 'P2025') { // err.target === ['email']
+      log.info('patch user: entity not found')
+      return c.notFound()
+    }
+    else
     if (err.code === 'P2002') { // err.target === ['email']
       log.info('patch user: unique constraint failed', err)
       return c.json({ error: 'Unique constraint failed' }, 429)
     }
-    log.warn('Error creating user', err)
+    log.warn('error updating user', err)
     throw(err)
     // TODO test various error conditions, logging and output for failure modes
     // return c.json({ error: 'Error creating user' }, 500)
   }
 })
+
+// .get('/:id/post', zValidator('param', uuidIdSchema), async (c: Context) => {
+//   const { id } = c.req.valid('param' as never);
+//   const user = await db.user.findUnique({
+//     where: {
+//       id,
+//     },
+//     include: {
+//       posts: true, // Include all posts related to this user
+//     },
+//   })
+//   if (!user) {
+//     return c.notFound()
+//   }
+//   return c.json({ data: userView(user) })
+// })
+

@@ -1,83 +1,81 @@
 import { Prisma, PrismaClient } from '@mod/db'
-import { faker } from "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts";
-import { genSalt, hashPassword } from "@util";
-import { encodeBase64 } from "@std/encoding/base64";
+import { faker } from 'https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts'
+import { genSalt, hashPassword } from '@util'
+import { encodeBase64 } from '@std/encoding/base64'
 
-const superEmail = 'super@grantoz.io'
-const adminEmail = 'admin@grantoz.io'
-const staffEmail = 'staff@grantoz.io'
-const userEmail = 'user@grantoz.io'
-let superPass = 'super'
-let adminPass = 'admin'
-let staffPass = 'staff'
-let userPass = 'user'
+export interface SeededUser {
+  email: string
+  pass: string
+}
+
+export const seededUsers: Record<string, SeededUser> = {
+  superUser: { email: 'super@grantoz.io', pass: 'superPass2025$' },
+  adminUser: { email: 'admin@grantoz.io', pass: 'adminPass2025$' },
+  staffUser: { email: 'staff@grantoz.io', pass: 'staffPass2025$' },
+  userUser: { email: 'user@grantoz.io', pass: 'userPass2025$' },
+}
 
 const genRandomStr = (length: number): string => {
   length = Math.floor(length)
   return encodeBase64(crypto.getRandomValues(new Uint8Array(length)))
 }
 
-const userLogins = () => {
+const randomisePasswordsForDeployedEnvs = () => {
   const env = Deno.env.get('APP_ENV') ?? ''
   const live = ['prod', 'uat', 'sandbox'].includes(env)
   if (live) {
-    superPass = genRandomStr(20)
+    const superPass = genRandomStr(20)
     console.info(`SUPER password is ${superPass} - YOU WILL NOT SEE THIS AGAIN`)
-    adminPass = genRandomStr(20)
-    staffPass = genRandomStr(20)
-    userPass = genRandomStr(20)
+    seededUsers.superUser.pass = superPass
+    seededUsers.adminUser.pass = genRandomStr(20)
+    seededUsers.staffUser.pass = genRandomStr(20)
+    seededUsers.userUser.pass = genRandomStr(20)
   }
-  return { superEmail, superPass, adminEmail, adminPass, staffEmail, staffPass, userEmail, userPass }
 }
 
-
 export default async (db: PrismaClient) => {
-
-  const { superEmail, superPass, adminEmail, adminPass } = userLogins()
+  randomisePasswordsForDeployedEnvs()
+  const { superUser, adminUser, staffUser, userUser } = seededUsers
 
   const superSalt = genSalt()
-  const superHash = await hashPassword(superPass, superSalt)
   const adminSalt = genSalt()
-  const adminHash = await hashPassword(adminPass, adminSalt)
   const staffSalt = genSalt()
-  const staffHash = await hashPassword(staffPass, staffSalt)
   const userSalt = genSalt()
-  const userHash = await hashPassword(staffPass, staffSalt)
 
   const userData: Prisma.UserCreateInput[] = [
     {
-      name: "Super User",
-      email: superEmail,
-      role: "super",
+      name: 'Super User',
+      email: superUser.email,
+      role: 'super',
       props: Prisma.DbNull,
-      hash: superHash,
+      hash: await hashPassword(superUser.pass, superSalt),
       salt: superSalt,
       // verifiedAt: Date.now()
     },
     {
-      name: "Admin User",
-      email: adminEmail,
-      role: "admin",
+      name: 'Admin User',
+      email: adminUser.email,
+      role: 'admin',
       props: Prisma.DbNull,
-      hash: adminHash,
+      hash: await hashPassword(adminUser.pass, adminSalt),
       salt: adminSalt,
       // verifiedAt: Date.now()
     },
     {
-      name: "Staff User",
-      email: staffEmail,
-      role: "staff",
+      name: 'Staff User',
+      email: staffUser.email,
+      role: 'staff',
       props: Prisma.DbNull,
-      hash: staffHash,
+      hash: await hashPassword(staffUser.pass, staffSalt),
       salt: staffSalt,
       // verifiedAt: Date.now()
     },
     {
-      name: "User User",
-      email: userEmail,
-      role: "user",
+      name: 'User User',
+      email: userUser.email,
+      role: 'user',
       props: Prisma.DbNull,
-      hash: userHash,
+      hash: await hashPassword(userUser.pass, userSalt),
       salt: userSalt,
       // verifiedAt: Date.now()
     },
@@ -91,13 +89,14 @@ export default async (db: PrismaClient) => {
       salt: null,
       posts: {
         create: [{
-          title: "Aardonyx Facts",
-          content: "Aardonyx was a pro-sauropod dinosaur that lived in the Early Jurassic period.",
+          title: 'Aardonyx Facts',
+          content:
+            'Aardonyx was a pro-sauropod dinosaur that lived in the Early Jurassic period.',
           published: false,
-        }]
+        }],
       },
     },
-  ];
+  ]
 
   // Seed db, upsert to avoid duplicates if run multiple times.
   let count = 0
@@ -106,10 +105,8 @@ export default async (db: PrismaClient) => {
       where: { email: u.email },
       update: {},
       create: u,
-    });
-    count ++
+    })
+    count++
   }
-  console.log(`Created ${count} users`);
+  console.log(`Created ${count} users`)
 }
-
-export { superEmail, adminEmail, superPass, adminPass }

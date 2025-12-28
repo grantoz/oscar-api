@@ -7,8 +7,8 @@ import { assertEquals } from '@std/assert'
 Deno.test('parses pager params', () => {
   // note, queries are all string-based
   const pagerParams1 = {
-    p: '1',
-    pp: '10',
+    page: '1',
+    size: '10',
     sort: 'name'
   }
   let opt: queryOptions = pageOptions(pagerParams1)
@@ -19,8 +19,8 @@ Deno.test('parses pager params', () => {
   }, opt)
 
   const pagerParams2 = {
-    p: '3',
-    pp: '25',
+    page: '3',
+    size: '25',
     sort: 'field',
     dir: 'desc'
   }
@@ -32,8 +32,8 @@ Deno.test('parses pager params', () => {
   }, opt)
 
   const badParams = {
-    p: '3',
-    pp: '25',
+    page: '3',
+    size: '25',
     sort: 'field',
     dir: 'sausage'
   }

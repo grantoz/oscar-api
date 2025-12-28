@@ -1,81 +1,52 @@
 // import { load } from "@std/dotenv";
 import "@std/dotenv/load";
-import { assert, assertEquals } from '@std/assert'
+import { assertEquals } from '@std/assert'
 import { describe, it, beforeAll, } from '@std/testing/bdd'
-import ky from 'ky'
-import { superEmail, superPass } from '../../prisma/seed/user.ts'
-import { encodeBase64 } from "@std/encoding/base64";
-import { verifyAndDecodeJwt } from '../auth/jwt.ts'
-
-const port = Deno.env.get('PORT') || 8001 // test port
-console.log('MY PORT IS', port)
+import { KyInstance } from 'ky'
+import { asSuper, asAdmin, logHeaders, testUsers, type TestUser  } from '../util/test.ts';
 
 interface loginOutput {
   token: string
 }
 
-let token: string
-let superId: string
+let superApi: KyInstance
+let _adminApi: KyInstance
+let superUser: TestUser
+let _adminUser: TestUser
 
 describe("BDD style tests", () => {
   beforeAll(async () => {
-    console.log('get super user creds before all tests')
-    const auth = encodeBase64(superEmail + ':' + superPass)
-    const resp: loginOutput = await ky.post(`http://localhost:${port}/auth/login`, {
-      headers: {
-        Authorization: 'Basic ' + auth
-      }
-    }).json()
-    assert(resp)
-    token = resp.token
-    const decoded = await verifyAndDecodeJwt(token)
-    //    if (!decoded.sub || !decoded.email || !decoded.role || !decoded.exp) {
-    assert(decoded.sub)
-    superId = decoded.sub
+    superApi = await asSuper();
+    _adminApi = await asAdmin();
+    ({ superUser, adminUser: _adminUser } = testUsers)
   })
 
-  it("get bad user ID should return 404", async () => {
-    await ky.get(`http://localhost:${port}/api/user/xxxxxxxx`, {
-      headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      },
+  it("should return 400 for get requests with non-uuid :id path parameter", async () => {
+    await superApi.get('user/xxxxxxx', {
       throwHttpErrors: false
     }).then(async (resp) => {
       const text = await resp.text()
-      console.log('YYY', text)
-      Array.from(resp.headers.entries()).forEach(([key, value]: [string, string]) => {
-        console.log(key, value)
-      })
+      console.log('raw error output:', text)
+      assertEquals(400, resp.status)
+      logHeaders(resp)
     })
   })
 
   it("get valid user ID should return 200 and matching output", async () => {
-    console.log('superId', superId)
-    await ky.get(`http://localhost:${port}/api/user`, { // will get page 1 of output, up to 10 records by default
-      headers: {
-        Authorization: 'Bearer ' + token,
-        // 'Content-Type': 'application/json'
-      },
+    await superApi.get('user', {
       throwHttpErrors: false
     }).then(async (resp) => {
       const output = await resp.json();
       console.log(output)
       assertEquals(200, resp.status)
       // TODO assert that output has array of userView instance
-      Array.from(resp.headers.entries()).forEach(([key, value]: [string, string]) => {
-        console.log(key, value)
-      })
+      logHeaders(resp)
     })
   })
 
   it("get valid user ID should return 200 and matching output", async () => {
-    console.log('superId', superId)
-    await ky.get(`http://localhost:${port}/api/user/${superId}`, {
-      headers: {
-        Authorization: 'Bearer ' + token,
-        // 'Content-Type': 'application/json'
-      },
+    console.log('superId', superUser.id)
+    await superApi.get(`user/${superUser.id}`, {
       throwHttpErrors: false
     }).then(async (resp) => {
       const output = await resp.json();
@@ -84,6 +55,11 @@ describe("BDD style tests", () => {
       assertEquals(200, resp.status)
     })
   })
+
+ // TODO test etag
+ // TODO test PATCH
+ // TODO test patch optimistic concurrency control with If-Modified: etag
+ // TODO test PUT
 
 
   // it("should get JSON using ky", async () => {

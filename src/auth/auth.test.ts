@@ -1,10 +1,12 @@
 import { assert, assertEquals, assertGreater } from '@std/assert'
 import ky from 'ky'
-import { superEmail, superPass } from '../../prisma/seed/user.ts'
 import { encodeBase64 } from "@std/encoding/base64";
 import { verifyAndDecodeJwt } from './jwt.ts'
+import { testUsers } from '@/util/test.ts'
 
 const port = Deno.env.get('PORT') ?? 8001
+
+const { superUser } = testUsers
 
 Deno.test.ignore("should get JSON using ky", async () => {
   type postComment = {
@@ -20,7 +22,7 @@ Deno.test.ignore("should get JSON using ky", async () => {
 })
 
 Deno.test("should log not super user in with bad password", async () => {
-  const auth = encodeBase64(superEmail + ':' + 'bogus')
+  const auth = encodeBase64(superUser.email + ':' + 'bogus')
   await ky.post(`http://localhost:${port}/auth/login`, {
     headers: {
       Authorization: 'Basic ' + auth
@@ -33,7 +35,7 @@ Deno.test("should log not super user in with bad password", async () => {
 })
 
 Deno.test("should log not super user in with bad email", async () => {
-  const auth = encodeBase64('bogus@foo.com' + ':' + superPass)
+  const auth = encodeBase64('bogus@foo.com' + ':' + superUser.pass)
   const resp = await ky.post(`http://localhost:${port}/auth/login`, {
     headers: {
       Authorization: 'Basic ' + auth
@@ -49,7 +51,7 @@ interface tokenResponse {
 }
 
 Deno.test("should log super user in and be returned a JWT and refreshToken", async () => {
-  const auth = encodeBase64(superEmail + ':' + superPass)
+  const auth = encodeBase64(superUser.email + ':' + superUser.pass)
   const resp = await ky.post(`http://localhost:${port}/auth/login`, {
     headers: {
       Authorization: 'Basic ' + auth
@@ -58,6 +60,6 @@ Deno.test("should log super user in and be returned a JWT and refreshToken", asy
   const json = await resp.json() as tokenResponse
   assert(json)
   const token = await verifyAndDecodeJwt(json.token)
-  assertEquals(token.email, superEmail)
+  assertEquals(token.email, superUser.email)
   // TODO get refresh token from set-cookie response
 })

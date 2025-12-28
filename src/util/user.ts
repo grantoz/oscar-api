@@ -25,19 +25,10 @@ export const savePasswordSaltAndHash = async (user: User, password: string) => {
       },
     })
     log.info('user: updated password', { id: user.id })
-  // deno-lint-ignore no-explicit-any
-  } catch (err: any) {
+  } catch (err: unknown) {
     log.error('user: failed to update password', err)
     throw err
   }
-}
-
-export const validateLogin = async function (
-  user: User,
-  pass: string
-) {
-  const hashedPass = await hashPassword(pass, user.salt ?? '')
-  return hashedPass !== user.hash
 }
 
 // see https://github.com/felix-schindler/deno-argon2/blob/master/examples/with-options.ts

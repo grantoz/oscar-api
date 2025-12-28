@@ -2,31 +2,31 @@ import { z } from '@zod'
 import { log } from "@util"
 
 // deno-lint-ignore no-explicit-any
-const meta = (records: any[]) => {
+const meta = (records: any[]) => { // TODO FIX THIS SHIT
   return {
     count: records.length,
     page: 1,
-    limit: 10,
+    size: 10,
     pages: Math.ceil(records.length / 10)
   }
 }
 
 const pageSchema = z.object({
-  p: z.string() // page
+  page: z.string()
     .optional()
     .transform(val => parseIntOrDefault(val, 1))
-    .refine(num => num > 0, { message: 'p (page) must be a positive integer' }),
-  pp: z.string() // per page
+    .refine(num => num > 0, { message: 'page must be a positive integer' }),
+  size: z.string() // per page
     .optional()
     .transform(val => parseIntOrDefault(val, 10))
-    .refine(num => num >= 1 && num <= 100, { message: 'pp (per-page) must be between 1 and 100' }),
+    .refine(num => num >= 1 && num <= 100, { message: 'size must be between 1 and 100' }),
   sort: z.string().optional(),
   dir: z.enum(['asc', 'desc', 'ASC', 'DESC']).optional()
 })
 
 export interface page {
-  p?: string
-  pp?: string
+  page?: string
+  size?: string
   sort?: string
   dir?: 'asc' | 'desc' | 'ASC' | 'DESC'
 }
@@ -54,8 +54,8 @@ const pageOptions = (query: any): queryOptions => {
   const parsed = result.data
   log.debug('parsed query string for pageOptions', parsed)
   const options: queryOptions = {}
-  options.skip = (parsed.p - 1) * parsed.pp
-  options.take = parsed.pp
+  options.skip = (parsed.page - 1) * parsed.size
+  options.take = parsed.size
   if (parsed.sort) {
     options.orderBy = {
       [parsed.sort]: parsed.dir?.toLowerCase() || 'asc'
