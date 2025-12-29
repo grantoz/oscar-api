@@ -4,7 +4,7 @@ import { hash, Variant, verify, Version } from "@felix/argon2";
 import { assertEquals, assertExists } from '@std/assert'
 import { genSalt, hashPassword } from './user.ts';
 
-Deno.test("generates salt and hashes password", async function() {
+Deno.test("generate salt and hashed password", async function() {
   const salt = genSalt()
   assertExists(salt)
   const password = 'password123'
@@ -13,7 +13,7 @@ Deno.test("generates salt and hashes password", async function() {
   assertEquals(isValid, true)
 })
 
-Deno.test("Finds seeded users", async function() {
+Deno.test("find seeded users", async function() {
   const allUsers = await db.user.findMany({
     include: {
       posts: true,
