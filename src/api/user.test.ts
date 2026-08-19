@@ -1,7 +1,7 @@
 // import { load } from "@std/dotenv";
 import "@std/dotenv/load";
 import { assertEquals } from '@std/assert'
-import { describe, it, beforeAll, } from '@std/testing/bdd'
+import { describe, it, before, } from 'node:test'
 import { KyInstance } from 'ky'
 import { asSuper, asAdmin, logHeaders, testUsers, type TestUser  } from '../util/test.ts';
 
@@ -15,7 +15,7 @@ let superUser: TestUser
 let _adminUser: TestUser
 
 describe("BDD style tests", () => {
-  beforeAll(async () => {
+  before(async () => {
     superApi = await asSuper();
     _adminApi = await asAdmin();
     ({ superUser, adminUser: _adminUser } = testUsers)
