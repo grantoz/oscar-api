@@ -1,7 +1,7 @@
 import {
   pageOptions,
-  queryOptions,
-} from './page.ts'
+  prismaPagination,
+} from '@/util/pagination.ts'
 import { assertEquals } from '@std/assert'
 
 Deno.test('parses pager params', () => {
@@ -11,7 +11,7 @@ Deno.test('parses pager params', () => {
     size: '10',
     sort: 'name'
   }
-  let opt: queryOptions = pageOptions(pagerParams1)
+  let opt: prismaPagination = pageOptions(pagerParams1)
   assertEquals({
     orderBy: { name: "asc" },
     skip: 0,

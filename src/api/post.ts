@@ -1,6 +1,6 @@
 import { Context, Hono } from '@hono'
 import { db, Post, User } from '@mod/db'
-import { log, meta, page, pageOptions } from '@util'
+import { log, meta, pagination, pageOptions } from '@util'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 
@@ -24,7 +24,7 @@ type postPost = z.infer<typeof postPostSchema>
 export const post = new Hono()
 .get('/', async (c: Context) => {
   // log.info(c.req.query())
-  const options = pageOptions(c.req.query() as page)
+  const options = pageOptions(c.req.query() as pagination)
   const items: Post[] = await db.post.findMany(options)
   c.res.headers.append('cache-control', 'max-age=10')
   return c.json({ data: items, meta: meta(items) })

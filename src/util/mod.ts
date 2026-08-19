@@ -1,4 +1,4 @@
-export * from './page.ts'
+export * from './pagination.ts'
 export * from './logger.ts'
 export * from './kv.ts'
 export * from './http.ts'

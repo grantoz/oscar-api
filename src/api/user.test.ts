@@ -14,7 +14,7 @@ let _adminApi: KyInstance
 let superUser: TestUser
 let _adminUser: TestUser
 
-describe("BDD style tests", () => {
+describe("BDD-style tests", () => {
   before(async () => {
     superApi = await asSuper();
     _adminApi = await asAdmin();
@@ -58,20 +58,4 @@ describe("BDD style tests", () => {
 
  // TODO test etag
  // TODO test PATCH
- // TODO test patch optimistic concurrency control with If-Modified: etag
- // TODO test PUT
-
-
-  // it("should get JSON using ky", async () => {
-  //   type postComment = {
-  //     userId: number,
-  //     id: number,
-  //     title: string,
-  //     body: string
-  //   }
-  //   const data: Array<postComment> = await ky('https://jsonplaceholder.typicode.com/posts/1/comments').json()
-  //   assertGreater(data.length, 0)
-  //   assertEquals(data[0].id, 1)
-  //   console.log(data)
-  // })
 })

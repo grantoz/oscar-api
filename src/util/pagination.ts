@@ -11,7 +11,7 @@ const meta = (records: any[]) => { // TODO FIX THIS SHIT
   }
 }
 
-const pageSchema = z.object({
+const paginationQuery = z.object({
   page: z.string()
     .optional()
     .transform(val => parseIntOrDefault(val, 1))
@@ -24,7 +24,7 @@ const pageSchema = z.object({
   dir: z.enum(['asc', 'desc', 'ASC', 'DESC']).optional()
 })
 
-export interface page {
+export interface pagination {
   page?: string
   size?: string
   sort?: string
@@ -32,7 +32,7 @@ export interface page {
 }
 
 // translation of the above "page" interface into Prisma params
-export interface queryOptions {
+export interface prismaPagination {
   orderBy?: { [key: string]: string }
   skip?: number
   take?: number
@@ -46,14 +46,14 @@ const parseIntOrDefault = (value: string | undefined, defaultValue: number): num
 }
 
 // deno-lint-ignore no-explicit-any
-const pageOptions = (query: any): queryOptions => {
-  const result = pageSchema.safeParse(query)
+const pageOptions = (query: any): prismaPagination => {
+  const result = paginationQuery.safeParse(query)
   if (!result.success) {
     return {}
   }
   const parsed = result.data
   log.debug('parsed query string for pageOptions', parsed)
-  const options: queryOptions = {}
+  const options: prismaPagination = {}
   options.skip = (parsed.page - 1) * parsed.size
   options.take = parsed.size
   if (parsed.sort) {
@@ -67,4 +67,4 @@ const pageOptions = (query: any): queryOptions => {
   return options
 }
 
-export { meta, pageSchema, pageOptions }
+export { meta, paginationQuery, pageOptions }

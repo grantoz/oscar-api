@@ -1,6 +1,6 @@
 import { Context, Hono } from '@hono'
 import { db, Prisma } from '@mod/db'
-import { log, meta, page, pageOptions } from '@util'
+import { log, meta, pagination, pageOptions } from '@util'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
 import { genSalt, hashPassword } from '@/util/user.ts'
@@ -8,7 +8,6 @@ import { userView } from '@/view/user.ts'
 import { getLastModified, setLastModified } from '@/util/lastModified.ts'
 import { validate } from '@util'
 import { etag } from '@hono/etag'
-
 
 // TODO add email verification, phone verification etc
 // TODO add role based access control, admin user etc
@@ -72,7 +71,7 @@ type userPostPayload = z.infer<typeof userPostSchema>
 
 export const user = new Hono()
 .get('/', etag(), async (c: Context) => {
-  const options = pageOptions(c.req.query() as page)
+  const options = pageOptions(c.req.query() as pagination)
   const users = await db.user.findMany(options)
   // TODO cache headers
   c.header('last-modified', await getLastModified('user'))
@@ -189,20 +188,3 @@ export const user = new Hono()
     // return c.json({ error: 'Error creating user' }, 500)
   }
 })
-
-// .get('/:id/post', zValidator('param', uuidIdSchema), async (c: Context) => {
-//   const { id } = c.req.valid('param' as never);
-//   const user = await db.user.findUnique({
-//     where: {
-//       id,
-//     },
-//     include: {
-//       posts: true, // Include all posts related to this user
-//     },
-//   })
-//   if (!user) {
-//     return c.notFound()
-//   }
-//   return c.json({ data: userView(user) })
-// })
-
