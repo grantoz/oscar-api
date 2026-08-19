@@ -17,25 +17,35 @@ const uuidIdSchema = z.object({
   id: z.uuidv7(),
 })
 
-const userPatchSchema = z.object({
+const userSchema = z.object({
   // id: z.uuidv7(),
   name: z.string().optional(),
-  email: z.string().optional(), // TODO email update validation loop
+  email: z.string().optional(),
   phone: z.string().optional(),
   password: z.string().optional(),
   passwordConfirm: z.string().optional(),
-}).refine((schema) => {
+})
+
+const passwordMatch = (schema: { password?: string; passwordConfirm?: string }) => {
   if (schema.password || schema.passwordConfirm) {
-    return  schema.password === schema.passwordConfirm
+    return schema.password === schema.passwordConfirm
   }
   return true
-}, {
+}
+
+const userPatchSchema = userSchema.strict().refine(passwordMatch, {
   message: 'Password and password confirmation must match',
-}).strict()
+})
 type userPatchPayload = z.infer<typeof userPatchSchema>
 
 // user post must have an email, so re-create is as non-optional
-const userPostSchema = userPatchSchema.omit({ email: true }).extend({email: z.email()})
+const userPostSchema = userSchema
+  .omit({ email: true })
+  .extend({ email: z.email() })
+  .strict()
+  .refine(passwordMatch, {
+    message: 'Password and password confirmation must match',
+  })
 type userPostPayload = z.infer<typeof userPostSchema>
 
 export const user = new Hono()

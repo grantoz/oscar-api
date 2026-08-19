@@ -6,7 +6,7 @@ import countrySeed from './country.ts';
 Deno.env.set('LOG_DB_QUERY', 'false')
 Deno.env.set('LOG_DB_INFO', 'false')
 const db = getDB()
-
+console.log(`Seeding finished.`);
 await countrySeed(db)
 await userSeed(db)
 

@@ -42,16 +42,16 @@ model User {
   /// @zod.uuidv7()
   id        String    @unique @default(dbgenerated("uuidv7()")) @db.Uuid
   email     String    @unique
+  role      Role      @default(user)
   name      String?   @db.VarChar(255)
   phone     String?   @db.VarChar(255)
-  salt      String?   @db.VarChar(32)
-  hash      String?   @db.VarChar(255)
   props     Json?
-  role      Role      @default(user)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   deletedAt DateTime?
   verifiedAt DateTime?
+  salt      String?   @db.VarChar(32)
+  hash      String?   @db.VarChar(255)
   posts     Post[]
 }
 
@@ -64,12 +64,6 @@ model Country {
   regionCode      Int?
   subRegion       String? @db.VarChar(255)
   subRegionCode   Int?
-}
-
-generator zod {
-  provider = "prisma-zod-generator"
-  output = "./zod" // (JSON config can supply if omitted)
-  config = "./zod-generator.json" // (relative to schema file)
 }
 
 // enum AddressType {
