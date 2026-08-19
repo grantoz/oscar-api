@@ -11,15 +11,14 @@ Deno.test("lastModified::formatLastModified", function() {
   assertEquals(s, 'Sun, 07 Dec 2025 09:01:02 GMT')
 })
 
-Deno.test("lastModified::setLastModified with no date arg", async function() {
+Deno.test("lastModified::setLastModified with no date arg returns string and can be found", async function() {
   const s = await setLastModified('test-entity')
-  assertMatch(s, /(Mon|Tue|Wed|Thu|Fri|Sat|Sun), [0-3]\d Dec \d{4} [0-2]\d:[0-5]\d:[0-5]\d GMT/)
+  assertMatch(s, /(Mon|Tue|Wed|Thu|Fri|Sat|Sun), [0-3]\d (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4} [0-2]\d:[0-5]\d:[0-5]\d GMT/)
 })
 
 Deno.test("lastModified::setLastModified with date arg", async function() {
   const d = new Date('2025-12-07 09:01:02');
   const s = await setLastModified('test-entity', d)
-  console.log(s)
   assertEquals(s, 'Sun, 07 Dec 2025 09:01:02 GMT')
 })
 

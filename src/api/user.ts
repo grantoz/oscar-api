@@ -33,9 +33,31 @@ const passwordMatch = (schema: { password?: string; passwordConfirm?: string }) 
   return true
 }
 
-const userPatchSchema = userSchema.strict().refine(passwordMatch, {
-  message: 'Password and password confirmation must match',
-})
+const MAX_PROPS_SIZE = 2048 // 2kb
+
+const userPropsSchema = z.custom<Prisma.InputJsonValue>().superRefine(
+  (props, ctx) => {
+    if (props === undefined) {
+      return
+    }
+    const bytes = new TextEncoder().encode(JSON.stringify(props)).length
+    if (bytes > MAX_PROPS_SIZE) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `props must be at most ${MAX_PROPS_SIZE} bytes, received ${bytes}`,
+      })
+    }
+  },
+)
+
+const userPatchSchema = userSchema
+  .extend({
+    props: userPropsSchema.optional(),
+  })
+  .strict()
+  .refine(passwordMatch, {
+    message: 'Password and password confirmation must match',
+  })
 type userPatchPayload = z.infer<typeof userPatchSchema>
 
 // user post must have an email, so re-create is as non-optional
@@ -125,7 +147,7 @@ export const user = new Hono()
     name: payload.name,
     email: payload.email,
     phone: payload.phone,
-    props: {}, // Prisma.JsonNull, // or {} if you prefer
+    props: payload.props,
   }
   if (payload.password) {
     userData.salt = genSalt()

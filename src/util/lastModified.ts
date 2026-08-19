@@ -29,17 +29,17 @@ const setLastModified = async (entity: string, date?: Date): Promise<string> => 
   const updatedAt = date ?? new Date()
   const key = ['lastModified', port, entity]
   await kv.set(key, updatedAt)
-  // const lastModified = formatLastModified(updatedAt)
-  const lastModified = updatedAt.toUTCString()
+  const lastModified = formatLastModified(updatedAt)
   log.debug(`new lastModified date for ${entity}: ${lastModified}`)
   return lastModified
 }
 
 const getLastModified = async (entity: string): Promise<string> => {
-  const key = ['lastModified`', port, entity]
-  const result = await kv.get(key)
-  if (result.value) {
-    log.debug(`typeof lastModified from `, typeof result.value);
+  const key = ['lastModified', port, entity]
+  const result = await kv.get<Date>(key)
+  if (result.value instanceof Date) {
+    log.debug(`typeof lastModified from `, result.value);
+    return formatLastModified(result.value)
   }
   return formatLastModified(new Date())
 }

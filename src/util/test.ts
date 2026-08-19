@@ -56,8 +56,8 @@ let adminApi: KyInstance
 const apiUri = `http://localhost:${port}/api`
 const authUri = `http://localhost:${port}/auth`
 
-const api = ky.create({prefixUrl: apiUri});
-const _auth = ky.create({prefixUrl: authUri});
+const api = ky.create({prefix: apiUri});
+const _auth = ky.create({prefix: authUri});
 
 const { superUser, adminUser } = seededUsers
 
