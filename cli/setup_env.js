@@ -1,105 +1,45 @@
-import { encodeBase64 } from "@std/encoding/base64";
-import { TextLineStream } from "@std/streams";
+import { encodeBase64 } from '@std/encoding/base64'
 
-// Generate 64 cryptographically secure random bytes
-const randomBytes = crypto.getRandomValues(new Uint8Array(64));
-
-// Encode the random bytes to a Base64 string
-const jwtSecret = encodeBase64(randomBytes);
-// console.log(jwtSecret);
-
-let outFileName = '.env'
 const test = Deno.args.includes('--test')
-if (test) {
-  outFileName = '.env.test'
+const outFileName = test ? '.env.test' : '.env'
+const jwtSecret = encodeBase64(crypto.getRandomValues(new Uint8Array(64)))
+
+const LINE = /^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/
+
+function suffixDbUrl(value) {
+  const q = value.indexOf('?')
+  return q === -1
+    ? `${value}_test`
+    : `${value.slice(0, q)}_test${value.slice(q)}`
 }
 
-async function processEnvFile() {
-  const cwd = Deno.cwd();
-  // console.log(`Current working directory: ${cwd}`);
-  const inFile = await Deno.open(cwd + '/env/.env.dev');
-  const outFile = await Deno.create(cwd + '/' + outFileName); // .env or .env.test
-  const writer = outFile.writable.getWriter();
-
-  try {
-    const lineStream = inFile.readable
-      .pipeThrough(new TextDecoderStream())
-      .pipeThrough(new TextLineStream());
-
-    for await (let line of lineStream) {
-
-      if (line.startsWith('JWT_SECRET=')) {
-        // Replace the line with the new JWT_SECRET value
-        line = `JWT_SECRET=${jwtSecret}`;
-      }
-
-      if (test) {
-        if (line.startsWith('DB_DB=')) {
-          // Replace the line with the new JWT_SECRET value
-          line = line + '_test';
-        }
-        else
-        if (line.startsWith('DB_URL=')) {
-          if (line.includes('?')) {
-            line = line.replace('?', '_test?')
-          } else {
-            line = line + '_test';
-          }
-        }
-        else
-        if (line.startsWith('LOG_DB')) {
-          line = line.replace('true', 'false')
-        }
-        else
-        if (line.startsWith('APP_ENV')) {
-          line = 'APP_ENV=test'
-        }
-        else
-        if (line.startsWith('PORT')) {
-          line = 'PORT=8001'
-        }
-        else
-        if (line.startsWith('LOG_COLORS')) {
-          line = 'LOG_COLORS=false'
-        }
-        else
-        if (line.startsWith('REFRESH_COOKIE_OPTIONS')) {
-          line = 'REFRESH_COOKIE_OPTIONS="SameSite=Strict"'
-        }
-      }
-
-      await writer.write(new TextEncoder().encode(line + '\n'));
-      // console.log(line);
-    }
-  } finally {
-    // Only close if it hasn't been closed already
-    if (!inFile.isClosed) {
-      try {
-        inFile?.close();
-      } catch {
-        // Ignore error if file is already closed
-      }
-    }
-    await writer.close();
-    if (!outFile.isClosed) {
-      try {
-        outFile?.close();
-      } catch {
-        // Ignore error if file is already closed
-      }
-    }
-  }
+const overrides = {
+  JWT_SECRET: () => jwtSecret,
+  ...(test && {
+    APP_ENV: () => 'test',
+    PORT: () => '8001',
+    LOG_COLORS: () => 'false',
+    LOG_DB_QUERY: () => 'false',
+    LOG_DB_INFO: () => 'false',
+    REFRESH_COOKIE_OPTIONS: () => '"SameSite=Strict"',
+    DB_DB: (v) => `${v}_test`,
+    DB_URL: suffixDbUrl,
+  }),
 }
 
-// const name = prompt("What is your name?", "oscar");
-// if (name) {
-//   console.log(`Hello, ${name}!`);
-// }
+function rewriteLine(line) {
+  const m = LINE.exec(line)
+  if (!m) return line
+  const [, key, value] = m
+  const override = overrides[key]
+  return override ? `${key}=${override(value)}` : line
+}
 
-const confirmed = confirm("Please confirm creating a new copy of ", outFileName);
-if (confirmed) {
-  console.log("Creating new copy of ", outFileName);
-  await processEnvFile();
-} else if (confirmed === false) {
-  console.log("Will not create new ", outFileName);
+if (confirm(`Please confirm creating a new copy of ${outFileName}`)) {
+  console.log(`Creating new copy of ${outFileName}`)
+  const src = await Deno.readTextFile('env/.env.dev')
+  const out = src.split(/\r?\n/).map(rewriteLine).join('\n')
+  await Deno.writeTextFile(outFileName, out.endsWith('\n') ? out : `${out}\n`)
+} else {
+  console.log(`Will not create new ${outFileName}`)
 }
