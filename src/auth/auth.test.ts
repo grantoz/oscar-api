@@ -1,7 +1,7 @@
 import { assert, assertEquals, assertGreater } from '@std/assert'
 import ky from 'ky'
 import { encodeBase64 } from "@std/encoding/base64";
-import { verifyAndDecodeJwt } from './jwt.ts'
+import { verifyAndDecodeJwt } from '@middleware'
 import { testUsers } from '@/util/test.ts'
 
 const port = Deno.env.get('PORT') ?? 8001

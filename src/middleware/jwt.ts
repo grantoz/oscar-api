@@ -2,7 +2,7 @@ import { Context } from '@hono'
 import { kv, log } from '@util'
 import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa';
 import { verify } from '@hono/jwt';
-import { jwtUser } from './types.ts';
+import { jwtUser } from '@/auth/types.ts';
 
 const jwtAlgo = Deno.env.get('JWT_ALGORITHM') as SignatureAlgorithm
 const jwtSecret = Deno.env.get('JWT_SECRET') as string
@@ -31,7 +31,7 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
     const decoded = await verifyAndDecodeJwt(token)
 
     if (!decoded.sub || !decoded.email || !decoded.role || !decoded.exp) {
-      log.warn('invalid JWT payload', decoded)
+      log.info('invalid JWT payload', decoded)
       return c.json({ error: 'Not Authorized' }, 401);
     }
     log.debug('JWT is valid:', decoded);
@@ -52,7 +52,7 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
     // store user info in context for use in app components
     c.set('authUser', res.value)
   } catch (error) {
-    log.warn('Invalid JWT:', { error });
+    log.info('Invalid JWT:', { error });
     return c.json({ error: 'Not Authorized' }, 401);
   }
 

@@ -1,5 +1,5 @@
 import { encodeBase64 } from "@std/encoding/base64";
-import { verifyAndDecodeJwt } from '../auth/jwt.ts'
+import { verifyAndDecodeJwt } from '@/middleware/jwt.ts'
 import { assert } from '@std/assert'
 import ky, { KyResponse, type KyInstance } from 'ky'
 import { seededUsers, type SeededUser } from '../../prisma/seed/user.ts'
