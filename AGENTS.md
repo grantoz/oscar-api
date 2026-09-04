@@ -43,5 +43,4 @@ Seeded test credentials (`prisma/seed/user.ts`): `super@grantoz.io` / `superPass
 
 ## Notes
 
-- `cli/patchPrismaZodGeneratorOutput.ts` and the `rm -rf prisma/zod` in `db:generate` are stale — the `prisma-zod-generator` was removed (commit `a046301`). There is no `prisma/zod` directory.
 - Seeding randomizes the four seeded-user passwords when `APP_ENV` is `prod`/`uat`/`sandbox` (prints the super password once).
