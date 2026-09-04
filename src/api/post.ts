@@ -23,7 +23,6 @@ type postPost = z.infer<typeof postPostSchema>
 
 export const post = new Hono()
 .get('/', async (c: Context) => {
-  // log.info(c.req.query())
   const options = pageOptions(c.req.query() as pagination)
   const items: Post[] = await db.post.findMany(options)
   c.res.headers.append('cache-control', 'max-age=10')
