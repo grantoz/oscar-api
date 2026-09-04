@@ -4,6 +4,9 @@
     "jsr:@db/postgres@~0.19.5": "0.19.5",
     "jsr:@denosaurs/plug@^1.1.0": "1.1.0",
     "jsr:@felix/argon2@^3.0.6": "3.0.6",
+    "jsr:@hono/hono@^4.13.5": "4.13.5",
+    "jsr:@hono/hono@^4.8.3": "4.13.5",
+    "jsr:@hono/zod-validator@~0.9.1": "0.9.1",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/bytes@1": "1.0.4",
     "jsr:@std/bytes@^1.0.2": "1.0.4",
@@ -32,17 +35,16 @@
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/streams@^1.0.9": "1.1.2",
     "jsr:@std/streams@^1.1.2": "1.1.2",
-    "npm:@hono/zod-validator@0.9.0": "0.9.0_hono@4.10.8_zod@4.4.3",
     "npm:@prisma/adapter-pg@^7.9.1": "7.9.1",
     "npm:@prisma/client@^7.9.1": "7.9.1_prisma@7.9.1__@types+react@19.2.18__react@19.2.8__react-dom@19.2.8___react@19.2.8_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8",
     "npm:@types/node@*": "24.2.0",
     "npm:create-hono@latest": "0.15.4",
-    "npm:hono@4.10.8": "4.10.8",
     "npm:ky@^2.0.2": "2.0.2",
     "npm:path-to-regexp@6.2.1": "6.2.1",
     "npm:prisma@*": "7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8",
     "npm:prisma@^7.9.1": "7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8",
-    "npm:zod@4.4.3": "4.4.3"
+    "npm:zod@4.4.3": "4.4.3",
+    "npm:zod@^4.2.1": "4.4.3"
   },
   "jsr": {
     "@db/postgres@0.19.5": {
@@ -68,6 +70,16 @@
       "integrity": "8480d5cbdacf1baa7acd07fcffed8780aaa158e420c41eef8f2fdd824846a2fe",
       "dependencies": [
         "jsr:@denosaurs/plug"
+      ]
+    },
+    "@hono/hono@4.13.5": {
+      "integrity": "b5b10f340820d14d69add622452e88722d7e99e05e30cdeafcb90133fc752126"
+    },
+    "@hono/zod-validator@0.9.1": {
+      "integrity": "d395d5437509890184c593ce117e48cbe887e1f556b15d4cc27c39367599c69f",
+      "dependencies": [
+        "jsr:@hono/hono@^4.8.3",
+        "npm:zod@^4.2.1"
       ]
     },
     "@std/assert@1.0.19": {
@@ -174,13 +186,6 @@
     },
     "@electric-sql/pglite@0.4.3": {
       "integrity": "sha512-ichuWTgtd4mOM1G4SpyGJa5trT03lWbMypDV0fUXUCXg5hiHqVAz/bZyV68NqmkLB7WcYmj1RMJVSp8HV/v/ZQ=="
-    },
-    "@hono/zod-validator@0.9.0_hono@4.10.8_zod@4.4.3": {
-      "integrity": "sha512-n0ZSXmCiHVIp4Y5wlOOyZCeTd/rsawA/qW1cipB8QOYKZ9N8Tk0nZUZCXho9cu374AN4JpDNKioNKBJ/W+LBug==",
-      "dependencies": [
-        "hono",
-        "zod"
-      ]
     },
     "@prisma/adapter-pg@7.9.1": {
       "integrity": "sha512-Ho2RK1KanQxLNSC0sR5bpiiVep10sWPLXCcxK+KXfI/Q69TMRbiafSvLPv3V9snimX72rMCqGlyJ4sBO4lKTAw==",
@@ -783,9 +788,6 @@
     },
     "graphmatch@1.1.1": {
       "integrity": "sha512-5ykVn/EXM1hF0XCaWh05VbYvEiOL2lY1kBxZtaYsyvjp7cmWOU1XsAdfQBwClraEofXDT197lFbXOEVMHpvQOg=="
-    },
-    "hono@4.10.8": {
-      "integrity": "sha512-DDT0A0r6wzhe8zCGoYOmMeuGu3dyTAE40HHjwUsWFTEy5WxK1x2WDSsBPlEXgPbRIFY6miDualuUDbasPogIww=="
     },
     "iconv-lite@0.7.3": {
       "integrity": "sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==",
@@ -1663,6 +1665,8 @@
     "dependencies": [
       "jsr:@db/postgres@~0.19.5",
       "jsr:@felix/argon2@^3.0.6",
+      "jsr:@hono/hono@^4.13.5",
+      "jsr:@hono/zod-validator@~0.9.1",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/csv@^1.0.6",
       "jsr:@std/dotenv@~0.225.8",
@@ -1670,8 +1674,6 @@
       "jsr:@std/expect@^1.0.20",
       "jsr:@std/path@^1.1.6",
       "jsr:@std/streams@^1.1.2",
-      "npm:@hono/zod-validator@0.9.0",
-      "npm:hono@4.10.8",
       "npm:zod@4.4.3"
     ],
     "packageJson": {
