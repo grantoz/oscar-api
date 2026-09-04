@@ -39,7 +39,6 @@ app
   //   return "OK"
   // })
   // .onError((err, _rev) => {
-  //   log.error(err)
   //   return "sorry, it's broken\n"
   // })
 

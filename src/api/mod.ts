@@ -1,5 +1,5 @@
 // import { etag } from '@hono/etag'
-import { validateJwtMiddleware } from '../auth/mod.ts'
+import { validateJwtMiddleware } from '@middleware'
 import { country } from './country.ts'
 import { post } from './post.ts'
 import { user } from './user.ts'

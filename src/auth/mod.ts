@@ -1,8 +1,8 @@
-import { validateJwtMiddleware } from './jwt.ts'
+// import { validateJwtMiddleware } from '@/middleware/jwt.ts'
 import { auth } from './auth.ts'
 import { jwtUser } from './types.ts'
 
-export { auth, validateJwtMiddleware }
+export { auth }
 export type { jwtUser }
 
 // TODO implement token revocation from KV
