@@ -1,10 +1,10 @@
 // const port = Deno.env.get('PORT') ?? 8000
-const kv = await Deno.openKv();
+const kv = await Deno.openKv()
 
 // You can also add helper functions here
 async function getUser(id: string) {
-  const res = await kv.get(["users", id]);
-  return res.value;
+  const res = await kv.get(['users', id])
+  return res.value
 }
 
-export { kv, getUser }
+export { getUser, kv }

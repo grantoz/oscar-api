@@ -1,9 +1,8 @@
 import { PrismaClient } from '../../prisma/generated/client.ts'
 import { Prisma } from '../../prisma/generated/client.ts'
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaPg } from '@prisma/adapter-pg'
 
 const getDB = (): PrismaClient => {
-
   const dbUrl: string = Deno.env.get('DB_URL') || ''
 
   // TODO: observability, metrics (DONE: logging)
@@ -17,15 +16,15 @@ const getDB = (): PrismaClient => {
   const log: Prisma.LogDefinition[] = [
     { emit: 'stdout', level: 'warn' },
     { emit: 'stdout', level: 'error' },
-  ];
-  if (Deno.env.get('LOG_DB_QUERY') === 'true') {
-    log.push({ emit: 'stdout', level: 'query' });
+  ]
+  if (Deno.env.get('LOG_DB_QUERIES') === 'true') {
+    log.push({ emit: 'stdout', level: 'query' })
   }
   if (Deno.env.get('LOG_DB_INFO') === 'true') {
-    log.push({ emit: 'stdout', level: 'info' });
+    log.push({ emit: 'stdout', level: 'info' })
   }
 
-  const adapter: PrismaPg = new PrismaPg({ connectionString: dbUrl! });
+  const adapter: PrismaPg = new PrismaPg({ connectionString: dbUrl! })
 
   return new PrismaClient({
     adapter,
@@ -37,5 +36,10 @@ const getDB = (): PrismaClient => {
 
 const db: PrismaClient = await getDB()
 
-export { db, Prisma, getDB }
-export type { User, Country, Post, PrismaClient } from '../../prisma/generated/client.ts'
+export { db, getDB, Prisma }
+export type {
+  Country,
+  Post,
+  PrismaClient,
+  User,
+} from '../../prisma/generated/client.ts'

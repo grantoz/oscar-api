@@ -24,13 +24,13 @@
 - Easy project setup
 - Last-Modified header for individual and collection entity endpoints
 - Emit etag for API resources
+- Only emit etag for GET-type routes
 
 **TODO:**
 
-- Only emit etag for GET-type routes
 - Some more meaningful entities
 - JWT invalidation via CLI
-- API tests (in progres...)
+- API tests (in progress...)
 - Hono CORS middleware
 - Hono / Zod OpenApi generation
 - View models (AKA transformers / presenters) - perhaps class based with declarative properties e.g. `publicFields`, map transform field:function

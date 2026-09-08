@@ -12,4 +12,3 @@ export type { jwtUser }
 // TODO implement email verification endpoint
 // TODO implement refresh token endpoint
 // TODO implement logout endpoint to invalidate tokens
-

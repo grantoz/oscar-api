@@ -1,10 +1,12 @@
 // note, always load dotenv first so that other imports in the dependency graph can use it
-import "@std/dotenv/load";
-import { Client } from "@db/postgres";
+import '@std/dotenv/load'
+import { Client } from '@db/postgres'
 
 // const test = Deno.args.includes('--test')
 const dbUrl = Deno.env.get('DB_URL')
-const match = dbUrl.match(/postgresql:\/\/(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^:]+):(?<port>\d+)\/(?<db>[^?]+)/)
+const match = dbUrl.match(
+  /postgresql:\/\/(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^:]+):(?<port>\d+)\/(?<db>[^?]+)/,
+)
 
 // let dbName = match?.groups?.db
 // if (test) {
@@ -12,17 +14,16 @@ const match = dbUrl.match(/postgresql:\/\/(?<user>[^:]+):(?<pass>[^@]+)@(?<host>
 //   console.log(`Running in test mode, using database name: ${dbName}`)
 // }
 
-
 const db = new Client({
   user: match.groups.user,
   password: match.groups.pass,
   database: 'postgres',
   hostname: match.groups.host,
   port: match.groups.port,
-});
+})
 
 try {
-  await db.connect();
+  await db.connect()
   // const result = await db.queryObject('SELECT 1 as result');
   // console.log('Connected to Postgres:', result.rows[0].result);
 } catch (e) {

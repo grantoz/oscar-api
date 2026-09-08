@@ -1,8 +1,8 @@
-import { encodeBase64 } from "@std/encoding/base64";
+import { encodeBase64 } from '@std/encoding/base64'
 import { verifyAndDecodeJwt } from '@/middleware/jwt.ts'
 import { assert } from '@std/assert'
-import ky, { KyResponse, type KyInstance } from 'ky'
-import { seededUsers, type SeededUser } from '../../prisma/seed/user.ts'
+import ky, { type KyInstance, KyResponse } from 'ky'
+import { type SeededUser, seededUsers } from '../../prisma/seed/user.ts'
 
 /**
  * Test utilities
@@ -25,25 +25,25 @@ export const testUsers: Record<string, TestUser> = {
     ...seededUsers.superUser,
     id: '',
     token: '',
-    refreshToken: ''
+    refreshToken: '',
   },
   adminUser: {
     ...seededUsers.adminUser,
     id: '',
     token: '',
-    refreshToken: ''
+    refreshToken: '',
   },
   staffUser: {
     ...seededUsers.staffUser,
     id: '',
     token: '',
-    refreshToken: ''
+    refreshToken: '',
   },
   userUser: {
     ...seededUsers.userUser,
     id: '',
     token: '',
-    refreshToken: ''
+    refreshToken: '',
   },
 }
 
@@ -56,27 +56,29 @@ let adminApi: KyInstance
 const apiUri = `http://localhost:${port}/api`
 const authUri = `http://localhost:${port}/auth`
 
-const api = ky.create({prefix: apiUri});
-const _auth = ky.create({prefix: authUri});
+const api = ky.create({ prefix: apiUri })
+const _auth = ky.create({ prefix: authUri })
 
 const { superUser, adminUser } = seededUsers
 
-const asSuper = async(): Promise<KyInstance> => {
+const asSuper = async (): Promise<KyInstance> => {
   if (superApi !== undefined) {
     return superApi
   }
   const auth = encodeBase64(superUser.email + ':' + superUser.pass)
   await ky.post(`${authUri}/login`, {
     headers: {
-      Authorization: 'Basic ' + auth
-    }
-  }).then(async(resp) => {
+      Authorization: 'Basic ' + auth,
+    },
+  }).then(async (resp) => {
     const respJson: loginOutput = await resp.json()
     assert(respJson)
     superToken = respJson.token
-    superApi = api.extend({headers: {
-      Authorization: 'Bearer ' + superToken
-    }})
+    superApi = api.extend({
+      headers: {
+        Authorization: 'Bearer ' + superToken,
+      },
+    })
 
     const decoded = await verifyAndDecodeJwt(superToken)
     assert(decoded.sub) // sub = id. Also, available: email, role, exp
@@ -89,22 +91,24 @@ const asSuper = async(): Promise<KyInstance> => {
   return superApi
 }
 
-const asAdmin = async() => {
+const asAdmin = async () => {
   if (adminApi !== undefined) {
     return adminApi
   }
   const auth = encodeBase64(adminUser.email + ':' + adminUser.pass)
   await ky.post(`${authUri}/login`, {
     headers: {
-      Authorization: 'Basic ' + auth
-    }
-  }).then(async(resp) => {
+      Authorization: 'Basic ' + auth,
+    },
+  }).then(async (resp) => {
     const respJson: loginOutput = await resp.json()
     assert(respJson)
     adminToken = respJson.token
-    adminApi = api.extend({headers: {
-      Authorization: 'Bearer ' + adminToken
-    }})
+    adminApi = api.extend({
+      headers: {
+        Authorization: 'Bearer ' + adminToken,
+      },
+    })
 
     const decoded = await verifyAndDecodeJwt(adminToken)
     assert(decoded.sub) // sub = id. Also, available: email, role, exp
@@ -118,11 +122,11 @@ const asAdmin = async() => {
 }
 
 const logHeaders = (resp: KyResponse<unknown>) => {
-  Array.from(resp.headers.entries()).forEach(([key, value]: [string, string]) => {
-    console.log(key, value)
-  })
+  Array.from(resp.headers.entries()).forEach(
+    ([key, value]: [string, string]) => {
+      console.log(key, value)
+    },
+  )
 }
 
-export {
-  asSuper, asAdmin, logHeaders
-}
+export { asAdmin, asSuper, logHeaders }

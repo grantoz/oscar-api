@@ -1,6 +1,6 @@
 {
   "workbench.colorCustomizations": {
-    "activityBar.background": "#3380aa",
+    "activityBar.background": "#3380aa"
   },
   "deno.enable": true,
   "editor.defaultFormatter": "denoland.vscode-deno",

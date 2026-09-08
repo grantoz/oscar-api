@@ -1,5 +1,3 @@
-
-
 // const payload = {
 //   Attachments: [],
 //   Bcc: [],
@@ -42,13 +40,13 @@ export interface mailpitPayload {
   HTML?: string
   Subject: string
   Tags?: string[]
-  Text: string;
+  Text: string
   To: mailpitEmailPerson[]
 }
 
 export interface emailRecipient {
-  email: string;
-  name: string;
+  email: string
+  name: string
 }
 
 export const createEmailPayload = (recipient: emailRecipient) => {
@@ -58,36 +56,38 @@ export const createEmailPayload = (recipient: emailRecipient) => {
     Cc: [],
     From: {
       Name: 'Oscar',
-      Email: 'oscar@grantoz.io'
+      Email: 'oscar@grantoz.io',
     },
-    HTML: "<div style=\"text-align:center\"><p style=\"font-family: arial; font-size: 24px;\">Welcome</p></div>",
-    Subject: "Welcome to Oscar!",
+    HTML:
+      '<div style="text-align:center"><p style="font-family: arial; font-size: 24px;">Welcome</p></div>',
+    Subject: 'Welcome to Oscar!',
     // Tags: ["test", "mailpit"],
-    Text: "Welcome to Oscar!",
+    Text: 'Welcome to Oscar!',
     To: [
       {
         Email: recipient.email,
-        Name: recipient.name
-      }
-    ]
+        Name: recipient.name,
+      },
+    ],
   }
   return emailPayload
 }
 
 export const sendTestEmail = async (payload: mailpitPayload) => {
-
   console.log(payload)
 
   await fetch('http://localhost:8025/api/v1/send', {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   })
-  .then(function(res){ return res.json() })
-  .then(function(data){ 
-    console.log(data) 
-  })
+    .then(function (res) {
+      return res.json()
+    })
+    .then(function (data) {
+      console.log(data)
+    })
 }

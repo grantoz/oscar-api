@@ -1,9 +1,15 @@
 // import { load } from "@std/dotenv";
-import "@std/dotenv/load";
+import '@std/dotenv/load'
 import { assert, assertEquals, assertExists } from '@std/assert'
-import { describe, it, before } from 'node:test'
+import { before, describe, it } from 'node:test'
 import { KyInstance } from 'ky'
-import { asSuper, asAdmin, logHeaders, testUsers, type TestUser } from '../util/test.ts';
+import {
+  asAdmin,
+  asSuper,
+  logHeaders,
+  type TestUser,
+  testUsers,
+} from '../util/test.ts'
 
 interface loginOutput {
   token: string
@@ -29,16 +35,16 @@ const isUserView = (value: unknown) => {
   assert(u.salt === undefined)
 }
 
-describe("BDD-style tests", () => {
+describe('BDD-style tests', () => {
   before(async () => {
-    superApi = await asSuper();
-    _adminApi = await asAdmin();
-    ({ superUser, adminUser: _adminUser } = testUsers)
+    superApi = await asSuper()
+    _adminApi = await asAdmin()
+    ;({ superUser, adminUser: _adminUser } = testUsers)
   })
 
-  it("should return 400 for get requests with non-uuid :id path parameter", async () => {
+  it('should return 400 for get requests with non-uuid :id path parameter', async () => {
     await superApi.get('user/xxxxxxx', {
-      throwHttpErrors: false
+      throwHttpErrors: false,
     }).then(async (resp) => {
       const text = await resp.text()
       console.log('raw error output:', text)
@@ -47,9 +53,9 @@ describe("BDD-style tests", () => {
     })
   })
 
-  it("GET /user should return 200 with an array of userView instances", async () => {
+  it('GET /user should return 200 with an array of userView instances', async () => {
     const resp = await superApi.get('user', {
-      throwHttpErrors: false
+      throwHttpErrors: false,
     })
     const output = await resp.json() as ApiEnvelope<unknown[]>
     console.log(output)
@@ -59,10 +65,10 @@ describe("BDD-style tests", () => {
     logHeaders(resp)
   })
 
-  it("GET /user/:id should return 200 and a matching userView instance", async () => {
+  it('GET /user/:id should return 200 and a matching userView instance', async () => {
     console.log('superId', superUser.id)
     const resp = await superApi.get(`user/${superUser.id}`, {
-      throwHttpErrors: false
+      throwHttpErrors: false,
     })
     const output = await resp.json() as ApiEnvelope<Record<string, unknown>>
     console.log(output)
@@ -72,14 +78,16 @@ describe("BDD-style tests", () => {
     assertEquals(output.data.email, superUser.email)
   })
 
-  it("PATCH /user/:id should update unstructured props and return the updated user", async () => {
+  it('PATCH /user/:id should update unstructured props and return the updated user', async () => {
     const email = `patch-props-${crypto.randomUUID()}@example.com`
     const createResp = await superApi.post('user', {
       json: { email },
       throwHttpErrors: false,
     })
     assertEquals(createResp.status, 200)
-    const created = await createResp.json() as ApiEnvelope<Record<string, unknown>>
+    const created = await createResp.json() as ApiEnvelope<
+      Record<string, unknown>
+    >
     const id = created.data.id as string
 
     const props = { foo: 'bar', count: 42, nested: { arr: [1, 2, 3] } }
@@ -88,7 +96,9 @@ describe("BDD-style tests", () => {
       throwHttpErrors: false,
     })
     assertEquals(patchResp.status, 200)
-    const patched = await patchResp.json() as ApiEnvelope<Record<string, unknown>>
+    const patched = await patchResp.json() as ApiEnvelope<
+      Record<string, unknown>
+    >
     assertEquals(patched.data.props, props)
 
     const getResp = await superApi.get(`user/${id}`, { throwHttpErrors: false })
@@ -96,7 +106,7 @@ describe("BDD-style tests", () => {
     assertEquals(fetched.data.props, props)
   })
 
-  it("PATCH /user/:id without props should preserve existing props", async () => {
+  it('PATCH /user/:id without props should preserve existing props', async () => {
     const email = `patch-preserve-${crypto.randomUUID()}@example.com`
     const props = { preserve: true }
     const createResp = await superApi.post('user', {
@@ -104,7 +114,9 @@ describe("BDD-style tests", () => {
       throwHttpErrors: false,
     })
     assertEquals(createResp.status, 200)
-    const created = await createResp.json() as ApiEnvelope<Record<string, unknown>>
+    const created = await createResp.json() as ApiEnvelope<
+      Record<string, unknown>
+    >
     const id = created.data.id as string
 
     const propsResp = await superApi.patch(`user/${id}`, {
@@ -118,19 +130,23 @@ describe("BDD-style tests", () => {
       throwHttpErrors: false,
     })
     assertEquals(patchResp.status, 200)
-    const patched = await patchResp.json() as ApiEnvelope<Record<string, unknown>>
+    const patched = await patchResp.json() as ApiEnvelope<
+      Record<string, unknown>
+    >
     assertEquals(patched.data.name, 'Updated Name')
     assertEquals(patched.data.props, props)
   })
 
-  it("PATCH /user/:id should reject props larger than 2kb", async () => {
+  it('PATCH /user/:id should reject props larger than 2kb', async () => {
     const email = `patch-too-big-${crypto.randomUUID()}@example.com`
     const createResp = await superApi.post('user', {
       json: { email },
       throwHttpErrors: false,
     })
     assertEquals(createResp.status, 200)
-    const created = await createResp.json() as ApiEnvelope<Record<string, unknown>>
+    const created = await createResp.json() as ApiEnvelope<
+      Record<string, unknown>
+    >
     const id = created.data.id as string
 
     const tooBigProps = { data: 'x'.repeat(3000) }
@@ -141,7 +157,7 @@ describe("BDD-style tests", () => {
     assertEquals(patchResp.status, 400)
   })
 
-  it("GET /user/:id should include an ETag header", async () => {
+  it('GET /user/:id should include an ETag header', async () => {
     const resp = await superApi.get(`user/${superUser.id}`, {
       throwHttpErrors: false,
     })
@@ -149,7 +165,7 @@ describe("BDD-style tests", () => {
     assertExists(resp.headers.get('etag'))
   })
 
-  it("GET /user/:id with If-None-Match should return 304 Not Modified", async () => {
+  it('GET /user/:id with If-None-Match should return 304 Not Modified', async () => {
     const first = await superApi.get(`user/${superUser.id}`, {
       throwHttpErrors: false,
     })

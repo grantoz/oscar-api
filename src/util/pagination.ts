@@ -1,5 +1,5 @@
 import { z } from '@zod'
-import { log } from "@util"
+import { log } from '@util'
 
 // deno-lint-ignore no-explicit-any
 const meta = (records: any[]) => { // TODO FIX THIS SHIT
@@ -7,21 +7,23 @@ const meta = (records: any[]) => { // TODO FIX THIS SHIT
     count: records.length,
     page: 1,
     size: 10,
-    pages: Math.ceil(records.length / 10)
+    pages: Math.ceil(records.length / 10),
   }
 }
 
 const paginationQuery = z.object({
   page: z.string()
     .optional()
-    .transform(val => parseIntOrDefault(val, 1))
-    .refine(num => num > 0, { message: 'page must be a positive integer' }),
+    .transform((val) => parseIntOrDefault(val, 1))
+    .refine((num) => num > 0, { message: 'page must be a positive integer' }),
   size: z.string() // per page
     .optional()
-    .transform(val => parseIntOrDefault(val, 10))
-    .refine(num => num >= 1 && num <= 100, { message: 'size must be between 1 and 100' }),
+    .transform((val) => parseIntOrDefault(val, 10))
+    .refine((num) => num >= 1 && num <= 100, {
+      message: 'size must be between 1 and 100',
+    }),
   sort: z.string().optional(),
-  dir: z.enum(['asc', 'desc', 'ASC', 'DESC']).optional()
+  dir: z.enum(['asc', 'desc', 'ASC', 'DESC']).optional(),
 })
 
 export interface pagination {
@@ -40,7 +42,10 @@ export interface prismaPagination {
   where?: { [key: string]: any }
 }
 
-const parseIntOrDefault = (value: string | undefined, defaultValue: number): number => {
+const parseIntOrDefault = (
+  value: string | undefined,
+  defaultValue: number,
+): number => {
   const parsedValue = parseInt(value || '')
   return Number.isNaN(parsedValue) ? defaultValue : parsedValue
 }
@@ -58,7 +63,7 @@ const pageOptions = (query: any): prismaPagination => {
   options.take = parsed.size
   if (parsed.sort) {
     options.orderBy = {
-      [parsed.sort]: parsed.dir?.toLowerCase() || 'asc'
+      [parsed.sort]: parsed.dir?.toLowerCase() || 'asc',
     }
   }
   // const limit = parseIntOrDefault(query.limit, 10)
@@ -67,4 +72,4 @@ const pageOptions = (query: any): prismaPagination => {
   return options
 }
 
-export { meta, paginationQuery, pageOptions }
+export { meta, pageOptions, paginationQuery }

@@ -14,9 +14,9 @@
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "task",
-        "dev:test:inspect",
+        "dev:test:inspect"
       ],
-      "type": "node",
+      "type": "node"
     },
     {
       "attachSimplePort": 9229,
@@ -32,9 +32,9 @@
         "test",
         "-A",
         "--env-file=.env.test",
-        "--inspect-brk",
+        "--inspect-brk"
       ],
-      "type": "node",
+      "type": "node"
     }
   ]
 }

@@ -1,8 +1,8 @@
-import { User, Post } from '@mod/db'
+import { Post, User } from '@mod/db'
 
-export type UserView = Omit<User, 'hash' | 'salt' | 'props' | 'verifiedAt'>
-  & { props: Record<string, unknown>, posts?: Post[] }
-
+export type UserView =
+  & Omit<User, 'hash' | 'salt' | 'props' | 'verifiedAt'>
+  & { props: Record<string, unknown>; posts?: Post[] }
 
 const userView = (user: User & { posts?: Post[] }): UserView => {
   return {
@@ -15,7 +15,7 @@ const userView = (user: User & { posts?: Post[] }): UserView => {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     deletedAt: user.deletedAt,
-    posts: user.posts
+    posts: user.posts,
   }
 }
 

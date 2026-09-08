@@ -7,31 +7,32 @@ import { z } from '@zod'
 // import { countryCodes } from 'util/country.ts'
 
 const countryCodeSchema = z.string()
-  .length(2, { message: "Invalid country code. Please use valid ISO 3166-1 alpha-2 code." })
+  .length(2, {
+    message: 'Invalid country code. Please use valid ISO 3166-1 alpha-2 code.',
+  })
   .toUpperCase()
-  // .refine(code => countryCodes.includes(code), {
-  //   message: "Invalid country code. Please use valid ISO 3166-1 alpha-2 code."
-  // });
+// .refine(code => countryCodes.includes(code), {
+//   message: "Invalid country code. Please use valid ISO 3166-1 alpha-2 code."
+// });
 
 export const country = new Hono()
-.get('/', async (c: Context) => {
-  // const options = pageOptions(c.req.query() as page)
-  // const countries = await db.country.findMany(options)
-  const countries = await db.country.findMany()
-  c.header('max-age', '86400')
-  return c.json({ data: countries, meta: meta(countries) })
-})
-
-.get('/:id', zValidator('param', countryCodeSchema), async (c: Context) => {
-  const { id } = c.req.valid('param' as never);
-  const item = await db.country.findUnique({
-    where: {
-      id,
-    },
+  .get('/', async (c: Context) => {
+    // const options = pageOptions(c.req.query() as page)
+    // const countries = await db.country.findMany(options)
+    const countries = await db.country.findMany()
+    c.header('max-age', '86400')
+    return c.json({ data: countries, meta: meta(countries) })
   })
-  if (!item) {
-    return c.notFound()
-  }
-  c.header('max-age: 86400')
-  return c.json({ data: item })
-})
+  .get('/:id', zValidator('param', countryCodeSchema), async (c: Context) => {
+    const { id } = c.req.valid('param' as never)
+    const item = await db.country.findUnique({
+      where: {
+        id,
+      },
+    })
+    if (!item) {
+      return c.notFound()
+    }
+    c.header('max-age: 86400')
+    return c.json({ data: item })
+  })

@@ -1,7 +1,4 @@
-import {
-  pageOptions,
-  prismaPagination,
-} from '@/util/pagination.ts'
+import { pageOptions, prismaPagination } from '@/util/pagination.ts'
 import { assertEquals } from '@std/assert'
 
 Deno.test('parses pager params', () => {
@@ -9,33 +6,33 @@ Deno.test('parses pager params', () => {
   const pagerParams1 = {
     page: '1',
     size: '10',
-    sort: 'name'
+    sort: 'name',
   }
   let opt: prismaPagination = pageOptions(pagerParams1)
   assertEquals({
-    orderBy: { name: "asc" },
+    orderBy: { name: 'asc' },
     skip: 0,
-    take: 10
+    take: 10,
   }, opt)
 
   const pagerParams2 = {
     page: '3',
     size: '25',
     sort: 'field',
-    dir: 'desc'
+    dir: 'desc',
   }
   opt = pageOptions(pagerParams2)
   assertEquals({
-    orderBy: { field: "desc" },
+    orderBy: { field: 'desc' },
     skip: 50,
-    take: 25
+    take: 25,
   }, opt)
 
   const badParams = {
     page: '3',
     size: '25',
     sort: 'field',
-    dir: 'sausage'
+    dir: 'sausage',
   }
   opt = pageOptions(badParams)
   assertEquals({}, opt)

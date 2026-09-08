@@ -3,7 +3,7 @@ import { createEmailPayload, sendTestEmail } from './util/mail.ts'
 
 const payload = createEmailPayload({
   email: 'grant@grantoz.io',
-  name: 'Grant Ozolins'
+  name: 'Grant Ozolins',
 })
 
-sendTestEmail(payload);
+sendTestEmail(payload)

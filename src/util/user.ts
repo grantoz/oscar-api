@@ -1,5 +1,5 @@
 import { db, User } from '@mod/db'
-import { hash, Variant, Version } from "@felix/argon2";
+import { hash, Variant, Version } from '@felix/argon2'
 import { log } from '@util'
 // https://jsr.io/@felix/argon2/doc
 
@@ -21,7 +21,7 @@ export const savePasswordSaltAndHash = async (user: User, password: string) => {
       },
       data: {
         salt,
-        hash
+        hash,
       },
     })
     log.info('user: updated password', { id: user.id })
@@ -33,7 +33,7 @@ export const savePasswordSaltAndHash = async (user: User, password: string) => {
 
 // see https://github.com/felix-schindler/deno-argon2/blob/master/examples/with-options.ts
 export const hashPassword = async function (password: string, salt: string) {
-  const encodedSalt = new TextEncoder().encode(salt);
+  const encodedSalt = new TextEncoder().encode(salt)
   const hashed = await hash(password, {
     salt: encodedSalt,
     variant: Variant.Argon2id,
@@ -42,18 +42,18 @@ export const hashPassword = async function (password: string, salt: string) {
     lanes: 4,
     hashLength: 64,
     // secret UInt8Array e.g. encoded APP_KEY for platform-specific hashing
-  });
+  })
   return hashed.toString()
 
   // await verify(hashed, password, secret, data);
 }
 
 export const genSalt = () => {
-  const array = new Uint16Array(20);
-  self.crypto.getRandomValues(array);
+  const array = new Uint16Array(20)
+  self.crypto.getRandomValues(array)
   return array.reduce((acc, curr) => {
-    return acc + String.fromCharCode((curr % 95) + 32);
-  }, '');
+    return acc + String.fromCharCode((curr % 95) + 32)
+  }, '')
 }
 
 // export const genHash = function (pass: string, salt: string)

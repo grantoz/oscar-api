@@ -17,13 +17,16 @@ const overrides = {
   JWT_SECRET: () => jwtSecret,
   ...(test && {
     APP_ENV: () => 'test',
-    PORT: () => '8001',
-    LOG_COLORS: () => 'false',
-    LOG_DB_QUERY: () => 'false',
-    LOG_DB_INFO: () => 'false',
-    REFRESH_COOKIE_OPTIONS: () => '"SameSite=Strict"',
     DB_DB: (v) => `${v}_test`,
     DB_URL: suffixDbUrl,
+    LOG_COLORS: () => 'false',
+    LOG_DB_QUERIES: () => 'false',
+    LOG_DB_INFO: () => 'false',
+    OTEL_DENO: () => 'false',
+    OTEL_RESOURCE_ATTRIBUTES: () => 'env=test',
+    OTEL_SERVICE_NAME: (v) => `${v}_test`,
+    PORT: () => '8001',
+    REFRESH_COOKIE_OPTIONS: () => '"SameSite=Strict"',
   }),
 }
 

@@ -4,36 +4,37 @@ export const sendTestEmail = async () => {
     Bcc: [],
     Cc: [],
     From: {
-      Name: "Oscar",
-      Email: "oscar@grantoz.io"
+      Name: 'Oscar',
+      Email: 'oscar@grantoz.io',
     },
-    HTML: "<div style=\"text-align:center\"><p style=\"font-family: arial; font-size: 24px;\">Hello</p></div>",
-    Subject: "Mailpit message via the HTTP API",
-    Tags: ["test", "mailpit"],
-    Text: "Welcome to Oscar!",
+    HTML:
+      '<div style="text-align:center"><p style="font-family: arial; font-size: 24px;">Hello</p></div>',
+    Subject: 'Mailpit message via the HTTP API',
+    Tags: ['test', 'mailpit'],
+    Text: 'Welcome to Oscar!',
     To: [
       {
-        Email: "jane@example.com",
-        Name: "Jane Doe"
-      }
-    ]
-  };
+        Email: 'jane@example.com',
+        Name: 'Jane Doe',
+      },
+    ],
+  }
   console.log(payload)
 
   await fetch('http://localhost:8025/api/v1/send', {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   })
-  .then(function(res){ return res.json() })
-  .then(function(data){ 
-    console.log(data) 
-  })
-
-
+    .then(function (res) {
+      return res.json()
+    })
+    .then(function (data) {
+      console.log(data)
+    })
 
   // const data = new FormData();
   // data.append("json", JSON.stringify(payload));
@@ -43,7 +44,7 @@ export const sendTestEmail = async () => {
   //     body: data
   // })
   // .then(function(res){ return res.json() })
-  // .then(function(data){ 
-  //   console.log(data) 
+  // .then(function(data){
+  //   console.log(data)
   // })
 }
