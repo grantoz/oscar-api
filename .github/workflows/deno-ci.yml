@@ -41,10 +41,10 @@ jobs:
       - name: Copy .env.ci into place
         run: cp ./env/.env.ci .env
 
-      - name: Create Temporary Env File
+      - name: Append env vars
         run: |
-          echo "DATABASE_URL=${{ env.DATABASE_URL }}" >> .env
-          sed -i "s/^JWT_SECRET=$/JWT_SECRET=$(openssl rand -hex 32)/" .env
+          echo "DATABASE_URL=\"${{ env.DATABASE_URL }}\"" >> .env
+          echo "JWT_SECRET=\"$(openssl rand -hex 32)\"" >> .env
 
       # prisma/generated is gitignored, but mod/db/mod.ts imports it, so deno ci
       # (which resolves the full module graph) requires the client to exist first.
