@@ -9,6 +9,6 @@ export default defineConfig({
     seed: 'deno run prisma/seed.ts',
   },
   datasource: {
-    url: process.env.DB_URL ?? '',
+    url: process.env.DATABASE_URL ?? '',
   },
 })

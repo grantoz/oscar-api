@@ -35,7 +35,7 @@
 
 - `main.ts` must `import '@std/dotenv/load'` first so the whole dependency graph
   sees env vars. Tasks also pass `--env-file`.
-- `DB_URL` is required (Prisma exits if unset). Deno KV (`Deno.openKv`) is
+- `DATABASE_URL` is required (Prisma exits if unset). Deno KV (`Deno.openKv`) is
   opened at import time in `src/util/kv.ts`.
 - `deno.json` `unstable: ["kv", "otel"]` — these flags are required at runtime.
 

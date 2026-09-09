@@ -55,15 +55,3 @@ export const genSalt = () => {
     return acc + String.fromCharCode((curr % 95) + 32)
   }, '')
 }
-
-// export const genHash = function (pass: string, salt: string)
-// {
-//   let result = pass
-//   const env = Deno.env.get('APP_ENV') || 'dev'
-//   const times = env === 'prod' ? 5 : env === 'stage' ? 3 : 1;
-//   for (let i = 0; i < times; i++) {
-//     const encoded = new TextEncoder().encode(salt + result);
-//     result = self.crypto.subtle.digest('SHA-256', encoded).toString()
-//   }
-//   return result
-// }

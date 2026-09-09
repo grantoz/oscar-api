@@ -12,7 +12,7 @@ if (!create && !drop) {
 const dbName = match?.groups?.db
 
 if (!dbName) {
-  console.error('No database name found in DB_URL env var, exiting...')
+  console.error('No database name found in DATABASE_URL env var, exiting...')
   Deno.exit()
 }
 

@@ -3,7 +3,7 @@ import '@std/dotenv/load'
 import { Client } from '@db/postgres'
 
 // const test = Deno.args.includes('--test')
-const dbUrl = Deno.env.get('DB_URL')
+const dbUrl = Deno.env.get('DATABASE_URL')
 const match = dbUrl.match(
   /postgresql:\/\/(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^:]+):(?<port>\d+)\/(?<db>[^?]+)/,
 )

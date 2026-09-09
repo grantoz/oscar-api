@@ -5,7 +5,7 @@
 
     "db:create": "deno run -A --env-file cli/alter_db.js --create",
     "db:drop": "deno run -A --env-file cli/alter_db.js --drop",
-    "db:generate": "rm -rf prisma/generated && rm -rf prisma/zod && node --help && deno task prisma generate --schema ./prisma/schema.prisma",
+    "db:generate": "rm -rf prisma/generated && node --help && deno task prisma generate --schema ./prisma/schema.prisma",
     "db:migrate": "deno run -A --env-file npm:prisma migrate dev",
     "db:new": "deno run -A --env-file cli/alter_db.js --drop --create && deno task db:migrate",
     "db:new:seed": "deno run -A --env-file cli/alter_db.js --drop --create && deno task db:migrate && deno task db:seed",
@@ -35,6 +35,7 @@
     "@felix/argon2": "jsr:@felix/argon2@^3.0.6",
     "@hono": "jsr:@hono/hono@^4.13.5",
     "@hono/zod-validator": "jsr:@hono/zod-validator@^0.9.1",
+    "@prisma/client": "./generated/client.ts",
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "@std/csv": "jsr:@std/csv@^1.0.6",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.8",

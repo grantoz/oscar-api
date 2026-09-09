@@ -17,8 +17,7 @@ const overrides = {
   JWT_SECRET: () => jwtSecret,
   ...(test && {
     APP_ENV: () => 'test',
-    DB_DB: (v) => `${v}_test`,
-    DB_URL: suffixDbUrl,
+    DATABASE_URL: suffixDbUrl,
     LOG_COLORS: () => 'false',
     LOG_DB_QUERIES: () => 'false',
     LOG_DB_INFO: () => 'false',

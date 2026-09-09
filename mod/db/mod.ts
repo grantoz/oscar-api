@@ -3,13 +3,13 @@ import { Prisma } from '../../prisma/generated/client.ts'
 import { PrismaPg } from '@prisma/adapter-pg'
 
 const getDB = (): PrismaClient => {
-  const dbUrl: string = Deno.env.get('DB_URL') || ''
+  const dbUrl: string = Deno.env.get('DATABASE_URL') || ''
 
   // TODO: observability, metrics (DONE: logging)
   // https://www.prisma.io/docs/orm/prisma-client/observability-and-logging
 
   if (!dbUrl) {
-    console.error('DB_URL environment variable is not set')
+    console.error('DATABASE_URL environment variable is not set')
     Deno.exit(1)
   }
 
