@@ -2,9 +2,9 @@ name: Deno v2 CI with Prisma
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -38,20 +38,24 @@ jobs:
           deno-version: v2.x
           cache: true
 
-      - name: Install dependencies
-        run: deno ci
-
       - name: Copy .env.ci into place
         run: cp ./env/.env.ci .env
 
       - name: Create Temporary Env File
-        run: echo "DATABASE_URL=${{ env.DATABASE_URL }}" >> .env
+        run: |
+          echo "DATABASE_URL=${{ env.DATABASE_URL }}" >> .env
+          sed -i "s/^JWT_SECRET=$/JWT_SECRET=$(openssl rand -hex 32)/" .env
 
+      # prisma/generated is gitignored, but mod/db/mod.ts imports it, so deno ci
+      # (which resolves the full module graph) requires the client to exist first.
       - name: Generate Prisma Client
         run: deno run -A npm:prisma generate
 
+      - name: Install dependencies
+        run: deno ci
+
       - name: Apply Database Migrations
-        run: deno run -A npm:prisma migrate deploy
+        run: deno run -A --env-file .env npm:prisma migrate deploy
 
       - name: Seed Database
         run: deno run -A --env-file .env ./prisma/seed/index.ts
@@ -63,4 +67,15 @@ jobs:
         run: deno lint
 
       - name: Run tests
-        run: deno test --allow-all
+        run: |
+          deno run -A --env-file .env src/main.ts &
+          server_pid=$!
+          trap 'kill $server_pid' EXIT
+          for _ in $(seq 1 60); do
+            if (exec 3<>/dev/tcp/localhost/8000) 2>/dev/null; then
+              exec 3>&- 3<&-
+              break
+            fi
+            sleep 1
+          done
+          deno test -A --env-file=.env src/
