@@ -43,8 +43,8 @@ jobs:
 
       - name: Append env vars
         run: |
-          echo "DATABASE_URL=\"${{ env.DATABASE_URL }}\"" >> .env
-          echo "JWT_SECRET=\"$(openssl rand -hex 32)\"" >> .env
+          echo "DATABASE_URL=${{ env.DATABASE_URL }}" >> .env
+          echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env
 
       # prisma/generated is gitignored, but mod/db/mod.ts imports it, so deno ci
       # (which resolves the full module graph) requires the client to exist first.
@@ -55,10 +55,10 @@ jobs:
         run: deno ci
 
       - name: Apply Database Migrations
-        run: deno run -A --env-file .env npm:prisma migrate deploy
+        run: deno run -A --env-file npm:prisma migrate deploy
 
       - name: Seed Database
-        run: deno run -A --env-file .env ./prisma/seed/index.ts
+        run: deno run -A --env-file ./prisma/seed/index.ts
 
       - name: Check formatting
         run: deno fmt --check
@@ -68,7 +68,7 @@ jobs:
 
       - name: Run tests
         run: |
-          deno run -A --env-file .env src/main.ts &
+          deno run -A --env-file src/main.ts &
           server_pid=$!
           trap 'kill $server_pid' EXIT
           for _ in $(seq 1 60); do
@@ -78,4 +78,4 @@ jobs:
             fi
             sleep 1
           done
-          deno test -A --env-file=.env src/
+          deno test -A --env-file src/
