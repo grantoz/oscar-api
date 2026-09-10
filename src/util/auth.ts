@@ -63,7 +63,7 @@ const createAndStoreTokens = async (user: User) => {
   const jwtPayload: jwtUser = {
     sub: user.id,
     email: user.email,
-    role: user.role,
+    role: (user as unknown as { roleId: string }).roleId,
     exp: Date.now() + jwtExpiry,
     iss: issuer,
   }

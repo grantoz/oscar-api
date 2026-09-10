@@ -46,7 +46,7 @@ export default async (db: PrismaClient) => {
     {
       name: 'Super User',
       email: superUser.email,
-      role: 'super',
+      role: { connect: { id: 'super' } },
       props: Prisma.DbNull,
       hash: await hashPassword(superUser.pass, superSalt),
       salt: superSalt,
@@ -55,7 +55,7 @@ export default async (db: PrismaClient) => {
     {
       name: 'Admin User',
       email: adminUser.email,
-      role: 'admin',
+      role: { connect: { id: 'admin' } },
       props: Prisma.DbNull,
       hash: await hashPassword(adminUser.pass, adminSalt),
       salt: adminSalt,
@@ -64,7 +64,7 @@ export default async (db: PrismaClient) => {
     {
       name: 'Staff User',
       email: staffUser.email,
-      role: 'staff',
+      role: { connect: { id: 'staff' } },
       props: Prisma.DbNull,
       hash: await hashPassword(staffUser.pass, staffSalt),
       salt: staffSalt,
@@ -73,7 +73,7 @@ export default async (db: PrismaClient) => {
     {
       name: 'User User',
       email: userUser.email,
-      role: 'user',
+      role: { connect: { id: 'user' } },
       props: Prisma.DbNull,
       hash: await hashPassword(userUser.pass, userSalt),
       salt: userSalt,

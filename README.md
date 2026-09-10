@@ -10,6 +10,21 @@
   database, generates prisma client
 - Run `deno task dev` - start service
 
+## Testing
+
+You'll need to use `.env.test` for testing.
+
+I recommend creating a shell alias for `deno task`, e.g: `alias dtt='env $(grep -v "^#" .env.test | xargs) deno task'`
+
+First time, you'll need to set up the test env and DB: `dtt setup:all`
+
+Ensure there's an instance of the app server running in test mode: `dtt dev`
+
+You can then run the tests: `dtt test`
+
+
+- Run `deno task test` - execute the test suite
+
 ## Inspiration
 
 - [Why](./doc/why.md)

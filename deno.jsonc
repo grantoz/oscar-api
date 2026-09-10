@@ -17,17 +17,7 @@
     "setup:all": "deno task setup:env && deno task db:generate && deno task db:new:seed",
     "setup:env": "deno run -A cli/setup_env.js",
 
-    "test": "deno test -A --env-file=.env.test --trace-leaks src/",
-    "test:db:create": "deno run -A --env-file=.env.test cli/alter_db.js --create",
-    "test:db:drop": "deno run -A --env-file=.env.test cli/alter_db.js --drop",
-    "test:db:migrate": "deno run -A --env-file=.env.test npm:prisma migrate dev",
-    "test:db:new": "deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno task test:db:migrate",
-    "test:db:new:seed": "deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno task test:db:migrate && deno task test:db:seed",
-    "test:db:seed": "deno run -A --env-file=.env.test ./prisma/seed/index.ts --test",
-    "test:dev": "deno run -A --watch --env-file=.env.test src/main.ts",
-    "test:dev:inspect": "deno run -A --inspect --env-file=.env.test src/main.ts",
-    "test:setup:all": "deno task test:setup:env && deno task db:generate && deno task test:db:new:seed",
-    "test:setup:env": "deno run -A cli/setup_env.js --test"
+    "test": "deno test -A --env-file=.env.test --trace-leaks src/"
   },
   "unstable": ["kv", "otel"],
   "imports": {

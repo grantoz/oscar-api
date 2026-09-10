@@ -1,16 +1,20 @@
 import { Post, User } from '@mod/db'
 
-export type UserView =
-  & Omit<User, 'hash' | 'salt' | 'props' | 'verifiedAt'>
-  & { props: Record<string, unknown>; posts?: Post[] }
+type UserWithRole = User & { posts?: Post[]; role?: { id: string } }
 
-const userView = (user: User & { posts?: Post[] }): UserView => {
+export type UserView =
+  & Omit<User, 'hash' | 'salt' | 'props' | 'verifiedAt' | 'roleId'>
+  & { props: Record<string, unknown>; posts?: Post[]; role: string }
+
+const userView = (user: UserWithRole): UserView => {
+  const role = (user as unknown as { roleId: string }).roleId ??
+    user.role?.id ?? ''
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     phone: user.phone,
-    role: user.role,
+    role,
     props: (user.props || {}) as Record<string, unknown>,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,

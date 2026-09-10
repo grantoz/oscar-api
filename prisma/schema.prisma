@@ -14,6 +14,12 @@ datasource db {
   provider = "postgresql"
 }
 
+model Role {
+  id    String @id @unique
+  desc  String
+  users User[]
+}
+
 model Post {
   id        String    @unique @default(dbgenerated("uuidv7()")) @db.Uuid
   title     String    @db.VarChar(255)
@@ -26,19 +32,13 @@ model Post {
   deletedAt DateTime?
 }
 
-enum Role {
-  super
-  admin
-  staff
-  user
-}
-
 // https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
 
 model User {
   id        String    @unique @default(dbgenerated("uuidv7()")) @db.Uuid
   email     String    @unique
-  role      Role      @default(user)
+  role      Role      @relation(fields: [roleId], references: [id])
+  roleId    String    @default("user")
   name      String?   @db.VarChar(255)
   phone     String?   @db.VarChar(255)
   props     Json?

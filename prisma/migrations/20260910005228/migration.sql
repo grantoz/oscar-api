@@ -1,5 +1,10 @@
--- CreateEnum
-CREATE TYPE "Role" AS ENUM ('super', 'admin', 'staff', 'user');
+-- CreateTable
+CREATE TABLE "Role" (
+    "id" TEXT NOT NULL,
+    "desc" TEXT NOT NULL,
+
+    CONSTRAINT "Role_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Post" (
@@ -17,7 +22,7 @@ CREATE TABLE "Post" (
 CREATE TABLE "User" (
     "id" UUID NOT NULL DEFAULT uuidv7(),
     "email" TEXT NOT NULL,
-    "role" "Role" NOT NULL DEFAULT 'user',
+    "roleId" TEXT NOT NULL DEFAULT 'user',
     "name" VARCHAR(255),
     "phone" VARCHAR(255),
     "props" JSONB,
@@ -42,6 +47,9 @@ CREATE TABLE "Country" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Role_id_key" ON "Role"("id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Post_id_key" ON "Post"("id");
 
 -- CreateIndex
@@ -55,3 +63,6 @@ CREATE UNIQUE INDEX "Country_id_key" ON "Country"("id");
 
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "User" ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

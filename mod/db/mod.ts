@@ -41,5 +41,6 @@ export type {
   Country,
   Post,
   PrismaClient,
+  Role,
   User,
 } from '../../prisma/generated/client.ts'
