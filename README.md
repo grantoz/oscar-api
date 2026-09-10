@@ -2,28 +2,25 @@
 
 ## Setup
 
-- [Clone the related infrastructure repo](https://github.com/grantoz/oscar-infra)
-  and follow the setup instructions
+- [Clone the related infrastructure repo](https://github.com/grantoz/oscar-infra) and follow the setup instructions
 - [Ensure you have the latest Deno installed](https://docs.deno.com/runtime/getting_started/installation/)
 - Clone this repo
-- Run `deno task setup:all` - creates .env file with defaults, sets up and seeds
-  database, generates prisma client
+- Run `deno task setup:all` - creates .env file with defaults, sets up and seeds database, generates prisma client
 - Run `deno task dev` - start service
 
 ## Testing
 
-You'll need to use `.env.test` for testing.
+You'll need to use `.env.test` for testing. The easiest way to do this is with a shell alias for `deno task`, e.g:
 
-I recommend creating a shell alias for `deno task`, e.g: `alias dtt='env $(grep -v "^#" .env.test | xargs) deno task'`
+```sh
+alias dtt='env $(grep -v "^#" .env.test | xargs) deno task'
+```
 
 First time, you'll need to set up the test env and DB: `dtt setup:all`
 
 Ensure there's an instance of the app server running in test mode: `dtt dev`
 
 You can then run the tests: `dtt test`
-
-
-- Run `deno task test` - execute the test suite
 
 ## Inspiration
 
@@ -57,7 +54,7 @@ You can then run the tests: `dtt test`
 - OAuth2.0
 - CI testing
 - Postmark integration
-- Varnish in front of all GET by default, with per-calling=user and per-resource
+- Maybe: Varnish in front of all GET by default, with per-calling=user and per-resource
   tagging to allow for invalidation
 - Invalidation strategies for all listable entities to account for pagination
   - both singular e.g. /user/*

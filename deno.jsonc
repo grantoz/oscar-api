@@ -39,6 +39,7 @@
     "@middleware": "./src/middleware/mod.ts",
     "@/": "./src/"
   },
+  "exclude": ["**/*.md"],
   "fmt": {
     "indentWidth": 2,
     "semiColons": false,
@@ -47,7 +48,7 @@
   "lint": {
     "exclude": [
       "prisma/generated/**",
-      "prisma/zod/**"
+      "**/*.md"
     ]
   },
   "workspace": ["./mod/db"],
