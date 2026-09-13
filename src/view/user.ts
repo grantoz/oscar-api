@@ -3,7 +3,7 @@ import { Post, User } from '@mod/db'
 type UserWithRole = User & { posts?: Post[]; role?: { id: string } }
 
 export type UserView =
-  & Omit<User, 'hash' | 'salt' | 'props' | 'verifiedAt' | 'roleId'>
+  & Omit<User, 'hash' | 'seedKey' | 'props' | 'verifiedAt' | 'roleId'>
   & { props: Record<string, unknown>; posts?: Post[]; role: string }
 
 const userView = (user: UserWithRole): UserView => {

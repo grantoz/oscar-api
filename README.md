@@ -41,7 +41,7 @@ You can then run the tests: `dtt test`
 - Only emit etag for GET-type routes
 
 **TODO:**
-
+-
 - Some more meaningful entities
 - JWT invalidation via CLI
 - API tests (in progress...)

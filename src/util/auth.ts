@@ -1,6 +1,6 @@
 import { db, User } from '@mod/db'
 import { kv, log } from '@util'
-import { hashPassword } from '@/util/user.ts'
+import { verify } from '@felix/argon2'
 import { sign } from '@hono/jwt'
 import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa'
 import { jwtUser, refreshUser } from './types.ts'
@@ -41,13 +41,13 @@ const authoriseLogin = async (
   }
 
   // todo test that this really works for user record not found
-  if (!user?.salt || !user?.hash) {
+  if (!user?.hash) {
     log.warn('login: user has no auth set up', { id: user.id })
     throw new Error()
   }
 
-  const hash = await hashPassword(password, user?.salt || '')
-  if (hash !== user?.hash) {
+  const verified = await verify(user.hash, password)
+  if (!verified) {
     log.warn('login: bad password', { id: user.id })
     throw new Error()
   }
@@ -55,7 +55,7 @@ const authoriseLogin = async (
   return user
 }
 
-const createAndStoreTokens = async (user: User) => {
+const createAndStoreLoginTokens = async (user: User) => {
   if (!user) {
     // TODO throw Error, have caller catch and return 401
     throw new HTTPException(401, { message: 'Not Authorized' })
@@ -81,7 +81,6 @@ const createAndStoreTokens = async (user: User) => {
 
   const userData = Object.assign({}, user)
   userData.hash = null
-  userData.salt = null
 
   // store the logged-in user in the kv store with an expiry matching the token
   await Promise.all([
@@ -93,4 +92,11 @@ const createAndStoreTokens = async (user: User) => {
   return { token: jwt, refresh: refreshToken }
 }
 
-export { authoriseLogin, createAndStoreTokens }
+const deleteLoginTokens = async (user: User) => {
+  await Promise.all([
+    kv.delete(['login', port, user.id]),
+    kv.delete(['refresh', port, user.id]),
+  ])
+}
+
+export { authoriseLogin, createAndStoreLoginTokens, deleteLoginTokens }

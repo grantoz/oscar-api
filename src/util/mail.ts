@@ -61,7 +61,7 @@ export const createEmailPayload = (recipient: emailRecipient) => {
     HTML:
       '<div style="text-align:center"><p style="font-family: arial; font-size: 24px;">Welcome</p></div>',
     Subject: 'Welcome to Oscar!',
-    // Tags: ["test", "mailpit"],
+    Tags: ["test", "dev", "oscar", "mailpit"],
     Text: 'Welcome to Oscar!',
     To: [
       {

@@ -1,5 +1,4 @@
-import { PrismaClient } from '../../prisma/generated/client.ts'
-import { Prisma } from '../../prisma/generated/client.ts'
+import { Prisma, PrismaClient } from '../../prisma/generated/client.ts'
 import { PrismaPg } from '@prisma/adapter-pg'
 
 const getDB = (): PrismaClient => {

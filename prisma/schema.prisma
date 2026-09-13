@@ -2,10 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  // provider        = "prisma-client-js"
-  provider   = "prisma-client" // ESM-first
-  engineType = "client"        // No rust engines
-  previewFeatures = ["relationJoins"]
+  provider        = "prisma-client"
+  previewFeatures = ["relationJoins", "partialIndexes"]
   output          = "./generated"
   runtime         = "deno"
 }
@@ -15,9 +13,9 @@ datasource db {
 }
 
 model Role {
-  id    String @id @unique
-  desc  String
-  users User[]
+  id        String @id @unique
+  desc      String
+  users     User[]
 }
 
 model Post {
@@ -42,15 +40,18 @@ model User {
   name      String?   @db.VarChar(255)
   phone     String?   @db.VarChar(255)
   props     Json?
+  seedKey   String?   @db.VarChar(255)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   deletedAt DateTime?
   verifiedAt DateTime?
-  salt      String?   @db.VarChar(32)
   hash      String?   @db.VarChar(255)
   posts     Post[]
+
+  @@unique([seedKey], where: raw("seedKey IS NOT NULL"))
 }
 
+// from seed only
 model Country {
   id              String  @db.VarChar(2) @unique
   name            String  @db.VarChar(64)

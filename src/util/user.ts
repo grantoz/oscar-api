@@ -11,16 +11,14 @@ import { log } from '@util'
 // add user.lastLoginIp, method
 // add user.lastLoginAt - no, should be in login history
 
-export const savePasswordSaltAndHash = async (user: User, password: string) => {
-  const salt = genSalt()
-  const hash = await hashPassword(password, salt)
+export const hashPasswordAndSave = async (user: User, password: string) => {
+  const hash = await hashPassword(password)
   try {
     await db.user.update({
       where: {
         id: user.id,
       },
       data: {
-        salt,
         hash,
       },
     })
@@ -32,8 +30,8 @@ export const savePasswordSaltAndHash = async (user: User, password: string) => {
 }
 
 // see https://github.com/felix-schindler/deno-argon2/blob/master/examples/with-options.ts
-export const hashPassword = async function (password: string, salt: string) {
-  const encodedSalt = new TextEncoder().encode(salt)
+export const hashPassword = async function (password: string) {
+  const encodedSalt = new TextEncoder().encode(genSalt())
   const hashed = await hash(password, {
     salt: encodedSalt,
     variant: Variant.Argon2id,
@@ -49,7 +47,7 @@ export const hashPassword = async function (password: string, salt: string) {
 }
 
 export const genSalt = () => {
-  const array = new Uint16Array(20)
+  const array = new Uint16Array(16)
   self.crypto.getRandomValues(array)
   return array.reduce((acc, curr) => {
     return acc + String.fromCharCode((curr % 95) + 32)

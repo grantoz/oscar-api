@@ -1,9 +1,15 @@
 import '@std/dotenv/load'
-import { authoriseLogin } from './auth.ts'
+import {
+  authoriseLogin,
+  createAndStoreLoginTokens,
+  deleteLoginTokens,
+} from './auth.ts'
 import { assert, assertEquals, assertExists, assertRejects } from '@std/assert'
+import { kv } from './kv.ts'
 import { testUsers } from './test.ts'
 
 const { superUser } = testUsers
+const port = parseInt(Deno.env.get('PORT') || '8000')
 
 Deno.test('authoriseLogin fails with bad email', function () {
   assertRejects(
@@ -38,4 +44,39 @@ Deno.test('authoriseLogin succeeds with valid email and password and returns Use
   assert(isUser, 'Result should conform to User model shape')
 
   // await db.$disconnect()
+})
+
+Deno.test('createAndStoreLoginTokens creates login and refresh tokens in kv', async function () {
+  const user = await authoriseLogin(superUser.email, superUser.pass)
+
+  const tokens = await createAndStoreLoginTokens(user)
+
+  assert(typeof tokens.token === 'string' && tokens.token.length > 0)
+  assert(typeof tokens.refresh === 'string' && tokens.refresh.length > 0)
+
+  const [login, refresh] = await Promise.all([
+    kv.get(['login', port, user.id]),
+    kv.get(['refresh', port, user.id]),
+  ])
+
+  assertExists(login.value)
+  assertExists(refresh.value)
+  assertEquals((login.value as { id: string }).id, user.id)
+  assertEquals((refresh.value as { id: string }).id, user.id)
+})
+
+Deno.test('deleteLoginTokens removes login and refresh tokens from kv', async function () {
+  const user = await authoriseLogin(superUser.email, superUser.pass)
+
+  await createAndStoreLoginTokens(user)
+
+  await deleteLoginTokens(user)
+
+  const [login, refresh] = await Promise.all([
+    kv.get(['login', port, user.id]),
+    kv.get(['refresh', port, user.id]),
+  ])
+
+  assertEquals(login.value, null)
+  assertEquals(refresh.value, null)
 })

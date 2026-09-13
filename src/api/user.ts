@@ -3,7 +3,7 @@ import { db, Prisma } from '@mod/db'
 import { log, meta, pageOptions, pagination } from '@util'
 import { zValidator } from '@hono/zod-validator'
 import { z } from '@zod'
-import { genSalt, hashPassword } from '@/util/user.ts'
+import { hashPassword } from '@/util/user.ts'
 import { userView } from '@/view/user.ts'
 import { getLastModified, setLastModified } from '@/util/lastModified.ts'
 import { validate } from '@util'
@@ -109,12 +109,10 @@ export const user = new Hono()
       props: {}, // Prisma.JsonNull, // or {} if you prefer
     }
     if (payload.password) {
-      userData.salt = genSalt()
-      userData.hash = await hashPassword(payload.password, userData.salt)
+      userData.hash = await hashPassword(payload.password)
     }
 
     const logData = Object.assign({}, userData)
-    delete logData.salt
     delete logData.hash
     log.info('creating user', logData)
 
@@ -154,12 +152,10 @@ export const user = new Hono()
         props: payload.props,
       }
       if (payload.password) {
-        userData.salt = genSalt()
-        userData.hash = await hashPassword(payload.password, userData.salt)
+        userData.hash = await hashPassword(payload.password)
       }
 
       const logData = Object.assign({}, userData)
-      delete logData.salt
       delete logData.hash
       logData.id = id
       log.info('updating user', logData)

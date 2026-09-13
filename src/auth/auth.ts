@@ -1,14 +1,15 @@
 import { Context, Hono } from '@hono'
 import { verify } from '@hono/jwt'
 import { db, User } from '@mod/db'
-import { createAndStoreTokens, kv, log } from '@util'
+import { createAndStoreLoginTokens, deleteLoginTokens, kv, log } from '@util'
 import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa'
 import { authoriseLogin } from '@/util/auth.ts'
+import { validateJwtMiddleware } from '@middleware'
 import { jwtUser } from './types.ts'
 import { z } from '@zod'
 import { zValidator } from '@hono/zod-validator'
 // import { HTTPException } from '@hono/http-exception'
-import { getCookie, setCookie } from '@hono/cookie'
+import { deleteCookie, getCookie, setCookie } from '@hono/cookie'
 
 const jwtAlgo = Deno.env.get('JWT_ALGORITHM') as SignatureAlgorithm
 const jwtSecret = Deno.env.get('JWT_SECRET') as string
@@ -62,7 +63,7 @@ const auth = new Hono()
       // TODO enforce sensible min password as app constant TODO updated seeders to match
       z.string().min(5).max(128).regex(printableAsciiRegex).parse(password)
     } catch (error) {
-      log.debug('login email or password validation error', error)
+      log.info('login email or password validation error', error)
       return c.json({ error: 'Invalid login' }, 401)
     }
 
@@ -73,7 +74,7 @@ const auth = new Hono()
       return c.json({ error: 'Invalid login' }, 401)
     }
 
-    const { token, refresh } = await createAndStoreTokens(user)
+    const { token, refresh } = await createAndStoreLoginTokens(user)
 
     setCookie(c, 'refresh', refresh, {
       path: '/auth/refresh', // The path for which the cookie is valid
@@ -138,7 +139,7 @@ const auth = new Hono()
         return c.json({ error: 'Not Authorized' }, 401)
       }
 
-      const { token, refresh } = await createAndStoreTokens(user)
+      const { token, refresh } = await createAndStoreLoginTokens(user)
 
       setCookie(c, 'refresh', refresh, {
         path: '/auth/refresh', // The path for which the cookie is valid
@@ -152,6 +153,21 @@ const auth = new Hono()
       return c.json({ token })
     },
   )
+  .post('/logout', validateJwtMiddleware, async (c: Context) => {
+    const user = c.get('authUser') as User
+
+    await deleteLoginTokens(user)
+
+    deleteCookie(c, 'refresh', {
+      path: '/auth/refresh', // must match the path used when the cookie was set
+      secure: true,
+      httpOnly: true,
+      sameSite: 'Strict',
+    })
+
+    // TODO emit metric for successful logout
+    return c.json({ message: 'Logged out' })
+  })
 
 // TODO remove login token from KV on user update
 // this will force revalidation using refresh token
@@ -159,8 +175,6 @@ const auth = new Hono()
 
 export { auth }
 
-// TODO implement token revocation from KV
 // TODO implement register endpoint
 // TODO implement reset password endpoint with email workflow, rather than just allow it in PATCH
 // TODO implement email verification endpoint
-// TODO implement logout endpoint to invalidate tokens

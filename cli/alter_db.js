@@ -10,6 +10,7 @@ if (!create && !drop) {
 }
 
 const dbName = match?.groups?.db
+const appEnv = Deno.env.get('APP_ENV') || 'unknown'
 
 if (!dbName) {
   console.error('No database name found in DATABASE_URL env var, exiting...')
@@ -30,7 +31,7 @@ async function createDb(db) {
   if (!proceed) {
     proceed = confirm(
       `This will create a new database '${dbName}' for environment '${
-        Deno.env.get('APP_ENV')
+        appEnv
       }' - do you wish to proceed?`,
     )
     if (!proceed) {
@@ -55,7 +56,7 @@ async function dropDb(db) {
   if (!proceed) {
     proceed = confirm(
       `This will drop the database '${dbName}' for environment '${
-        Deno.env.get('APP_ENV')
+        appEnv
       }' - do you wish to proceed?`,
     )
     if (!proceed) {
@@ -79,7 +80,7 @@ async function dropDb(db) {
 if (create && drop && !proceed) {
   proceed = confirm(
     `This will drop the old database and create a new instance for '${dbName}' in environment '${
-      Deno.env.get('APP_ENV')
+        appEnv
     }' - do you wish to proceed?`,
   )
 }

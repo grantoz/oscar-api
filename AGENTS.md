@@ -11,7 +11,7 @@
   consumed via the `@mod/db` workspace package (`mod/db/mod.ts`), which exports
   `db`, `Prisma`, `getDB`.
 
-## Import aliases (defined in `deno.json` `imports`)
+## Import aliases (defined in `deno.jsonc` `imports`)
 
 - `@util` -> `./src/util/mod.ts`
 - `@/` -> `./src/`
@@ -37,18 +37,35 @@
   sees env vars. Tasks also pass `--env-file`.
 - `DATABASE_URL` is required (Prisma exits if unset). Deno KV (`Deno.openKv`) is
   opened at import time in `src/util/kv.ts`.
-- `deno.json` `unstable: ["kv", "otel"]` — these flags are required at runtime.
+- `deno.jsonc` `unstable: ["kv", "otel"]` — these flags are required at runtime.
 
 ## Testing (integration tests — not self-contained)
 
-`deno task test` = `deno test -A --env-file=.env.test --trace-leaks src/`. Tests
-are **HTTP integration tests** that hit a running server on `PORT=8001` via
-`ky`. They will fail unless:
+There are no test-specific tasks. Run the normal tasks with the test env vars
+loaded from `.env.test`:
 
-1. The test DB exists and is seeded: `deno task test:setup:all` (or
-   `test:db:new:seed`). Test DB name is the dev DB name + `_test` suffix.
-2. The server is running against `.env.test`: `deno task test:dev` (separate
-   terminal).
+```
+env $(grep -v "^#" .env.test | xargs) deno task <task> [...args]
+```
+
+Tests are **HTTP integration tests** that hit a running server on `PORT=8001`
+via `ky`. They will fail unless:
+
+1. The test DB exists and is seeded:
+   `env $(grep -v "^#" .env.test | xargs) deno task db:new:seed`. This is
+   **destructive** (drops + recreates + migrates + seeds). Test DB name is the
+   dev DB name + `_test` suffix.
+2. The server is running against `.env.test` in a separate terminal:
+   `env $(grep -v "^#" .env.test | xargs) deno task dev`.
+
+Then run the suite:
+
+```
+env $(grep -v "^#" .env.test | xargs) deno test -A --trace-leaks src/
+```
+
+(The shell-provided `.env.test` vars win over the `.env` loaded by
+`@std/dotenv/load` / `--env-file`.)
 
 Seeded test credentials (`prisma/seed/user.ts`): `super@grantoz.io` /
 `superPass2025$`, `admin@grantoz.io` / `adminPass2025$`, etc. Test helpers live

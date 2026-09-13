@@ -32,7 +32,6 @@ const isUserView = (value: unknown) => {
   assert(typeof u.email === 'string')
   assert(typeof u.props === 'object' && u.props !== null)
   assert(u.hash === undefined)
-  assert(u.salt === undefined)
 }
 
 describe('BDD-style tests', () => {
