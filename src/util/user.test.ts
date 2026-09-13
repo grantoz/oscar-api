@@ -1,7 +1,7 @@
 import '@std/dotenv/load'
 import { db } from '@mod/db'
 import { hash, Variant, verify, Version } from '@felix/argon2'
-import { assertEquals, assertExists } from '@std/assert'
+import { assertEquals } from '@std/assert'
 import { hashPassword } from './user.ts'
 
 Deno.test('generate salt and hashed password', async function () {
