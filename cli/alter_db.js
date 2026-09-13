@@ -30,9 +30,7 @@ async function createDb(db) {
 
   if (!proceed) {
     proceed = confirm(
-      `This will create a new database '${dbName}' for environment '${
-        appEnv
-      }' - do you wish to proceed?`,
+      `This will create a new database '${dbName}' for environment '${appEnv}' - do you wish to proceed?`,
     )
     if (!proceed) {
       console.log('Exiting...')
@@ -55,9 +53,7 @@ async function dropDb(db) {
   console.log(`Dropping database '${dbName}'...`)
   if (!proceed) {
     proceed = confirm(
-      `This will drop the database '${dbName}' for environment '${
-        appEnv
-      }' - do you wish to proceed?`,
+      `This will drop the database '${dbName}' for environment '${appEnv}' - do you wish to proceed?`,
     )
     if (!proceed) {
       console.log('Exiting...')
@@ -79,9 +75,7 @@ async function dropDb(db) {
 
 if (create && drop && !proceed) {
   proceed = confirm(
-    `This will drop the old database and create a new instance for '${dbName}' in environment '${
-        appEnv
-    }' - do you wish to proceed?`,
+    `This will drop the old database and create a new instance for '${dbName}' in environment '${appEnv}' - do you wish to proceed?`,
   )
 }
 

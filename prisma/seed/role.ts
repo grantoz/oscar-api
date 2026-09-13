@@ -1,5 +1,5 @@
 import { PrismaClient } from '@mod/db'
-import { UserRole, USER_ROLES } from '@const'
+import { USER_ROLES, UserRole } from '@const'
 import { Seeder } from './index.ts'
 
 export const roleSeeder: Seeder = {

@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@mod/db'
-import { faker as _faker} from '@faker'
+import { faker as _faker } from '@faker'
 import { hashPassword } from '@util'
 import { Seeder } from './index.ts'
 
@@ -28,7 +28,7 @@ export const userSeeder: Seeder = {
       role: { connect: { id: 'super' } },
       props: Prisma.DbNull,
       hash: await hashPassword(superUser.pass),
-      seedKey: 'SEED DEFAULT SUPER USER'
+      seedKey: 'SEED DEFAULT SUPER USER',
       // verifiedAt: Date.now()
     }
 
@@ -102,5 +102,5 @@ export const userSeeder: Seeder = {
       count++
     }
     console.log(`Created ${count} users`)
-  }
+  },
 }

@@ -37,5 +37,5 @@ export const countrySeeder: Seeder = {
       // console.log(`Created country with id: ${country.id}`);
     }
     console.log(`Created ${count} countries`)
-  }
+  },
 }

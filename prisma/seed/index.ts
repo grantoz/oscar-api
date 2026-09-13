@@ -8,22 +8,26 @@ type AppEnv = 'dev' | 'test' | 'ci' | 'staging' | 'uat' | 'sandbox' | 'prod'
 const env = Deno.env.get('APP_ENV') as AppEnv
 
 export interface Seeder {
-  name: string;
-  prod: (db: PrismaClient) => Promise<void>;
-  dev: (db: PrismaClient) => Promise<void>;
-  always: (db: PrismaClient) => Promise<void>;
+  name: string
+  prod: (db: PrismaClient) => Promise<void>
+  dev: (db: PrismaClient) => Promise<void>
+  always: (db: PrismaClient) => Promise<void>
 }
 
 // Higher-order execution runner
-export async function runSeeder(seeder: Seeder, env: AppEnv, db: PrismaClient): Promise<void> {
-  const isProdLike = ['prod', 'uat', 'sandbox'].includes(env);
-  console.log(`Running ${seeder.name} for ${env}...`);
+export async function runSeeder(
+  seeder: Seeder,
+  env: AppEnv,
+  db: PrismaClient,
+): Promise<void> {
+  const isProdLike = ['prod', 'uat', 'sandbox'].includes(env)
+  console.log(`Running ${seeder.name} for ${env}...`)
 
-  await seeder.always(db);
+  await seeder.always(db)
   if (isProdLike) {
-    await seeder.prod(db);
+    await seeder.prod(db)
   } else {
-    await seeder.dev(db);
+    await seeder.dev(db)
   }
 }
 
