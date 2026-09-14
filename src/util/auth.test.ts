@@ -25,8 +25,6 @@ Deno.test('authoriseLogin fails with bad password', function () {
     Error, // Expected error class (optional, but good practice)
     // "User not found"  // Expected error message or part of the message (optional)
   )
-  // console.log('foo result', foo)
-  // assertEquals(foo, true)
 })
 
 Deno.test('authoriseLogin succeeds with valid email and password and returns User instance', async function () {

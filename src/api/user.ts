@@ -1,5 +1,5 @@
 import { Context, Hono } from '@hono'
-import { db, Prisma, User } from '@mod/db'
+import { db, Prisma } from '@mod/db'
 import { log, meta, pageOptions, pagination } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
 import type { DescribeRouteOptions } from 'hono-openapi'
@@ -259,14 +259,10 @@ export const user = new Hono()
       }
 
       const authUser = c.get('authUser')
-      const logData = Object.assign({}, userData)
-      // redact sensitive fields
-      delete logData.hash
-      log.info('creating user', { ...logData, actorId: authUser.id })
 
       try {
         const result = await db.user.create({ data: userData })
-        log.info('created user', {actorId: authUser.id, subjectId: result.id})
+        log.info('created user', { actorId: authUser.id, subjectId: result.id })
         const lastModified = await setLastModified('user')
         c.header('Last-Modified', lastModified)
         return c.json({ data: userView(result) })
@@ -326,7 +322,6 @@ export const user = new Hono()
     async (c: Context) => {
       const { id } = c.req.valid('param' as never)
       const payload: userPatchPayload = c.req.valid('json' as never)
-      log.info('updating user', { id, payload })
 
       const userData: Prisma.UserUpdateInput = {
         name: payload.name,

@@ -13,24 +13,7 @@ export const validate = <
 ) =>
   validator(target, schema, (result, _c) => {
     if (!result.success) {
-      console.log(result)
       const error = result.error.map((issue) => issue.message).join(', ')
-      // const foo = result.error.issues
-      // throw new HTTPException(400, { cause: result.error })
       throw new HTTPException(400, { message: error })
     }
   })
-
-// data: { id: "019af282-f8ac-75b9-b193-fd4827821889x" },
-// success: false,
-// error: ZodError: [
-// {
-//   "origin": "string",
-//   "code": "invalid_format",
-//   "format": "uuid",
-//   "pattern": "/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$/",
-//   "path": [
-//     "id"
-//   ],
-//   "message": "Invalid UUID"
-// }

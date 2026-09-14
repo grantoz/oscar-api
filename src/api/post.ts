@@ -184,10 +184,7 @@ export const post = new Hono()
     zValidator('json', postPostSchema),
     async (c: Context) => {
       const payload: postPost = c.req.valid('json' as never)
-      log.info('creating post', payload)
-
       const authUser = c.get('authUser') as User
-      log.info('creating post for user', { userId: authUser.id }) // TODO PII LEAK
 
       try {
         const result = await db.post.create({
@@ -241,7 +238,6 @@ export const post = new Hono()
     async (c: Context) => {
       const payload: postPatch = c.req.valid('json' as never)
       const authUser = c.get('authUser') as User
-      log.info('updating post', { actorId: authUser.id, payload })
       try {
         const result = await db.post.update({
           where: {
@@ -265,5 +261,5 @@ export const post = new Hono()
         log.error('error updating post')
         return c.json({ error: 'error updating post' }, 500)
       }
-    }
+    },
   )
