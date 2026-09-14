@@ -7,7 +7,8 @@ import { authoriseLogin } from '@/util/auth.ts'
 import { validateJwtMiddleware } from '@middleware'
 import { jwtUser } from './types.ts'
 import { z } from '@zod'
-import { zValidator } from '@hono/zod-validator'
+import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
+
 // import { HTTPException } from '@hono/http-exception'
 import { deleteCookie, getCookie, setCookie } from '@hono/cookie'
 
@@ -32,63 +33,126 @@ const printableAsciiRegex = /^[\x20-\x7E]*$/
 
 type refreshTokenPayload = z.infer<typeof refreshTokenSchema>
 
+const tokenResponseSchema = z.object({
+  token: z.string(),
+})
+
+const logoutResponseSchema = z.object({
+  message: z.string(),
+})
+
+const errorResponseSchema = z.object({
+  error: z.string(),
+})
+
 // TODO validate NO OTHER BODY OR QUERY PASSED TO LOGIN ENDPOINT?
 const auth = new Hono()
-  .post('/login', async (c: Context) => { // TODO could probably custom zValidate auth header here
-    const auth = c.req.header('Authorization')
+  .post(
+    '/login',
+    describeRoute({
+      tags: ['auth'],
+      summary: 'Log in',
+      description:
+        'Authenticate with an HTTP Basic `Authorization` header. On success an access token is returned and a refresh token is set as an HttpOnly cookie.',
+      responses: {
+        200: {
+          description: 'Access token issued',
+          content: {
+            'application/json': {
+              schema: resolver(tokenResponseSchema),
+            },
+          },
+        },
+        401: {
+          description: 'Invalid credentials',
+          content: {
+            'application/json': {
+              schema: resolver(errorResponseSchema),
+            },
+          },
+        },
+      },
+    }),
+    async (c: Context) => { // TODO could probably custom zValidate auth header here
+      const auth = c.req.header('Authorization')
 
-    if (!auth || !auth.startsWith('Basic ')) {
-      c.res.headers.set('WWW-Authenticate', 'Basic realm="Secure Area"')
-      return c.text('Not Authorized', 401)
-    }
+      if (!auth || !auth.startsWith('Basic ')) {
+        c.res.headers.set('WWW-Authenticate', 'Basic realm="Secure Area"')
+        return c.text('Not Authorized', 401)
+      }
 
-    // Extract the Base64-encoded part
-    const encodedCreds = auth.substring(6)
+      // Extract the Base64-encoded part
+      const encodedCreds = auth.substring(6)
 
-    try {
-      z.base64().parse(encodedCreds)
-    } catch (_error) {
-      log.debug('encoded creds is not base64')
-      return c.json({ error: 'Invalid login' }, 401)
-    }
+      try {
+        z.base64().parse(encodedCreds)
+      } catch (_error) {
+        log.debug('encoded creds is not base64')
+        return c.json({ error: 'Invalid login' }, 401)
+      }
 
-    // Decode the Base64 string
-    const decodedCreds = atob(encodedCreds)
+      // Decode the Base64 string
+      const decodedCreds = atob(encodedCreds)
 
-    // Split into username and password
-    const [email, password] = decodedCreds.split(':')
+      // Split into username and password
+      const [email, password] = decodedCreds.split(':')
 
-    try {
-      z.email().parse(email)
-      // TODO enforce sensible min password as app constant TODO updated seeders to match
-      z.string().min(5).max(128).regex(printableAsciiRegex).parse(password)
-    } catch (error) {
-      log.info('login email or password validation error', error)
-      return c.json({ error: 'Invalid login' }, 401)
-    }
+      try {
+        z.email().parse(email)
+        // TODO enforce sensible min password as app constant TODO updated seeders to match
+        z.string().min(5).max(128).regex(printableAsciiRegex).parse(password)
+      } catch (error) {
+        log.info('login email or password validation error', error)
+        return c.json({ error: 'Invalid login' }, 401)
+      }
 
-    let user: User
-    try {
-      user = await authoriseLogin(email, password)
-    } catch (_e) {
-      return c.json({ error: 'Invalid login' }, 401)
-    }
+      let user: User
+      try {
+        user = await authoriseLogin(email, password)
+      } catch (_e) {
+        return c.json({ error: 'Invalid login' }, 401)
+      }
 
-    const { token, refresh } = await createAndStoreLoginTokens(user)
+      const { token, refresh } = await createAndStoreLoginTokens(user)
 
-    setCookie(c, 'refresh', refresh, {
-      path: '/auth/refresh', // The path for which the cookie is valid
-      secure: true, // Ensures the cookie is only sent over HTTPS
-      httpOnly: true, // Prevents JavaScript access, mitigating XSS attacks
-      maxAge: refreshCookieExpiry, // Cookie expiry in seconds (e.g., 1 week)
-      sameSite: 'Strict', // Prevents cookies from being sent with cross-site requests, mitigating CSRF attacks
-    })
+      setCookie(c, 'refresh', refresh, {
+        path: '/auth/refresh', // The path for which the cookie is valid
+        secure: true, // Ensures the cookie is only sent over HTTPS
+        httpOnly: true, // Prevents JavaScript access, mitigating XSS attacks
+        maxAge: refreshCookieExpiry, // Cookie expiry in seconds (e.g., 1 week)
+        sameSite: 'Strict', // Prevents cookies from being sent with cross-site requests, mitigating CSRF attacks
+      })
 
-    // TODO emit metric for successful login
-    return c.json({ token })
-  })
+      // TODO emit metric for successful login
+      return c.json({ token })
+    },
+  )
   .post(
     '/refresh',
+    describeRoute({
+      tags: ['auth'],
+      summary: 'Refresh access token',
+      description:
+        'Exchange a valid refresh token (supplied via the `refresh` HttpOnly cookie) for a new access token. A fresh refresh token is set as a cookie.',
+      responses: {
+        200: {
+          description: 'Access token issued',
+          content: {
+            'application/json': {
+              schema: resolver(tokenResponseSchema),
+            },
+          },
+        },
+        401: {
+          description: 'Invalid or expired refresh token',
+          content: {
+            'application/json': {
+              schema: resolver(errorResponseSchema),
+            },
+          },
+        },
+      },
+    }),
     zValidator('json', refreshTokenSchema),
     async (c: Context) => {
       // NB here we are using application/json not application/www-form-encoded as is often done with refresh token endpoint
@@ -153,21 +217,49 @@ const auth = new Hono()
       return c.json({ token })
     },
   )
-  .post('/logout', validateJwtMiddleware, async (c: Context) => {
-    const user = c.get('authUser') as User
+  .post(
+    '/logout',
+    describeRoute({
+      tags: ['auth'],
+      summary: 'Log out',
+      description:
+        'Invalidate the current session for the user identified by the bearer token and clear the `refresh` cookie.',
+      responses: {
+        200: {
+          description: 'Logged out',
+          content: {
+            'application/json': {
+              schema: resolver(logoutResponseSchema),
+            },
+          },
+        },
+        401: {
+          description: 'Not authorized',
+          content: {
+            'application/json': {
+              schema: resolver(errorResponseSchema),
+            },
+          },
+        },
+      },
+    }),
+    validateJwtMiddleware,
+    async (c: Context) => {
+      const user = c.get('authUser') as User
 
-    await deleteLoginTokens(user)
+      await deleteLoginTokens(user)
 
-    deleteCookie(c, 'refresh', {
-      path: '/auth/refresh', // must match the path used when the cookie was set
-      secure: true,
-      httpOnly: true,
-      sameSite: 'Strict',
-    })
+      deleteCookie(c, 'refresh', {
+        path: '/auth/refresh', // must match the path used when the cookie was set
+        secure: true,
+        httpOnly: true,
+        sameSite: 'Strict',
+      })
 
-    // TODO emit metric for successful logout
-    return c.json({ message: 'Logged out' })
-  })
+      // TODO emit metric for successful logout
+      return c.json({ message: 'Logged out' })
+    },
+  )
 
 // TODO remove login token from KV on user update
 // this will force revalidation using refresh token

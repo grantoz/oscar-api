@@ -2,6 +2,7 @@
 import '@std/dotenv/load'
 import { Context, Hono } from '@hono'
 import { logger } from '@hono/logger'
+import { openAPIRouteHandler } from 'hono-openapi'
 import { db } from '@mod/db'
 import { api } from './api/mod.ts' // api  routes
 import { auth } from './auth/mod.ts' // auth routes
@@ -23,14 +24,35 @@ app.route('/auth', auth)
 // api routes
 app.route('/api', api)
 
-// TODO hono openapi middleware
-// https://hono.dev/examples/hono-openapi
-
 app
   .get('/', (c: Context) => {
     log.info('Welcome URL was hit')
     return c.text('Welcome to the User API!')
   })
+
+// openapi spec
+// https://hono.dev/examples/hono-openapi
+app.get(
+  '/openapi',
+  openAPIRouteHandler(app, {
+    documentation: {
+      info: {
+        title: 'Oscar API',
+        version: '1.0.0',
+        description: 'Oscar user API',
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+    },
+  }),
+)
 // .options("*", (rev: RequestEvent) => {
 //   rev.response.header().append("Access-Control-Allow-Methods", "GET, POST, DELETE");
 //   rev.response.header().append('access-control-allow-origin', '*')

@@ -1,7 +1,7 @@
 // file: validator-wrapper.ts
 import { ZodSchema } from '@zod'
 import type { ValidationTargets } from '@hono'
-import { zValidator } from '@hono/zod-validator'
+import { validator } from 'hono-openapi'
 import { HTTPException } from '@hono/http-exception'
 
 export const validate = <
@@ -11,10 +11,10 @@ export const validate = <
   target: Target,
   schema: T,
 ) =>
-  zValidator(target, schema, (result, _c) => {
+  validator(target, schema, (result, _c) => {
     if (!result.success) {
       console.log(result)
-      const error = result.error.message
+      const error = result.error.map((issue) => issue.message).join(', ')
       // const foo = result.error.issues
       // throw new HTTPException(400, { cause: result.error })
       throw new HTTPException(400, { message: error })

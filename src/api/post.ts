@@ -1,7 +1,8 @@
 import { Context, Hono } from '@hono'
 import { db, Post, User } from '@mod/db'
 import { log, meta, pageOptions, pagination } from '@util'
-import { zValidator } from '@hono/zod-validator'
+import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
+import type { DescribeRouteOptions } from 'hono-openapi'
 import { z } from '@zod'
 
 const uuidIdSchema = z.object({
@@ -21,73 +22,242 @@ const postPostSchema = z.object({
 })
 type postPost = z.infer<typeof postPostSchema>
 
+const postSchema = z.object({
+  id: z.uuidv7(),
+  title: z.string(),
+  content: z.string().nullable(),
+  published: z.boolean(),
+  userId: z.uuidv7(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+})
+
+const metaSchema = z.object({
+  count: z.int(),
+  page: z.int(),
+  size: z.int(),
+  pages: z.int(),
+})
+
+const errorSchema = z.object({
+  error: z.string(),
+})
+
+const postListResponseSchema = z.object({
+  data: z.array(postSchema),
+  meta: metaSchema,
+})
+
+const postResponseSchema = z.object({
+  data: postSchema,
+})
+
+const paginationParams: NonNullable<DescribeRouteOptions['parameters']> = [
+  {
+    name: 'page',
+    in: 'query',
+    schema: { type: 'integer', minimum: 1, default: 1 },
+  },
+  {
+    name: 'size',
+    in: 'query',
+    schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
+  },
+  { name: 'sort', in: 'query', schema: { type: 'string' } },
+  {
+    name: 'dir',
+    in: 'query',
+    schema: { type: 'string', enum: ['asc', 'desc', 'ASC', 'DESC'] },
+  },
+]
+
 export const post = new Hono()
-  .get('/', async (c: Context) => {
-    const options = pageOptions(c.req.query() as pagination)
-    const items: Post[] = await db.post.findMany(options)
-    c.res.headers.append('cache-control', 'max-age=10')
-    return c.json({ data: items, meta: meta(items) })
-  })
-  .get('/:id', zValidator('param', uuidIdSchema), async (c: Context) => {
-    const { id } = c.req.valid('param' as never)
-    const item: Post | null = await db.post.findUnique({
-      where: {
-        id,
+  .get(
+    '/',
+    describeRoute({
+      tags: ['post'],
+      summary: 'List posts',
+      security: [{ bearerAuth: [] }],
+      parameters: paginationParams,
+      responses: {
+        200: {
+          description: 'List of posts',
+          content: {
+            'application/json': {
+              schema: resolver(postListResponseSchema),
+            },
+          },
+        },
+        401: {
+          description: 'Not authorized',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
       },
-    })
-    if (!item) {
-      return c.notFound()
-    }
-    return c.json({ data: item })
-  })
-  .post('/', zValidator('json', postPostSchema), async (c: Context) => {
-    const payload: postPost = c.req.valid('json' as never)
-    log.info('creating post', payload)
-
-    const user = c.get('authUser') as User
-    log.info('creating post for user', { userId: user.id }) // TODO PII LEAK
-
-    try {
-      const result = await db.post.create({
-        data: {
-          title: payload.title,
-          content: payload.content,
-          userId: user.id,
+    }),
+    async (c: Context) => {
+      const options = pageOptions(c.req.query() as pagination)
+      const items: Post[] = await db.post.findMany(options)
+      c.res.headers.append('cache-control', 'max-age=10')
+      return c.json({ data: items, meta: meta(items) })
+    },
+  )
+  .get(
+    '/:id',
+    describeRoute({
+      tags: ['post'],
+      summary: 'Get a post by id',
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Post',
+          content: {
+            'application/json': {
+              schema: resolver(postResponseSchema),
+            },
+          },
         },
-      })
-      log.info('created post', result)
-      return c.json({ data: result })
-
-      // deno-lint-ignore no-explicit-any
-    } catch (err: any) {
-      if (err.code === 'P2002') {
-        log.warn('create post: unique constraint failed', err)
-        return c.json({ error: 'unique constraint failed' }, 422)
-      }
-      log.warn('error creating post', err)
-      return c.json({ error: 'error creating post' }, 500)
-    }
-  })
-  // TODO move ID to the path parameter
-  .patch('/', zValidator('json', postPatchSchema), async (c: Context) => {
-    const payload: postPatch = c.req.valid('json' as never)
-    log.info('updating post', payload)
-    try {
-      const result = await db.post.update({
+        404: {
+          description: 'Post not found',
+        },
+        401: {
+          description: 'Not authorized',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+      },
+    }),
+    zValidator('param', uuidIdSchema),
+    async (c: Context) => {
+      const { id } = c.req.valid('param' as never)
+      const item: Post | null = await db.post.findUnique({
         where: {
-          id: payload.id,
-        },
-        data: {
-          title: payload.title,
-          content: payload.content,
+          id,
         },
       })
-      log.info('updated post', result)
-      return c.json({ data: result })
+      if (!item) {
+        return c.notFound()
+      }
+      return c.json({ data: item })
+    },
+  )
+  .post(
+    '/',
+    describeRoute({
+      tags: ['post'],
+      summary: 'Create a post',
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Created post',
+          content: {
+            'application/json': {
+              schema: resolver(postResponseSchema),
+            },
+          },
+        },
+        422: {
+          description: 'Unique constraint failed',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+        500: {
+          description: 'Error creating post',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+      },
+    }),
+    zValidator('json', postPostSchema),
+    async (c: Context) => {
+      const payload: postPost = c.req.valid('json' as never)
+      log.info('creating post', payload)
 
-      // deno-lint-ignore no-explicit-any
-    } catch (err: any) {
-      log.error('error updating post', err)
-      throw err
-    }
-  })
+      const user = c.get('authUser') as User
+      log.info('creating post for user', { userId: user.id }) // TODO PII LEAK
+
+      try {
+        const result = await db.post.create({
+          data: {
+            title: payload.title,
+            content: payload.content,
+            userId: user.id,
+          },
+        })
+        log.info('created post', result)
+        return c.json({ data: result })
+
+        // deno-lint-ignore no-explicit-any
+      } catch (err: any) {
+        if (err.code === 'P2002') {
+          log.warn('create post: unique constraint failed', err)
+          return c.json({ error: 'unique constraint failed' }, 422)
+        }
+        log.warn('error creating post', err)
+        return c.json({ error: 'error creating post' }, 500)
+      }
+    },
+  )
+  // TODO move ID to the path parameter
+  .patch(
+    '/',
+    describeRoute({
+      tags: ['post'],
+      summary: 'Update a post',
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Updated post',
+          content: {
+            'application/json': {
+              schema: resolver(postResponseSchema),
+            },
+          },
+        },
+        401: {
+          description: 'Not authorized',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+      },
+    }),
+    zValidator('json', postPatchSchema),
+    async (c: Context) => {
+      const payload: postPatch = c.req.valid('json' as never)
+      log.info('updating post', payload)
+      try {
+        const result = await db.post.update({
+          where: {
+            id: payload.id,
+          },
+          data: {
+            title: payload.title,
+            content: payload.content,
+          },
+        })
+        log.info('updated post', result)
+        return c.json({ data: result })
+
+        // deno-lint-ignore no-explicit-any
+      } catch (err: any) {
+        log.error('error updating post', err)
+        throw err
+      }
+    },
+  )

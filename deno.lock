@@ -4,9 +4,6 @@
     "jsr:@db/postgres@~0.19.5": "0.19.5",
     "jsr:@denosaurs/plug@^1.1.0": "1.1.0",
     "jsr:@felix/argon2@^3.0.6": "3.0.6",
-    "jsr:@hono/hono@^4.13.5": "4.13.5",
-    "jsr:@hono/hono@^4.8.3": "4.13.5",
-    "jsr:@hono/zod-validator@~0.9.1": "0.9.1",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/bytes@1": "1.0.4",
     "jsr:@std/bytes@^1.0.2": "1.0.4",
@@ -35,16 +32,18 @@
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/streams@^1.0.9": "1.1.2",
     "jsr:@std/streams@^1.1.2": "1.1.2",
+    "npm:@hono/standard-validator@0.4": "0.4.0_@standard-schema+spec@1.1.0_hono@4.13.4",
     "npm:@prisma/adapter-pg@^7.9.1": "7.9.1",
-    "npm:@prisma/client@^7.9.1": "7.9.1_prisma@7.9.1__@types+react@19.2.18__react@19.2.8__react-dom@19.2.8___react@19.2.8_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8",
+    "npm:@prisma/client@^7.9.1": "7.9.1_prisma@7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8",
     "npm:@types/node@*": "24.2.0",
     "npm:create-hono@latest": "0.15.4",
+    "npm:hono-openapi@^1.3.2": "1.3.2_hono@4.13.4_zod@4.4.3",
+    "npm:hono@^4.13.4": "4.13.4",
     "npm:ky@^2.0.2": "2.0.2",
     "npm:path-to-regexp@6.2.1": "6.2.1",
-    "npm:prisma@*": "7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8",
-    "npm:prisma@^7.9.1": "7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8",
-    "npm:zod@4.4.3": "4.4.3",
-    "npm:zod@^4.2.1": "4.4.3"
+    "npm:prisma@*": "7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8",
+    "npm:prisma@^7.9.1": "7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8",
+    "npm:zod@4.4.3": "4.4.3"
   },
   "jsr": {
     "@db/postgres@0.19.5": {
@@ -70,16 +69,6 @@
       "integrity": "8480d5cbdacf1baa7acd07fcffed8780aaa158e420c41eef8f2fdd824846a2fe",
       "dependencies": [
         "jsr:@denosaurs/plug"
-      ]
-    },
-    "@hono/hono@4.13.5": {
-      "integrity": "b5b10f340820d14d69add622452e88722d7e99e05e30cdeafcb90133fc752126"
-    },
-    "@hono/zod-validator@0.9.1": {
-      "integrity": "d395d5437509890184c593ce117e48cbe887e1f556b15d4cc27c39367599c69f",
-      "dependencies": [
-        "jsr:@hono/hono@^4.8.3",
-        "npm:zod@^4.2.1"
       ]
     },
     "@std/assert@1.0.19": {
@@ -187,6 +176,13 @@
     "@electric-sql/pglite@0.4.3": {
       "integrity": "sha512-ichuWTgtd4mOM1G4SpyGJa5trT03lWbMypDV0fUXUCXg5hiHqVAz/bZyV68NqmkLB7WcYmj1RMJVSp8HV/v/ZQ=="
     },
+    "@hono/standard-validator@0.4.0_@standard-schema+spec@1.1.0_hono@4.13.4": {
+      "integrity": "sha512-MxOm1asDh9j7c1D0KiWwppSbFgAQxTRO4YEhjMrJn3lF1BIcXenPdgjSGKDRfQmZdaTaMA8slQLETgVOKyJxFw==",
+      "dependencies": [
+        "@standard-schema/spec",
+        "hono"
+      ]
+    },
     "@prisma/adapter-pg@7.9.1": {
       "integrity": "sha512-Ho2RK1KanQxLNSC0sR5bpiiVep10sWPLXCcxK+KXfI/Q69TMRbiafSvLPv3V9snimX72rMCqGlyJ4sBO4lKTAw==",
       "dependencies": [
@@ -199,7 +195,7 @@
     "@prisma/client-runtime-utils@7.9.1": {
       "integrity": "sha512-mVIBGYdO5CFmK0HvjxrtfIyQQcPdb88pSCeVQriVQPVZyDovIWblpHfOgcS8QO187j3QF0ePArH8qPhp0AU2vg=="
     },
-    "@prisma/client@7.9.1_prisma@7.9.1__@types+react@19.2.18__react@19.2.8__react-dom@19.2.8___react@19.2.8_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8": {
+    "@prisma/client@7.9.1_prisma@7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8": {
       "integrity": "sha512-+xgrh2EhJVF79wC0yX5G4PI1Rdcm7Qn/nekNQ+t/O153wtNggruHal+fXHSa0QE+Tp/Cw5wvxeCEhZZ59xGm8Q==",
       "dependencies": [
         "@prisma/client-runtime-utils",
@@ -295,7 +291,7 @@
         "proper-lockfile"
       ]
     },
-    "@prisma/studio-core@0.33.0_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8": {
+    "@prisma/studio-core@0.33.0_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8": {
       "integrity": "sha512-V2fX/nKEymNTrHXwfP26PGjoLStO35Ogu+ex7CFJbLrMYEcZxxZpiSNOs7px23Hk5mzLWvM5RsqG6Ka+rha+wg==",
       "dependencies": [
         "@radix-ui/react-toggle",
@@ -327,7 +323,7 @@
         "@types/react"
       ]
     },
-    "@radix-ui/react-primitive@2.1.3_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8": {
+    "@radix-ui/react-primitive@2.1.3_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8": {
       "integrity": "sha512-m9gTwRkhy2lvCPe6QJp4d3G1TYEUHn/FzJUtq9MjH46an1wJU+GdoGC5VLof8RX8Ft/DlpshApkhswDLZzHIcQ==",
       "dependencies": [
         "@radix-ui/react-slot",
@@ -350,7 +346,7 @@
         "@types/react"
       ]
     },
-    "@radix-ui/react-toggle@1.1.10_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8": {
+    "@radix-ui/react-toggle@1.1.10_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8": {
       "integrity": "sha512-lS1odchhFTeZv3xwHH31YPObmJn8gOg7Lq12inrr0+BH/l3Tsq32VfjqH1oh80ARM3mlkfMic15n0kg4sD1poQ==",
       "dependencies": [
         "@radix-ui/primitive",
@@ -395,6 +391,30 @@
       ],
       "optionalPeers": [
         "@types/react"
+      ]
+    },
+    "@standard-community/standard-json@0.3.6_@standard-schema+spec@1.1.0_@types+json-schema@7.0.15_zod@4.4.3": {
+      "integrity": "sha512-tuXKz1Ps4al0W4xhfwii7v4lskKtOv3QE7mcouRVThrBdOR6JzY4Vea3nsxcEnte84bOJvMvXGmOMWE3IBbHyA==",
+      "dependencies": [
+        "@standard-schema/spec",
+        "@types/json-schema",
+        "quansync",
+        "zod"
+      ],
+      "optionalPeers": [
+        "zod"
+      ]
+    },
+    "@standard-community/standard-openapi@0.2.10_@standard-community+standard-json@0.3.6_@standard-schema+spec@1.1.0_openapi-types@12.1.3_zod@4.4.3_@types+json-schema@7.0.15": {
+      "integrity": "sha512-whaCN9eu5zv5gu6Kyeh5am/S3AyS1nqo57/wAxs/KPS7+94UhBUZmkIetmXzm22qIV0zMrHt3y+2VfjkbkYYTA==",
+      "dependencies": [
+        "@standard-community/standard-json",
+        "@standard-schema/spec",
+        "openapi-types",
+        "zod"
+      ],
+      "optionalPeers": [
+        "zod"
       ]
     },
     "@standard-schema/spec@1.1.0": {
@@ -447,6 +467,9 @@
     },
     "@types/geojson@7946.0.16": {
       "integrity": "sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg=="
+    },
+    "@types/json-schema@7.0.15": {
+      "integrity": "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="
     },
     "@types/lodash@4.17.25": {
       "integrity": "sha512-+K1NIO8I+F9/wNulfVvu23QYd0Pe9/OCqRrim4NoYIf1VoEDL90Ve4ClzpyqBLc7NpGGWRvYNCKZ1BE/Jpf8dQ=="
@@ -789,6 +812,21 @@
     "graphmatch@1.1.1": {
       "integrity": "sha512-5ykVn/EXM1hF0XCaWh05VbYvEiOL2lY1kBxZtaYsyvjp7cmWOU1XsAdfQBwClraEofXDT197lFbXOEVMHpvQOg=="
     },
+    "hono-openapi@1.3.2_hono@4.13.4_zod@4.4.3": {
+      "integrity": "sha512-4feiTNQ6URizSmOuTMZsrbOczep8uXy+WrStnwZxxB3ud7+hGy6E5XbJVWSgT0hb9kZ9k2AqukYZbvJqx1aQqA==",
+      "dependencies": [
+        "@hono/standard-validator",
+        "@standard-community/standard-json",
+        "@standard-community/standard-openapi",
+        "@standard-schema/spec",
+        "@types/json-schema",
+        "hono",
+        "openapi-types"
+      ]
+    },
+    "hono@4.13.4": {
+      "integrity": "sha512-AGEwKIyRMHRv1t8Wjwa3LHxQ61X5CqrdFT+4BRNTpqS5aJNnpl5WLjADb7vFlJzI/8uK7T5QLVApCMQKNa3LgQ=="
+    },
     "iconv-lite@0.7.3": {
       "integrity": "sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==",
       "dependencies": [
@@ -845,6 +883,9 @@
     },
     "ohash@2.0.12": {
       "integrity": "sha512-65S/5gk9YSsaRjcyf7Nfa6h/d3E8/1gslpXfI4W7Dxn/oap8IKRuNT5VXkLQ1YFKIEg4apRY4Pj6aiwFzrDdmw=="
+    },
+    "openapi-types@12.1.3": {
+      "integrity": "sha512-N4YtSYJqghVu4iek2ZUvcN/0aqH1kRDuNqzcycDxhOUpg7GdvLa2F3DgS6yBNhInhv2r/6I0Flkn7CqL8+nIcw=="
     },
     "path-key@3.1.1": {
       "integrity": "sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q=="
@@ -934,7 +975,7 @@
     "postgres@3.4.7": {
       "integrity": "sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw=="
     },
-    "prisma@7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8__react@19.2.8": {
+    "prisma@7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8": {
       "integrity": "sha512-aPqePoZIqwlAchbgbFDO/wHqGB+7H1nj9gaM+OsL9h77S5S3TnLd9BgD3LnoeDikULo7cl2HSUrEyQ55Z7DYbg==",
       "dependencies": [
         "@prisma/config",
@@ -957,6 +998,9 @@
     },
     "pure-rand@6.1.0": {
       "integrity": "sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA=="
+    },
+    "quansync@0.2.11": {
+      "integrity": "sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA=="
     },
     "rc9@3.0.1": {
       "integrity": "sha512-gMDyleLWVE+i6Sgtc0QbbY6pEKqYs97NGi6isHQPqYlLemPoO8dxQ3uGi0f4NiP98c+jMW6cG1Kx9dDwfvqARQ==",
@@ -1665,8 +1709,6 @@
     "dependencies": [
       "jsr:@db/postgres@~0.19.5",
       "jsr:@felix/argon2@^3.0.6",
-      "jsr:@hono/hono@^4.13.5",
-      "jsr:@hono/zod-validator@~0.9.1",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/csv@^1.0.6",
       "jsr:@std/dotenv@~0.225.8",
@@ -1674,12 +1716,15 @@
       "jsr:@std/expect@^1.0.20",
       "jsr:@std/path@^1.1.6",
       "jsr:@std/streams@^1.1.2",
+      "npm:hono@^4.13.4",
       "npm:zod@4.4.3"
     ],
     "packageJson": {
       "dependencies": [
+        "npm:@hono/standard-validator@0.4",
         "npm:@prisma/adapter-pg@^7.9.1",
         "npm:@prisma/client@^7.9.1",
+        "npm:hono-openapi@^1.3.2",
         "npm:ky@^2.0.2",
         "npm:prisma@^7.9.1"
       ]

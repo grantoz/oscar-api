@@ -41,31 +41,30 @@
 
 ## Testing (integration tests — not self-contained)
 
-There are no test-specific tasks. Run the normal tasks with the test env vars
-loaded from `.env.test`:
-
-```
-env $(grep -v "^#" .env.test | xargs) deno task <task> [...args]
-```
+There are no test-specific tasks. Derive the underlying commands from the
+`deno.jsonc` tasks and point them at the test env with `--env-file=.env.test`
+(e.g. `deno task dev` becomes
+`deno run -A --env-file=.env.test src/main.ts`).
 
 Tests are **HTTP integration tests** that hit a running server on `PORT=8001`
 via `ky`. They will fail unless:
 
-1. The test DB exists and is seeded:
-   `env $(grep -v "^#" .env.test | xargs) deno task db:new:seed`. This is
-   **destructive** (drops + recreates + migrates + seeds). Test DB name is the
-   dev DB name + `_test` suffix.
+1. The test DB exists and is seeded (derived from `db:new:seed`):
+   `deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno run -A --env-file=.env.test npm:prisma migrate dev && deno run -A --env-file=.env.test ./prisma/seed/index.ts`.
+   This is **destructive** (drops + recreates + migrates + seeds). Test DB name
+   is the dev DB name + `_test` suffix.
 2. The server is running against `.env.test` in a separate terminal:
-   `env $(grep -v "^#" .env.test | xargs) deno task dev`.
+   `deno run -A --env-file=.env.test src/main.ts` (add `--watch` to reload on
+   change, as `dev` does).
 
-Then run the suite:
+Then run the suite (this is what `deno task test` runs):
 
 ```
-env $(grep -v "^#" .env.test | xargs) deno test -A --trace-leaks src/
+deno test -A --env-file=.env.test --trace-leaks src/
 ```
 
-(The shell-provided `.env.test` vars win over the `.env` loaded by
-`@std/dotenv/load` / `--env-file`.)
+`--env-file=.env.test` is applied before modules load, and `.env` loaded by
+`@std/dotenv/load` does not override already-set vars, so the test values win.
 
 Seeded test credentials (`prisma/seed/user.ts`): `super@grantoz.io` /
 `superPass2025$`, `admin@grantoz.io` / `adminPass2025$`, etc. Test helpers live
