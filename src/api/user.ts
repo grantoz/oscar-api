@@ -1,7 +1,8 @@
 import { Context, Hono } from '@hono'
 import { db, Prisma } from '@mod/db'
 import { log, meta, pageOptions, pagination } from '@util'
-import { zValidator } from '@hono/zod-validator'
+import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
+import type { DescribeRouteOptions } from 'hono-openapi'
 import { z } from '@zod'
 import { hashPassword } from '@/util/user.ts'
 import { userView } from '@/view/user.ts'
@@ -72,72 +73,252 @@ const userPostSchema = userSchema
   })
 type userPostPayload = z.infer<typeof userPostSchema>
 
+const userViewSchema = z.object({
+  id: z.uuidv7(),
+  name: z.string().nullable(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  role: z.string(),
+  props: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+  posts: z.array(z.unknown()).optional(),
+})
+
+const metaSchema = z.object({
+  count: z.int(),
+  page: z.int(),
+  size: z.int(),
+  pages: z.int(),
+})
+
+const errorSchema = z.object({
+  error: z.string(),
+})
+
+const userListResponseSchema = z.object({
+  data: z.array(userViewSchema),
+  meta: metaSchema,
+})
+
+const userResponseSchema = z.object({
+  data: userViewSchema,
+})
+
+const paginationParams: NonNullable<DescribeRouteOptions['parameters']> = [
+  {
+    name: 'page',
+    in: 'query',
+    schema: { type: 'integer', minimum: 1, default: 1 },
+  },
+  {
+    name: 'size',
+    in: 'query',
+    schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
+  },
+  { name: 'sort', in: 'query', schema: { type: 'string' } },
+  {
+    name: 'dir',
+    in: 'query',
+    schema: { type: 'string', enum: ['asc', 'desc', 'ASC', 'DESC'] },
+  },
+]
+
 export const user = new Hono()
-  .get('/', etag(), async (c: Context) => {
-    const options = pageOptions(c.req.query() as pagination)
-    const users = await db.user.findMany(options)
-    // TODO cache headers
-    c.header('last-modified', await getLastModified('user'))
-    return c.json({ data: users.map(userView), meta: meta(users) })
-  })
-  // TODO generalise ID fetch routes
-  .get('/:id', etag(), validate('param', uuidIdSchema), async (c: Context) => {
-    /**
-     * Extracts the validated `id` parameter from the request.
-     * The `as never` type assertion bypasses TypeScript's strict type checking for the validator target,
-     * allowing the zValidator to properly infer and validate the parameter against the defined schema.
-     * This is a common pattern in Hono when using zValidator to ensure the validation result is correctly typed.
-     */
-    const { id } = c.req.valid('param' as never)
-    const user = await db.user.findUnique({
-      where: {
-        id,
+  .get(
+    '/',
+    describeRoute({
+      tags: ['user'],
+      summary: 'List users',
+      security: [{ bearerAuth: [] }],
+      parameters: paginationParams,
+      responses: {
+        200: {
+          description: 'List of users',
+          content: {
+            'application/json': {
+              schema: resolver(userListResponseSchema),
+            },
+          },
+        },
+        401: {
+          description: 'Not authorized',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
       },
-    })
-    if (!user) {
-      return c.notFound()
-    }
-    c.header('last-modified', user.updatedAt.toUTCString())
-    return c.json({ data: userView(user) })
-  })
-  .post('/', zValidator('json', userPostSchema), async (c: Context) => {
-    const payload: userPostPayload = c.req.valid('json' as never)
-    const userData: Prisma.UserCreateInput = {
-      name: payload.name,
-      email: payload.email,
-      phone: payload.phone,
-      props: {}, // Prisma.JsonNull, // or {} if you prefer
-    }
-    if (payload.password) {
-      userData.hash = await hashPassword(payload.password)
-    }
-
-    const logData = Object.assign({}, userData)
-    delete logData.hash
-    log.info('creating user', logData)
-
-    try {
-      const result = await db.user.create({ data: userData })
-      const userPostResultView = userView(result)
-      log.info('created user', userPostResultView)
-      const lastModified = await setLastModified('user')
-      c.header('Last-Modified', lastModified)
-      return c.json({ data: userPostResultView })
-
-      // deno-lint-ignore no-explicit-any
-    } catch (err: any) {
-      if (err.code === 'P2002') {
-        log.warn('create user: unique constraint failed', err)
-        return c.json({ error: 'unique constraint failed' }, 422)
+    }),
+    etag(),
+    async (c: Context) => {
+      const options = pageOptions(c.req.query() as pagination)
+      const users = await db.user.findMany(options)
+      // TODO cache headers
+      c.header('last-modified', await getLastModified('user'))
+      return c.json({ data: users.map(userView), meta: meta(users) })
+    },
+  )
+  // TODO generalise ID fetch routes
+  .get(
+    '/:id',
+    describeRoute({
+      tags: ['user'],
+      summary: 'Get a user by id',
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'User',
+          content: {
+            'application/json': {
+              schema: resolver(userResponseSchema),
+            },
+          },
+        },
+        404: {
+          description: 'User not found',
+        },
+        401: {
+          description: 'Not authorized',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+      },
+    }),
+    etag(),
+    validate('param', uuidIdSchema),
+    async (c: Context) => {
+      /**
+       * Extracts the validated `id` parameter from the request.
+       * The `as never` type assertion bypasses TypeScript's strict type checking for the validator target,
+       * allowing the zValidator to properly infer and validate the parameter against the defined schema.
+       * This is a common pattern in Hono when using zValidator to ensure the validation result is correctly typed.
+       */
+      const { id } = c.req.valid('param' as never)
+      const user = await db.user.findUnique({
+        where: {
+          id,
+        },
+      })
+      if (!user) {
+        return c.notFound()
       }
-      log.warn('Error creating user', err)
-      throw err
-    }
-  })
+      c.header('last-modified', user.updatedAt.toUTCString())
+      return c.json({ data: userView(user) })
+    },
+  )
+  .post(
+    '/',
+    describeRoute({
+      tags: ['user'],
+      summary: 'Create a user',
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Created user',
+          content: {
+            'application/json': {
+              schema: resolver(userResponseSchema),
+            },
+          },
+        },
+        422: {
+          description: 'Unique constraint failed',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+        401: {
+          description: 'Not authorized',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+      },
+    }),
+    zValidator('json', userPostSchema),
+    async (c: Context) => {
+      const payload: userPostPayload = c.req.valid('json' as never)
+      const userData: Prisma.UserCreateInput = {
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        props: {}, // Prisma.JsonNull, // or {} if you prefer
+      }
+      if (payload.password) {
+        userData.hash = await hashPassword(payload.password)
+      }
+
+      const logData = Object.assign({}, userData)
+      delete logData.hash
+      log.info('creating user', logData)
+
+      try {
+        const result = await db.user.create({ data: userData })
+        const userPostResultView = userView(result)
+        log.info('created user', userPostResultView)
+        const lastModified = await setLastModified('user')
+        c.header('Last-Modified', lastModified)
+        return c.json({ data: userPostResultView })
+
+        // deno-lint-ignore no-explicit-any
+      } catch (err: any) {
+        if (err.code === 'P2002') {
+          log.warn('create user: unique constraint failed', err)
+          return c.json({ error: 'unique constraint failed' }, 422)
+        }
+        log.warn('Error creating user', err)
+        throw err
+      }
+    },
+  )
   // .patch('/', zValidator('json', userPatchSchema), async (c: Context) => {
 
   .patch(
     '/:id',
+    describeRoute({
+      tags: ['user'],
+      summary: 'Update a user',
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Updated user',
+          content: {
+            'application/json': {
+              schema: resolver(userResponseSchema),
+            },
+          },
+        },
+        404: {
+          description: 'User not found',
+        },
+        429: {
+          description: 'Unique constraint failed',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+        401: {
+          description: 'Not authorized',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
+      },
+    }),
     validate('param', uuidIdSchema),
     zValidator('json', userPatchSchema),
     async (c: Context) => {

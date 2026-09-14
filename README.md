@@ -39,14 +39,15 @@ You can then run the tests: `dtt test`
 - Last-Modified header for individual and collection entity endpoints
 - Emit etag for API resources
 - Only emit etag for GET-type routes
+- Per-env seeding (TODO improve)
+- Hono / Zod OpenApi generation
 
 **TODO:**
--
+
 - Some more meaningful entities
 - JWT invalidation via CLI
 - API tests (in progress...)
 - Hono CORS middleware
-- Hono / Zod OpenApi generation
 - View models (AKA transformers / presenters) - perhaps class based with
   declarative properties e.g. `publicFields`, map transform field:function
 - ACL system for API components
