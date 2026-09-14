@@ -186,27 +186,27 @@ export const post = new Hono()
       const payload: postPost = c.req.valid('json' as never)
       log.info('creating post', payload)
 
-      const user = c.get('authUser') as User
-      log.info('creating post for user', { userId: user.id }) // TODO PII LEAK
+      const authUser = c.get('authUser') as User
+      log.info('creating post for user', { userId: authUser.id }) // TODO PII LEAK
 
       try {
         const result = await db.post.create({
           data: {
             title: payload.title,
             content: payload.content,
-            userId: user.id,
+            userId: authUser.id,
           },
         })
-        log.info('created post', result)
+        log.info('created Post DB record', { actorId: authUser.id, result })
         return c.json({ data: result })
 
         // deno-lint-ignore no-explicit-any
       } catch (err: any) {
         if (err.code === 'P2002') {
-          log.warn('create post: unique constraint failed', err)
+          log.warn('error create post: unique constraint failed')
           return c.json({ error: 'unique constraint failed' }, 422)
         }
-        log.warn('error creating post', err)
+        log.warn('error creating post')
         return c.json({ error: 'error creating post' }, 500)
       }
     },
@@ -240,24 +240,30 @@ export const post = new Hono()
     zValidator('json', postPatchSchema),
     async (c: Context) => {
       const payload: postPatch = c.req.valid('json' as never)
-      log.info('updating post', payload)
+      const authUser = c.get('authUser') as User
+      log.info('updating post', { actorId: authUser.id, payload })
       try {
         const result = await db.post.update({
           where: {
             id: payload.id,
+            userId: authUser.id,
           },
           data: {
             title: payload.title,
             content: payload.content,
           },
         })
-        log.info('updated post', result)
+        log.info('updated post', { actorId: authUser.id, result })
         return c.json({ data: result })
 
         // deno-lint-ignore no-explicit-any
       } catch (err: any) {
-        log.error('error updating post', err)
-        throw err
+        if (err.code === 'P2025') {
+          log.info('error updating post: record not found', { id: payload.id })
+          return c.notFound()
+        }
+        log.error('error updating post')
+        return c.json({ error: 'error updating post' }, 500)
       }
-    },
+    }
   )

@@ -47,7 +47,7 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
       return c.json({ error: 'Not Authorized' }, 401)
     }
 
-    log.debug('logged-in user found in KV', { kvUser: res.value })
+    log.debug('logged-in user found in KV', { id: decoded.sub })
 
     // store user info in context for use in app components
     c.set('authUser', res.value)

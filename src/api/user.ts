@@ -1,5 +1,5 @@
 import { Context, Hono } from '@hono'
-import { db, Prisma } from '@mod/db'
+import { db, Prisma, User } from '@mod/db'
 import { log, meta, pageOptions, pagination } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
 import type { DescribeRouteOptions } from 'hono-openapi'
@@ -17,8 +17,8 @@ const uuidIdSchema = z.object({
   id: z.uuidv7(),
 })
 
-const userSchema = z.object({
-  // id: z.uuidv7(),
+// note: ID cannot be passed in the payload body for patch or post
+const userBaseSchema = z.object({
   name: z.string().optional(),
   email: z.string().optional(),
   phone: z.string().optional(),
@@ -53,7 +53,7 @@ const userPropsSchema = z.custom<Prisma.InputJsonValue>().superRefine(
   },
 )
 
-const userPatchSchema = userSchema
+const userPatchSchema = userBaseSchema
   .extend({
     props: userPropsSchema.optional(),
   })
@@ -64,7 +64,7 @@ const userPatchSchema = userSchema
 type userPatchPayload = z.infer<typeof userPatchSchema>
 
 // user post must have an email, so re-create is as non-optional
-const userPostSchema = userSchema
+const userPostSchema = userBaseSchema
   .omit({ email: true })
   .extend({ email: z.email() })
   .strict()
@@ -258,25 +258,27 @@ export const user = new Hono()
         userData.hash = await hashPassword(payload.password)
       }
 
+      const authUser = c.get('authUser')
       const logData = Object.assign({}, userData)
+      // redact sensitive fields
       delete logData.hash
-      log.info('creating user', logData)
+      log.info('creating user', { ...logData, actorId: authUser.id })
 
       try {
         const result = await db.user.create({ data: userData })
-        const userPostResultView = userView(result)
-        log.info('created user', userPostResultView)
+        log.info('created user', {actorId: authUser.id, subjectId: result.id})
         const lastModified = await setLastModified('user')
         c.header('Last-Modified', lastModified)
-        return c.json({ data: userPostResultView })
+        return c.json({ data: userView(result) })
 
         // deno-lint-ignore no-explicit-any
       } catch (err: any) {
         if (err.code === 'P2002') {
-          log.warn('create user: unique constraint failed', err)
+          // log.warn('create user: unique constraint failed', err)
+          log.warn('create user: unique constraint failed')
           return c.json({ error: 'unique constraint failed' }, 422)
         }
-        log.warn('Error creating user', err)
+        log.warn('Error creating user')
         throw err
       }
     },
@@ -336,11 +338,6 @@ export const user = new Hono()
         userData.hash = await hashPassword(payload.password)
       }
 
-      const logData = Object.assign({}, userData)
-      delete logData.hash
-      logData.id = id
-      log.info('updating user', logData)
-
       try {
         const result = await db.user.update({
           where: {
@@ -348,24 +345,22 @@ export const user = new Hono()
           },
           data: userData,
         })
-        const userPatchResultView = userView(result)
-        log.info('updated user', userPatchResultView)
+        const view = userView(result)
+        log.info('updated user', { id, user: view })
         await setLastModified('user') // TODO this could be rolled into metric emission
-        return c.json({ data: userPatchResultView })
+        return c.json({ data: view })
 
         // deno-lint-ignore no-explicit-any
       } catch (err: any) {
-        if (err.code === 'P2025') { // err.target === ['email']
-          log.info('patch user: entity not found')
+        if (err.code === 'P2025') {
+          log.info('patch user: record not found', { id })
           return c.notFound()
-        } else if (err.code === 'P2002') { // err.target === ['email']
-          log.info('patch user: unique constraint failed', err)
+        } else if (err.code === 'P2002') {
+          log.info('patch user: unique constraint failed', { id })
           return c.json({ error: 'Unique constraint failed' }, 429)
         }
-        log.warn('error updating user', err)
-        throw err
-        // TODO test various error conditions, logging and output for failure modes
-        // return c.json({ error: 'Error creating user' }, 500)
+        log.warn('error updating user')
+        return c.json({ error: 'error updating user' }, 500)
       }
     },
   )
