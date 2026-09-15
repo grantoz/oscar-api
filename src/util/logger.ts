@@ -1,6 +1,8 @@
 // logger.ts
 // Requires --allow-env permission
 
+import { getActorId } from './actorContext.ts'
+
 // --- Configuration Constants ---
 const LOG_LEVELS: { [key: string]: number } = {
   DEBUG: 1,
@@ -21,6 +23,19 @@ const MIN_LEVEL = LOG_LEVELS[LOG_LEVEL] ?? LOG_LEVELS.INFO
 
 function levelEnabled(targetLevel: number): boolean {
   return targetLevel >= MIN_LEVEL
+}
+
+const isLogObject = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
+
+export const withActorId = <T>(args: T[]): T[] => {
+  const actorId = getActorId()
+  if (!actorId) {
+    return args
+  }
+  return args.map((arg) =>
+    isLogObject(arg) && !('actorId' in arg) ? { ...arg, actorId } : arg
+  )
 }
 
 /**
@@ -69,6 +84,7 @@ const colors: { [key: string]: string } = {
  * @param args The rest of the arguments.
  */
 function output(levelName: string, message: unknown, args: unknown[]) {
+  args = withActorId(args)
   const consoleMethod = consoleMethods[levelName] || console.error
   const color = colors[levelName] || 'color: red; font-weight: bold'
 
@@ -121,6 +137,7 @@ export const log = {
     level: keyof typeof LOG_LEVELS,
     context: Record<string, unknown>,
   ) => {
+    const [resolved] = withActorId([context])
     const levelName = level.toString().toUpperCase()
     const levelNum = LOG_LEVELS[levelName]
     if (levelNum && levelEnabled(levelNum)) {
@@ -128,13 +145,13 @@ export const log = {
         // Log the full context object directly as the message
         console.log(
           JSON.stringify({
-            ...context,
+            ...resolved,
             level: levelName,
             timestamp: new Date().toISOString(),
           }),
         )
       } else {
-        console.log(`[${levelName}] CONTEXT:`, context)
+        console.log(`[${levelName}] CONTEXT:`, resolved)
       }
     }
   },

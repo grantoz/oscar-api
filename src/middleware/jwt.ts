@@ -1,5 +1,5 @@
 import { Context } from '@hono'
-import { kv, log } from '@util'
+import { actorStorage, kv, log } from '@util'
 import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa'
 import { verify } from '@hono/jwt'
 import { jwtUser } from '@/auth/types.ts'
@@ -51,6 +51,7 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
 
     // store user info in context for use in app components
     c.set('authUser', res.value)
+    actorStorage.enterWith(decoded.sub)
   } catch (error) {
     log.info('Invalid JWT:', { error })
     return c.json({ error: 'Not Authorized' }, 401)

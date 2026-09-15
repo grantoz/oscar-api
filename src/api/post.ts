@@ -194,7 +194,7 @@ export const post = new Hono()
             userId: authUser.id,
           },
         })
-        log.info('created Post DB record', { actorId: authUser.id, result })
+        log.info('created Post DB record', { result })
         return c.json({ data: result })
 
         // deno-lint-ignore no-explicit-any
@@ -249,7 +249,7 @@ export const post = new Hono()
             content: payload.content,
           },
         })
-        log.info('updated post', { actorId: authUser.id, result })
+        log.info('updated post', { result })
         return c.json({ data: result })
 
         // deno-lint-ignore no-explicit-any

@@ -69,12 +69,10 @@ export const requestLogMiddleware = async (
     }
   }
 
-  const authUser = c.get('authUser') as { id?: string } | undefined
-  const actorId = authUser?.id
   const config = loggedEntities[entity]
   const data = isPlainObject(payload)
-    ? { ...redactPayload(payload, config.redact), actorId }
-    : { payload, actorId }
+    ? redactPayload(payload, config.redact)
+    : { payload }
 
   log.info(`${method} ${entity}`, data)
   await next()

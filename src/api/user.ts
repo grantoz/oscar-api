@@ -258,11 +258,9 @@ export const user = new Hono()
         userData.hash = await hashPassword(payload.password)
       }
 
-      const authUser = c.get('authUser')
-
       try {
         const result = await db.user.create({ data: userData })
-        log.info('created user', { actorId: authUser.id, subjectId: result.id })
+        log.info('created user', { subjectId: result.id })
         const lastModified = await setLastModified('user')
         c.header('Last-Modified', lastModified)
         return c.json({ data: userView(result) })

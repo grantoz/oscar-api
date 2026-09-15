@@ -61,21 +61,15 @@ const withLogSpy = async (fn: (calls: unknown[][]) => Promise<void>) => {
   }
 }
 
-type TestEnv = { Variables: { authUser: { id: string } } }
-
-const appWithAuth = (actorId = 'actor-1') => {
-  const app = new Hono<TestEnv>()
-  app.use(async (c, next) => {
-    c.set('authUser', { id: actorId })
-    await next()
-  })
+const logApp = () => {
+  const app = new Hono()
   app.use(requestLogMiddleware)
   return app
 }
 
-Deno.test('requestLogMiddleware logs POST user with redacted secrets and actorId', async () => {
+Deno.test('requestLogMiddleware logs POST user with redacted secrets', async () => {
   await withLogSpy(async (calls) => {
-    const app = appWithAuth('user-42')
+    const app = logApp()
     let received: Record<string, unknown> | undefined
     app.post('/api/user', async (c) => {
       received = await c.req.json()
@@ -104,7 +98,6 @@ Deno.test('requestLogMiddleware logs POST user with redacted secrets and actorId
           password: '[REDACTED]',
           passwordConfirm: '[REDACTED]',
           confirmPassword: '[REDACTED]',
-          actorId: 'user-42',
         },
       ],
     ])
@@ -113,7 +106,7 @@ Deno.test('requestLogMiddleware logs POST user with redacted secrets and actorId
 
 Deno.test('requestLogMiddleware logs PATCH post payload without redaction', async () => {
   await withLogSpy(async (calls) => {
-    const app = appWithAuth()
+    const app = logApp()
     app.patch('/api/post', (c) => c.json({ ok: true }))
 
     const payload = { id: 'post-1', title: 't', content: 'c' }
@@ -124,14 +117,14 @@ Deno.test('requestLogMiddleware logs PATCH post payload without redaction', asyn
     })
 
     assertEquals(calls, [
-      ['PATCH post', { ...payload, actorId: 'actor-1' }],
+      ['PATCH post', { id: 'post-1', title: 't', content: 'c' }],
     ])
   })
 })
 
 Deno.test('requestLogMiddleware does not log GET or allow-listed-excluded entities', async () => {
   await withLogSpy(async (calls) => {
-    const app = appWithAuth()
+    const app = logApp()
     app.get('/api/user', (c) => c.json({ ok: true }))
     app.post('/api/country', (c) => c.json({ ok: true }))
 
