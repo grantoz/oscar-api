@@ -68,7 +68,7 @@ export const country = new Hono()
           },
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),
@@ -104,7 +104,7 @@ export const country = new Hono()
           description: 'Country not found',
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),

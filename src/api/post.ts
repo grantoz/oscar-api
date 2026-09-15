@@ -90,7 +90,7 @@ export const post = new Hono()
           },
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),
@@ -125,7 +125,7 @@ export const post = new Hono()
           description: 'Post not found',
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),
@@ -225,7 +225,7 @@ export const post = new Hono()
           },
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),

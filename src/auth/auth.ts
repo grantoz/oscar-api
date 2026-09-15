@@ -78,7 +78,7 @@ const auth = new Hono()
 
       if (!auth || !auth.startsWith('Basic ')) {
         c.res.headers.set('WWW-Authenticate', 'Basic realm="Secure Area"')
-        return c.text('Not Authorized', 401)
+        return c.text('Unauthorized', 401)
       }
 
       // Extract the Base64-encoded part
@@ -170,26 +170,26 @@ const auth = new Hono()
 
         if (!decoded.sub || !decoded.exp) { // any more fields required?
           log.warn('invalid refresh token payload', decoded)
-          return c.json({ error: 'Not Authorized' }, 401)
+          return c.json({ error: 'Unauthorized' }, 401)
         }
         log.debug('refresh token is valid:', decoded)
 
         if (decoded.exp < Date.now() || decoded.sub != payload.client_id) {
-          return c.json({ error: 'Not Authorized' }, 401)
+          return c.json({ error: 'Unauthorized' }, 401)
         }
 
         // check whether the refresh token is in the kv store
         const res = await kv.get(['refresh', port, decoded.sub as string])
         if (!res.value) {
           log.info('refresh token for user not found in kv:', decoded)
-          return c.json({ error: 'Not Authorized' }, 401)
+          return c.json({ error: 'Unauthorized' }, 401)
         }
 
         log.debug('refresh token for user found in kv', { kvUser: res.value })
         userId = decoded.sub
       } catch (error) {
         log.warn('Invalid JWT:', { error })
-        return c.json({ error: 'Not Authorized' }, 401)
+        return c.json({ error: 'Unauthorized' }, 401)
       }
 
       const user = await db.user.findUnique({
@@ -200,7 +200,7 @@ const auth = new Hono()
 
       if (!user) {
         log.warn('user not found despite valid refresh token!', { id: userId })
-        return c.json({ error: 'Not Authorized' }, 401)
+        return c.json({ error: 'Unauthorized' }, 401)
       }
 
       const { token, refresh } = await createAndStoreLoginTokens(user)
@@ -234,7 +234,7 @@ const auth = new Hono()
           },
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorResponseSchema),

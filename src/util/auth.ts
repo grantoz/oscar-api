@@ -58,7 +58,7 @@ const authoriseLogin = async (
 const createAndStoreLoginTokens = async (user: User) => {
   if (!user) {
     // TODO throw Error, have caller catch and return 401
-    throw new HTTPException(401, { message: 'Not Authorized' })
+    throw new HTTPException(401, { message: 'Unauthorized' })
   }
   const jwtPayload: jwtUser = {
     sub: user.id,

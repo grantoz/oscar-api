@@ -143,7 +143,7 @@ export const user = new Hono()
           },
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),
@@ -181,7 +181,7 @@ export const user = new Hono()
           description: 'User not found',
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),
@@ -236,7 +236,7 @@ export const user = new Hono()
           },
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),
@@ -306,7 +306,7 @@ export const user = new Hono()
           },
         },
         401: {
-          description: 'Not authorized',
+          description: 'Unauthorized',
           content: {
             'application/json': {
               schema: resolver(errorSchema),
@@ -331,6 +331,8 @@ export const user = new Hono()
         userData.hash = await hashPassword(payload.password)
       }
 
+      // TODO user with role 'user' can only update themselves
+
       try {
         const result = await db.user.update({
           where: {
@@ -338,10 +340,9 @@ export const user = new Hono()
           },
           data: userData,
         })
-        const view = userView(result)
-        log.info('updated user', { id, user: view })
+        log.info('updated user', { id })
         await setLastModified('user') // TODO this could be rolled into metric emission
-        return c.json({ data: view })
+        return c.json({ data: userView(result) })
 
         // deno-lint-ignore no-explicit-any
       } catch (err: any) {
