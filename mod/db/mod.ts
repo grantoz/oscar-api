@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from '../../prisma/generated/client.ts'
 import { PrismaPg } from '@prisma/adapter-pg'
+import { withCrudMetrics } from './crudMetrics.ts'
 
 const getDB = (): PrismaClient => {
   const dbUrl: string = Deno.env.get('DATABASE_URL') || ''
@@ -25,6 +26,14 @@ const getDB = (): PrismaClient => {
 
   const adapter: PrismaPg = new PrismaPg({ connectionString: dbUrl! })
 
+  if (Deno.env.get('DB_METRICS') === 'true') {
+    return withCrudMetrics(
+      new PrismaClient({
+        adapter,
+        log,
+      }),
+    )
+  }
   return new PrismaClient({
     adapter,
     log,
@@ -33,7 +42,7 @@ const getDB = (): PrismaClient => {
   // https://www.prisma.io/docs/orm/prisma-client/queries/custom-models
 }
 
-const db: PrismaClient = await getDB()
+const db: PrismaClient = getDB()
 
 export { db, getDB, Prisma }
 export type {

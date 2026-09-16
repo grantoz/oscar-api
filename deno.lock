@@ -33,6 +33,8 @@
     "jsr:@std/streams@^1.0.9": "1.1.2",
     "jsr:@std/streams@^1.1.2": "1.1.2",
     "npm:@hono/standard-validator@0.4": "0.4.0_@standard-schema+spec@1.1.0_hono@4.13.4",
+    "npm:@opentelemetry/api@1.9.1": "1.9.1",
+    "npm:@opentelemetry/api@^1.9.1": "1.9.1",
     "npm:@prisma/adapter-pg@^7.9.1": "7.9.1",
     "npm:@prisma/client@^7.9.1": "7.9.1_prisma@7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8",
     "npm:@types/node@*": "24.2.0",
@@ -182,6 +184,9 @@
         "@standard-schema/spec",
         "hono"
       ]
+    },
+    "@opentelemetry/api@1.9.1": {
+      "integrity": "sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q=="
     },
     "@prisma/adapter-pg@7.9.1": {
       "integrity": "sha512-Ho2RK1KanQxLNSC0sR5bpiiVep10sWPLXCcxK+KXfI/Q69TMRbiafSvLPv3V9snimX72rMCqGlyJ4sBO4lKTAw==",
@@ -1716,12 +1721,14 @@
       "jsr:@std/expect@^1.0.20",
       "jsr:@std/path@^1.1.6",
       "jsr:@std/streams@^1.1.2",
+      "npm:@opentelemetry/api@1.9.1",
       "npm:hono@^4.13.4",
       "npm:zod@4.4.3"
     ],
     "packageJson": {
       "dependencies": [
         "npm:@hono/standard-validator@0.4",
+        "npm:@opentelemetry/api@^1.9.1",
         "npm:@prisma/adapter-pg@^7.9.1",
         "npm:@prisma/client@^7.9.1",
         "npm:hono-openapi@^1.3.2",
