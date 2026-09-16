@@ -1,11 +1,13 @@
 import { Context, Hono } from '@hono'
-import { db, Prisma } from '@mod/db'
+import { db, Prisma, User } from '@mod/db'
 import { log, meta, pageOptions, pagination } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
 import type { DescribeRouteOptions } from 'hono-openapi'
 import { z } from '@zod'
+import { USER_ROLES, UserRole } from '@const'
 import { hashPassword } from '@/util/user.ts'
 import { userView } from '@/view/user.ts'
+import { canCreateUser, canPatchUser } from './userAuthz.ts'
 import { getLastModified, setLastModified } from '@/util/lastModified.ts'
 import { validate } from '@util'
 import { etag } from '@hono/etag'
@@ -53,9 +55,14 @@ const userPropsSchema = z.custom<Prisma.InputJsonValue>().superRefine(
   },
 )
 
+const roleIdSchema = z.enum(
+  Object.values(USER_ROLES) as [UserRole, ...UserRole[]],
+)
+
 const userPatchSchema = userBaseSchema
   .extend({
     props: userPropsSchema.optional(),
+    roleId: roleIdSchema.optional(),
   })
   .strict()
   .refine(passwordMatch, {
@@ -66,7 +73,7 @@ type userPatchPayload = z.infer<typeof userPatchSchema>
 // user post must have an email, so re-create is as non-optional
 const userPostSchema = userBaseSchema
   .omit({ email: true })
-  .extend({ email: z.email() })
+  .extend({ email: z.email(), roleId: roleIdSchema.optional() })
   .strict()
   .refine(passwordMatch, {
     message: 'Password and password confirmation must match',
@@ -235,6 +242,14 @@ export const user = new Hono()
             },
           },
         },
+        403: {
+          description: 'Forbidden',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
         401: {
           description: 'Unauthorized',
           content: {
@@ -248,12 +263,22 @@ export const user = new Hono()
     zValidator('json', userPostSchema),
     async (c: Context) => {
       const payload: userPostPayload = c.req.valid('json' as never)
-      const userData: Prisma.UserCreateInput = {
+      const roleId = payload.roleId ?? USER_ROLES.USER
+
+      // TODO /auth/registration endpoint that will allow new users to sign up
+      const authUser = c.get('authUser') as User
+      if (!canCreateUser(authUser, roleId)) {
+        return c.json({ error: 'forbidden' }, 403)
+      }
+
+      const userData: Prisma.UserUncheckedCreateInput = {
         name: payload.name,
         email: payload.email,
         phone: payload.phone,
+        roleId,
         props: {}, // Prisma.JsonNull, // or {} if you prefer
       }
+
       if (payload.password) {
         userData.hash = await hashPassword(payload.password)
       }
@@ -305,6 +330,14 @@ export const user = new Hono()
             },
           },
         },
+        403: {
+          description: 'Forbidden',
+          content: {
+            'application/json': {
+              schema: resolver(errorSchema),
+            },
+          },
+        },
         401: {
           description: 'Unauthorized',
           content: {
@@ -321,17 +354,34 @@ export const user = new Hono()
       const { id } = c.req.valid('param' as never)
       const payload: userPatchPayload = c.req.valid('json' as never)
 
-      const userData: Prisma.UserUpdateInput = {
+      const authUser = c.get('authUser') as User
+      const target = await db.user.findUnique({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          roleId: true,
+        },
+      })
+      if (!target) {
+        return c.notFound()
+      }
+      if (!canPatchUser(authUser, target, payload.roleId)) {
+        log.info('patch user: forbidden', { id, actorId: authUser.id })
+        return c.json({ error: 'forbidden' }, 403)
+      }
+
+      const userData: Prisma.UserUncheckedUpdateInput = {
         name: payload.name,
         email: payload.email,
         phone: payload.phone,
         props: payload.props,
+        roleId: payload.roleId,
       }
       if (payload.password) {
         userData.hash = await hashPassword(payload.password)
       }
-
-      // TODO user with role 'user' can only update themselves
 
       try {
         const result = await db.user.update({

@@ -47,11 +47,11 @@ export const testUsers: Record<string, TestUser> = {
   },
 }
 
-let superToken: string
-let adminToken: string
 // let superId: string
 let superApi: KyInstance
 let adminApi: KyInstance
+let staffApi: KyInstance
+let userApi: KyInstance
 
 const apiUri = `http://localhost:${port}/api`
 const authUri = `http://localhost:${port}/auth`
@@ -59,35 +59,46 @@ const authUri = `http://localhost:${port}/auth`
 const api = ky.create({ prefix: apiUri })
 const _auth = ky.create({ prefix: authUri })
 
-const { superUser, adminUser } = seededUsers
+const { superUser, adminUser, staffUser, userUser } = seededUsers
+
+const loginApi = async (
+  user: SeededUser,
+  setTestUserId: (id: string) => void,
+  setRefreshToken: (cookie: string) => void,
+): Promise<KyInstance> => {
+  const auth = encodeBase64(user.email + ':' + user.pass)
+  const resp = await ky.post(`${authUri}/login`, {
+    headers: {
+      Authorization: 'Basic ' + auth,
+    },
+  })
+  const respJson: loginOutput = await resp.json()
+  assert(respJson)
+
+  const decoded = await verifyAndDecodeJwt(respJson.token)
+  assert(decoded.sub) // sub = id. Also, available: email, role, exp
+  setTestUserId(decoded.sub)
+
+  const cookie = resp.headers.get('set-cookie')
+  assert(cookie)
+  setRefreshToken(cookie.substring(8, cookie.indexOf(';')))
+
+  return api.extend({
+    headers: {
+      Authorization: 'Bearer ' + respJson.token,
+    },
+  })
+}
 
 const asSuper = async (): Promise<KyInstance> => {
   if (superApi !== undefined) {
     return superApi
   }
-  const auth = encodeBase64(superUser.email + ':' + superUser.pass)
-  await ky.post(`${authUri}/login`, {
-    headers: {
-      Authorization: 'Basic ' + auth,
-    },
-  }).then(async (resp) => {
-    const respJson: loginOutput = await resp.json()
-    assert(respJson)
-    superToken = respJson.token
-    superApi = api.extend({
-      headers: {
-        Authorization: 'Bearer ' + superToken,
-      },
-    })
-
-    const decoded = await verifyAndDecodeJwt(superToken)
-    assert(decoded.sub) // sub = id. Also, available: email, role, exp
-    testUsers.superUser.id = decoded.sub
-
-    const cookie = resp.headers.get('set-cookie')
-    assert(cookie)
-    testUsers.superUser.refreshToken = cookie.substring(8, cookie.indexOf(';'))
-  })
+  superApi = await loginApi(
+    superUser,
+    (id) => testUsers.superUser.id = id,
+    (cookie) => testUsers.superUser.refreshToken = cookie,
+  )
   return superApi
 }
 
@@ -95,30 +106,36 @@ const asAdmin = async () => {
   if (adminApi !== undefined) {
     return adminApi
   }
-  const auth = encodeBase64(adminUser.email + ':' + adminUser.pass)
-  await ky.post(`${authUri}/login`, {
-    headers: {
-      Authorization: 'Basic ' + auth,
-    },
-  }).then(async (resp) => {
-    const respJson: loginOutput = await resp.json()
-    assert(respJson)
-    adminToken = respJson.token
-    adminApi = api.extend({
-      headers: {
-        Authorization: 'Bearer ' + adminToken,
-      },
-    })
-
-    const decoded = await verifyAndDecodeJwt(adminToken)
-    assert(decoded.sub) // sub = id. Also, available: email, role, exp
-    testUsers.adminUser.id = decoded.sub
-
-    const cookie = resp.headers.get('set-cookie')
-    assert(cookie)
-    testUsers.adminUser.refreshToken = cookie.substring(8, cookie.indexOf(';'))
-  })
+  adminApi = await loginApi(
+    adminUser,
+    (id) => testUsers.adminUser.id = id,
+    (cookie) => testUsers.adminUser.refreshToken = cookie,
+  )
   return adminApi
+}
+
+const asStaff = async () => {
+  if (staffApi !== undefined) {
+    return staffApi
+  }
+  staffApi = await loginApi(
+    staffUser,
+    (id) => testUsers.staffUser.id = id,
+    (cookie) => testUsers.staffUser.refreshToken = cookie,
+  )
+  return staffApi
+}
+
+const asUser = async () => {
+  if (userApi !== undefined) {
+    return userApi
+  }
+  userApi = await loginApi(
+    userUser,
+    (id) => testUsers.userUser.id = id,
+    (cookie) => testUsers.userUser.refreshToken = cookie,
+  )
+  return userApi
 }
 
 const logHeaders = (resp: KyResponse<unknown>) => {
@@ -129,4 +146,4 @@ const logHeaders = (resp: KyResponse<unknown>) => {
   )
 }
 
-export { asAdmin, asSuper, logHeaders }
+export { asAdmin, asStaff, asSuper, asUser, logHeaders }
