@@ -1,7 +1,6 @@
 {
   "tasks": {
     "dev": "deno run -A --env-file --watch src/main.ts",
-    "dev:otel": "OTEL_DENO=true deno run -A --env-file --watch src/main.ts",
 
     "db:create": "deno run -A --env-file cli/alter_db.js --create",
     "db:drop": "deno run -A --env-file cli/alter_db.js --drop",
@@ -34,6 +33,7 @@
     "@std/streams": "jsr:@std/streams@^1.1.2",
     "@zod": "npm:zod@4.4.3",
     "@faker": "https://deno.land/x/deno_faker@v1.0.3/locale/en_AU.ts",
+    "@opentelemetry/api": "npm:@opentelemetry/api@1.9.1",
     "@util": "./src/util/mod.ts",
     "@const": "./const/mod.ts",
     "@middleware": "./src/middleware/mod.ts",
