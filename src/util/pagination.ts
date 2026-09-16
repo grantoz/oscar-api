@@ -1,13 +1,18 @@
 import { z } from '@zod'
 import { log } from '@util'
+import type { DescribeRouteOptions } from 'hono-openapi'
 
 // deno-lint-ignore no-explicit-any
-const meta = (records: any[]) => { // TODO FIX THIS SHIT
+const meta = (records: any[], query?: pagination, total?: number) => {
+  const parsed = query ? paginationQuery.safeParse(query) : undefined
+  const page = parsed?.success ? parsed.data.page : 1
+  const size = parsed?.success ? parsed.data.size : 10
+  const count = total ?? records.length
   return {
-    count: records.length,
-    page: 1,
-    size: 10,
-    pages: Math.ceil(records.length / 10),
+    count,
+    page,
+    size,
+    pages: Math.ceil(count / size),
   }
 }
 
@@ -41,6 +46,27 @@ export interface prismaPagination {
   // deno-lint-ignore no-explicit-any
   where?: { [key: string]: any }
 }
+
+// OpenAPI query parameter definitions for paginated endpoints
+export const paginationParams: NonNullable<DescribeRouteOptions['parameters']> =
+  [
+    {
+      name: 'page',
+      in: 'query',
+      schema: { type: 'integer', minimum: 1, default: 1 },
+    },
+    {
+      name: 'size',
+      in: 'query',
+      schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
+    },
+    { name: 'sort', in: 'query', schema: { type: 'string' } },
+    {
+      name: 'dir',
+      in: 'query',
+      schema: { type: 'string', enum: ['asc', 'desc', 'ASC', 'DESC'] },
+    },
+  ]
 
 const parseIntOrDefault = (
   value: string | undefined,

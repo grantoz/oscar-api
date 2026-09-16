@@ -8,7 +8,12 @@ const port = Deno.env.get('PORT') ?? 8001
 
 interface ApiEnvelope<T> {
   data: T
-  meta?: unknown
+  meta?: {
+    count: number
+    page: number
+    size: number
+    pages: number
+  }
 }
 
 interface Country {
@@ -35,6 +40,53 @@ describe('country endpoints', () => {
     assertEquals(200, resp.status)
     assert(Array.isArray(output.data))
     assert(output.data.length > 0)
+  })
+
+  it('GET /country returns a Cache-Control header', async () => {
+    const resp = await superApi.get('country', { throwHttpErrors: false })
+    assertEquals(200, resp.status)
+    assertEquals(resp.headers.get('cache-control'), 'max-age=86400')
+  })
+
+  it('GET /country?page=2&size=10 should page the results', async () => {
+    const resp = await superApi.get('country?page=2&size=10', {
+      throwHttpErrors: false,
+    })
+    assertEquals(200, resp.status)
+    const output = await resp.json() as ApiEnvelope<Country[]>
+    assertEquals(output.data.length, 10)
+    assertEquals(output.meta?.page, 2)
+    assertEquals(output.meta?.size, 10)
+    assert((output.meta?.count ?? 0) > 10)
+    assertEquals(
+      output.meta?.pages,
+      Math.ceil((output.meta?.count ?? 0) / 10),
+    )
+  })
+
+  it('GET /country?sort=id&dir=desc should sort the results', async () => {
+    const resp = await superApi.get('country?sort=id&dir=desc', {
+      throwHttpErrors: false,
+    })
+    assertEquals(200, resp.status)
+    const output = await resp.json() as ApiEnvelope<Country[]>
+    assert(output.data.length > 1)
+    assert(
+      output.data[0].id >= output.data[1].id,
+      `expected descending order, got ${output.data[0].id} then ${
+        output.data[1].id
+      }`,
+    )
+  })
+
+  it('GET /country?sort=id&dir=asc should sort the results', async () => {
+    const resp = await superApi.get('country?sort=id&dir=asc', {
+      throwHttpErrors: false,
+    })
+    assertEquals(200, resp.status)
+    const output = await resp.json() as ApiEnvelope<Country[]>
+    assert(output.data.length > 1)
+    assert(output.data[0].id <= output.data[1].id)
   })
 
   it('GET /country/au should return 200 for a lowercase country code', async () => {

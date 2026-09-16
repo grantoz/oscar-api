@@ -1,6 +1,6 @@
 import { Context, Hono } from '@hono'
 import { db } from '@mod/db'
-import { meta } from '@util'
+import { meta, pageOptions, pagination, paginationParams } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
 import { z } from '@zod'
 import { log } from '@util'
@@ -58,6 +58,7 @@ export const country = new Hono()
       tags: ['country'],
       summary: 'List countries',
       security: [{ bearerAuth: [] }],
+      parameters: paginationParams,
       responses: {
         200: {
           description: 'List of countries',
@@ -78,11 +79,14 @@ export const country = new Hono()
       },
     }),
     async (c: Context) => {
-      // const options = pageOptions(c.req.query() as page)
-      // const countries = await db.country.findMany(options)
-      const countries = await db.country.findMany()
-      c.header('max-age', '86400')
-      return c.json({ data: countries, meta: meta(countries) })
+      const query = c.req.query() as pagination
+      const options = pageOptions(query)
+      const [countries, total] = await Promise.all([
+        db.country.findMany(options),
+        db.country.count(),
+      ])
+      c.header('Cache-Control', 'max-age=86400')
+      return c.json({ data: countries, meta: meta(countries, query, total) })
     },
   )
   .get(
@@ -125,7 +129,7 @@ export const country = new Hono()
       if (!item) {
         return c.notFound()
       }
-      c.header('max-age', '86400')
+      c.header('Cache-Control', 'max-age=86400')
       return c.json({ data: item })
     },
   )

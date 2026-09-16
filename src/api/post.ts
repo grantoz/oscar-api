@@ -1,8 +1,7 @@
 import { Context, Hono } from '@hono'
 import { db, Post, User } from '@mod/db'
-import { log, meta, pageOptions, pagination } from '@util'
+import { log, meta, pageOptions, pagination, paginationParams } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
-import type { DescribeRouteOptions } from 'hono-openapi'
 import { z } from '@zod'
 
 const uuidIdSchema = z.object({
@@ -52,25 +51,6 @@ const postListResponseSchema = z.object({
 const postResponseSchema = z.object({
   data: postSchema,
 })
-
-const paginationParams: NonNullable<DescribeRouteOptions['parameters']> = [
-  {
-    name: 'page',
-    in: 'query',
-    schema: { type: 'integer', minimum: 1, default: 1 },
-  },
-  {
-    name: 'size',
-    in: 'query',
-    schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
-  },
-  { name: 'sort', in: 'query', schema: { type: 'string' } },
-  {
-    name: 'dir',
-    in: 'query',
-    schema: { type: 'string', enum: ['asc', 'desc', 'ASC', 'DESC'] },
-  },
-]
 
 export const post = new Hono()
   .get(

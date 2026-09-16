@@ -1,8 +1,7 @@
 import { Context, Hono } from '@hono'
 import { db, Prisma, User } from '@mod/db'
-import { log, meta, pageOptions, pagination } from '@util'
+import { log, meta, pageOptions, pagination, paginationParams } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
-import type { DescribeRouteOptions } from 'hono-openapi'
 import { z } from '@zod'
 import { USER_ROLES, UserRole } from '@const'
 import { hashPassword } from '@/util/user.ts'
@@ -112,25 +111,6 @@ const userListResponseSchema = z.object({
 const userResponseSchema = z.object({
   data: userViewSchema,
 })
-
-const paginationParams: NonNullable<DescribeRouteOptions['parameters']> = [
-  {
-    name: 'page',
-    in: 'query',
-    schema: { type: 'integer', minimum: 1, default: 1 },
-  },
-  {
-    name: 'size',
-    in: 'query',
-    schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
-  },
-  { name: 'sort', in: 'query', schema: { type: 'string' } },
-  {
-    name: 'dir',
-    in: 'query',
-    schema: { type: 'string', enum: ['asc', 'desc', 'ASC', 'DESC'] },
-  },
-]
 
 export const user = new Hono()
   .get(
