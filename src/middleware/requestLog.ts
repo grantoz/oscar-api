@@ -74,6 +74,6 @@ export const requestLogMiddleware = async (
     ? redactPayload(payload, config.redact)
     : { payload }
 
-  log.info(`${method} ${entity}`, data)
+  log.info(data, `${method} ${entity}`)
   await next()
 }

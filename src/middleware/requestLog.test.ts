@@ -52,9 +52,9 @@ test('redactPayload clones payload when there is nothing to redact', () => {
 const withLogSpy = async (fn: (calls: unknown[][]) => Promise<void>) => {
   const calls: unknown[][] = []
   const original = log.info
-  log.info = (message: unknown, ...args: unknown[]) => {
-    calls.push([message, ...args])
-  }
+  log.info = ((object: unknown, message?: string) => {
+    calls.push([message, object])
+  }) as typeof log.info
   try {
     await fn(calls)
   } finally {

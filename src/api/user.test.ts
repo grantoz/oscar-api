@@ -12,10 +12,6 @@ import {
   testUsers,
 } from '../util/test.ts'
 
-interface loginOutput {
-  token: string
-}
-
 interface ApiEnvelope<T> {
   data: T
   meta?: unknown

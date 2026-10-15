@@ -25,16 +25,16 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
 
   // Extract the token part
   const token = auth.substring(7)
-  log.debug('validateJwt: token found in auth header', { token })
+  log.debug({ token }, 'validateJwt: token found in auth header')
 
   try {
     const decoded = await verifyAndDecodeJwt(token)
 
     if (!decoded.sub || !decoded.email || !decoded.role || !decoded.exp) {
-      log.info('invalid JWT payload', decoded)
+      log.info(decoded, 'invalid JWT payload')
       return c.json({ error: 'Unauthorized' }, 401)
     }
-    log.debug('JWT is valid:', decoded)
+    log.debug(decoded, 'JWT is valid')
 
     if (decoded.exp < Date.now()) {
       return c.json({ error: 'Unauthorized' }, 401)
@@ -51,8 +51,8 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
       ])
       if (refreshToken.value) {
         log.info(
-          'requesting user not found in login KV, but found in refresh KV',
           { id: decoded.sub },
+          'requesting user not found in login KV, but found in refresh KV',
         )
         c.header(
           'WWW-Authenticate',
@@ -65,9 +65,7 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
           refresh_url: '/auth/refresh',
         }, 401)
       }
-      log.info('requesting user not found in KV, they are logged out', {
-        id: decoded.sub,
-      })
+      log.info({ id: decoded.sub }, 'requesting user not found in KV, they are logged out')
       c.header(
         'WWW-Authenticate',
         'Bearer realm="api", error="invalid_token", error_description="Authentication required. Please log in at /auth/login."',
@@ -79,13 +77,13 @@ const validateJwtMiddleware = async (c: Context, next: () => Promise<void>) => {
       }, 401)
     }
 
-    log.debug('logged-in user found in KV', { id: decoded.sub })
+    log.debug({ id: decoded.sub }, 'logged-in user found in KV')
 
     // store user info in context for use in app components
     c.set('authUser', loginToken.value)
     actorStorage.enterWith(decoded.sub)
   } catch (error) {
-    log.info('Invalid JWT:', { error })
+    log.info({ err: error }, 'Invalid JWT')
     return c.json({ error: 'Unauthorized' }, 401)
   }
 

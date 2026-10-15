@@ -7,7 +7,7 @@ import {
 import { assertEquals } from '@/util/assert.ts'
 import process from 'node:process'
 
-process.env.TZ = process.env['TZ']
+process.env.TZ = 'UTC'
 
 test('lastModified::formatLastModified', function () {
   const d = new Date('2025-12-07 09:01:02')

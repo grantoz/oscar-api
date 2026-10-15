@@ -12,7 +12,7 @@ type KvKeyPart = string | number | bigint | boolean
 type KvKey = readonly KvKeyPart[]
 
 const client = createClient({ url: redisUrl })
-client.on('error', (err) => log.error('redis client error', { err }))
+client.on('error', (err) => log.error({ err }, 'redis client error'))
 
 await client.connect()
 
@@ -92,7 +92,10 @@ const del = async (key: KvKey): Promise<void> => {
 }
 
 const close = async (): Promise<void> => {
-  await client.quit()
+  // Idempotent: shutdown may race (e.g. node --watch forwards SIGINT), and
+  // quitting an already-closed client rejects with 'The client is closed'.
+  if (!client.isOpen) return
+  await client.close()
 }
 
 const kv = { get, set, delete: del, close }

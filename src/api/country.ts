@@ -120,7 +120,7 @@ export const country = new Hono()
     zValidator('param', countryIdSchema),
     async (c: Context) => {
       const { id } = c.req.valid('param' as never)
-      log.info('getting country', id)
+      log.info({ id }, 'getting country')
       const item = await db.country.findUnique({
         where: {
           id,

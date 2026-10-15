@@ -7,10 +7,10 @@ import { openAPIRouteHandler } from 'hono-openapi'
 import { db } from '@mod/db'
 import { api } from './api/mod.ts' // api  routes
 import { auth } from './auth/mod.ts' // auth routes
-import { kv, log } from '@util'
+import { kv, log, pinoLogger } from '@util'
 import process from 'node:process'
 
-process.env.TZ = process.env['TZ']
+process.env.TZ = 'UTC'
 
 const app = new Hono()
 app.use(logger())
@@ -65,6 +65,9 @@ app.get(
 
 // Other middleware here?
 
+let server: ReturnType<typeof serve> | undefined
+let shuttingDown = false
+
 const start = async () => {
   // TODO move this into a general utils file that is always included for runtime and non-runtime tests
   // deno-lint-ignore no-explicit-any
@@ -76,24 +79,47 @@ const start = async () => {
   log.info(`Starting server on port ${port}...`)
 
   try {
-    serve({ fetch: app.fetch, port }, (info) => {
+    server = serve({ fetch: app.fetch, port }, (info) => {
       log.info(`Server listening on port ${info.port}`)
     })
   } catch (err) {
-    log.error('start: error', { err })
+    log.error({ err }, 'start: error')
     await db.$disconnect()
     process.exit(1)
   }
 }
 
 const exit = async (status: number) => {
-  await db.$disconnect()
-  await kv.close()
+  // Signals may be delivered more than once (e.g. node --watch forwards the
+  // terminal's SIGINT to the child), so shutdown must be idempotent.
+  if (shuttingDown) return
+  shuttingDown = true
+
+  // Safety net: never let a stuck resource keep the process (and terminal) alive.
+  const forceExit = setTimeout(() => process.exit(status), 5000)
+  forceExit.unref()
+
+  server?.close()
+
+  try {
+    await db.$disconnect()
+  } catch (err) {
+    log.error({ err }, 'shutdown: failed to disconnect db')
+  }
+
+  try {
+    await kv.close()
+  } catch (err) {
+    log.error({ err }, 'shutdown: failed to close kv')
+  }
+
+  pinoLogger.flush()
+  clearTimeout(forceExit)
   process.exit(status)
 }
 
 process.on('unhandledRejection', async (err) => {
-  log.error('unhandledRejection', { err })
+  log.error({ err }, 'unhandledRejection')
   await exit(1)
 })
 
@@ -107,6 +133,4 @@ process.on('SIGTERM', async () => {
   await exit(0)
 })
 
-start().then(async () => {
-  await db.$disconnect()
-})
+void start()

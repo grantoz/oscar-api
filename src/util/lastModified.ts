@@ -23,7 +23,7 @@ const getLastModified = async (entity: string): Promise<string> => {
   const key = ['lastModified', port, entity]
   const result = await kv.get<Date>(key)
   if (result.value instanceof Date) {
-    log.debug(`typeof lastModified from `, result.value)
+    log.debug({ value: result.value }, 'typeof lastModified from')
     return formatLastModified(result.value)
   }
   return formatLastModified(new Date())

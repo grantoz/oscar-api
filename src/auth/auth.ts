@@ -86,7 +86,7 @@ const auth = new Hono()
 
       try {
         z.base64().parse(encodedCreds)
-      } catch (_error) {
+      } catch {
         log.debug('encoded creds is not base64')
         return c.json({ error: 'Invalid login' }, 401)
       }
@@ -102,14 +102,14 @@ const auth = new Hono()
         // TODO enforce sensible min password as app constant TODO updated seeders to match
         z.string().min(5).max(128).regex(printableAsciiRegex).parse(password)
       } catch (error) {
-        log.info('login email or password validation error', error)
+        log.info({ err: error }, 'login email or password validation error')
         return c.json({ error: 'Invalid login' }, 401)
       }
 
       let user: User
       try {
         user = await authoriseLogin(email, password)
-      } catch (_e) {
+      } catch {
         return c.json({ error: 'Invalid login' }, 401)
       }
 
@@ -169,10 +169,10 @@ const auth = new Hono()
         ) as jwtUser
 
         if (!decoded.sub || !decoded.exp) { // any more fields required?
-          log.warn('invalid refresh token payload', decoded)
+          log.warn(decoded, 'invalid refresh token payload')
           return c.json({ error: 'Unauthorized' }, 401)
         }
-        log.debug('refresh token is valid:', decoded)
+        log.debug(decoded, 'refresh token is valid')
 
         if (decoded.exp < Date.now() || decoded.sub != payload.client_id) {
           return c.json({ error: 'Unauthorized' }, 401)
@@ -181,14 +181,14 @@ const auth = new Hono()
         // check whether the refresh token is in the kv store
         const res = await kv.get(['refresh', port, decoded.sub as string])
         if (!res.value) {
-          log.info('refresh token for user not found in kv:', decoded)
+          log.info(decoded, 'refresh token for user not found in kv')
           return c.json({ error: 'Unauthorized' }, 401)
         }
 
-        log.debug('refresh token for user found in kv', { kvUser: res.value })
+        log.debug({ kvUser: res.value }, 'refresh token for user found in kv')
         userId = decoded.sub
       } catch (error) {
-        log.warn('Invalid JWT:', { error })
+        log.warn({ err: error }, 'Invalid JWT')
         return c.json({ error: 'Unauthorized' }, 401)
       }
 
@@ -199,7 +199,7 @@ const auth = new Hono()
       })
 
       if (!user) {
-        log.warn('user not found despite valid refresh token!', { id: userId })
+        log.warn({ id: userId }, 'user not found despite valid refresh token!')
         return c.json({ error: 'Unauthorized' }, 401)
       }
 

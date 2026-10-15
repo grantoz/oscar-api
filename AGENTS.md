@@ -119,6 +119,21 @@ The script runs `node --env-file=.env.test --import tsx --test
 Seeded test credentials (`prisma/seed/user.ts`): `super@grantoz.io` /
 `superPass2025$`, `admin@grantoz.io` / `adminPass2025$`, etc.
 
+## Logging
+
+- `src/util/logger.ts` exports `log`, a **pino** logger (also exported as
+  `pinoLogger`). Use the standard pino call convention:
+  `log.info({ field: value }, 'message')`, errors under the `err` key
+  (`log.error({ err }, 'message')`), or `log.info('message')` for a bare message.
+- Config: `LOG_LEVEL` (pino level), `LOG_FORMAT=JSON` for raw JSON output
+  (anything else uses `pino-pretty`), `LOG_COLORS` for pretty colors.
+- The actor id from `AsyncLocalStorage` (`actorContext.ts`) is attached to every
+  record via a pino `mixin` (`actorMixin`); an explicit `actorId` field on the
+  record wins.
+- Sensitive fields (`password`/`*Confirm`, `token`, `authorization`) are redacted
+  via pino `redact`, in addition to the `requestLog` payload redaction.
+- `log.flush()` is called on shutdown in `src/main.ts`.
+
 ## Style
 
 - No semicolons, single quotes, 2-space indent (carried over from `deno fmt`).

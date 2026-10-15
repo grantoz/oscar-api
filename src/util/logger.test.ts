@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import { assertEquals } from '@/util/assert.ts'
 import { getActorId, runWithActor } from './actorContext.ts'
-import { withActorId } from './logger.ts'
+import { actorMixin } from './logger.ts'
 
 test('actorContext::getActorId returns undefined outside a runWithActor scope', () => {
   assertEquals(getActorId(), undefined)
@@ -25,29 +25,21 @@ test('actorContext::runWithActor restores prior actor id when nested', () => {
   assertEquals(getActorId(), undefined)
 })
 
-test('logger::withActorId adds actorId to object log args', () => {
-  const args = runWithActor(
-    'actor-2',
-    () => withActorId<Record<string, unknown>>([{ email: 'a@b.c' }]),
-  )
-  assertEquals(args, [{ email: 'a@b.c', actorId: 'actor-2' }])
+test('logger::actorMixin is empty outside a runWithActor scope', () => {
+  assertEquals(actorMixin(), {})
 })
 
-test('logger::withActorId leaves existing actorId untouched', () => {
-  const args = runWithActor(
-    'actor-2',
-    () =>
-      withActorId<Record<string, unknown>>([{ actorId: 'explicit', foo: 1 }]),
-  )
-  assertEquals(args, [{ actorId: 'explicit', foo: 1 }])
+test('logger::actorMixin includes the actor id from scope', () => {
+  runWithActor('actor-2', () => {
+    assertEquals(actorMixin(), { actorId: 'actor-2' })
+  })
 })
 
-test('logger::withActorId leaves non-object args untouched', () => {
-  const args = runWithActor('actor-2', () => withActorId(['str', 42, [1, 2]]))
-  assertEquals(args, ['str', 42, [1, 2]])
-})
-
-test('logger::withActorId returns args unchanged with no actor in scope', () => {
-  const args = [{ foo: 'bar' }]
-  assertEquals(withActorId(args), args)
+test('logger::actorMixin tracks nested scopes', () => {
+  runWithActor('outer', () => {
+    runWithActor('inner', () => {
+      assertEquals(actorMixin(), { actorId: 'inner' })
+    })
+    assertEquals(actorMixin(), { actorId: 'outer' })
+  })
 })

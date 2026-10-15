@@ -22,9 +22,9 @@ export const hashPasswordAndSave = async (user: User, password: string) => {
         hash,
       },
     })
-    log.info('user: updated password', { id: user.id })
+    log.info({ id: user.id }, 'user: updated password')
   } catch (err: unknown) {
-    log.error('user: failed to update password', err)
+    log.error({ err }, 'user: failed to update password')
     throw err
   }
 }

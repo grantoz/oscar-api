@@ -265,7 +265,7 @@ export const user = new Hono()
 
       try {
         const result = await db.user.create({ data: userData })
-        log.info('created user', { subjectId: result.id })
+        log.info({ subjectId: result.id }, 'created user')
         const lastModified = await setLastModified('user')
         c.header('Last-Modified', lastModified)
         return c.json({ data: userView(result) })
@@ -273,7 +273,7 @@ export const user = new Hono()
         // deno-lint-ignore no-explicit-any
       } catch (err: any) {
         if (err.code === 'P2002') {
-          // log.warn('create user: unique constraint failed', err)
+          // log.warn({ err }, 'create user: unique constraint failed')
           log.warn('create user: unique constraint failed')
           return c.json({ error: 'unique constraint failed' }, 422)
         }
@@ -348,7 +348,7 @@ export const user = new Hono()
         return c.notFound()
       }
       if (!canPatchUser(authUser, target, payload.roleId)) {
-        log.info('patch user: forbidden', { id, actorId: authUser.id })
+        log.info({ id, actorId: authUser.id }, 'patch user: forbidden')
         return c.json({ error: 'forbidden' }, 403)
       }
 
@@ -370,17 +370,17 @@ export const user = new Hono()
           },
           data: userData,
         })
-        log.info('updated user', { id })
+        log.info({ id }, 'updated user')
         await setLastModified('user') // TODO this could be rolled into metric emission
         return c.json({ data: userView(result) })
 
         // deno-lint-ignore no-explicit-any
       } catch (err: any) {
         if (err.code === 'P2025') {
-          log.info('patch user: record not found', { id })
+          log.info({ id }, 'patch user: record not found')
           return c.notFound()
         } else if (err.code === 'P2002') {
-          log.info('patch user: unique constraint failed', { id })
+          log.info({ id }, 'patch user: unique constraint failed')
           return c.json({ error: 'Unique constraint failed' }, 429)
         }
         log.warn('error updating user')

@@ -174,7 +174,7 @@ export const post = new Hono()
             userId: authUser.id,
           },
         })
-        log.info('created Post DB record', { result })
+        log.info({ result }, 'created Post DB record')
         return c.json({ data: result })
 
         // deno-lint-ignore no-explicit-any
@@ -229,13 +229,13 @@ export const post = new Hono()
             content: payload.content,
           },
         })
-        log.info('updated post', { result })
+        log.info({ result }, 'updated post')
         return c.json({ data: result })
 
         // deno-lint-ignore no-explicit-any
       } catch (err: any) {
         if (err.code === 'P2025') {
-          log.info('error updating post: record not found', { id: payload.id })
+          log.info({ id: payload.id }, 'error updating post: record not found')
           return c.notFound()
         }
         log.error('error updating post')

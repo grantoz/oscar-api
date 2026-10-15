@@ -36,22 +36,22 @@ const authoriseLogin = async (
 
   // TODO improve exceptions
   if (!user) {
-    log.warn('login: user not found', { email }) // not a PII leak as user does not exist
+    log.warn({ email }, 'login: user not found') // not a PII leak as user does not exist
     throw new Error()
   }
 
   // todo test that this really works for user record not found
   if (!user?.hash) {
-    log.warn('login: user has no auth set up', { id: user.id })
+    log.warn({ id: user.id }, 'login: user has no auth set up')
     throw new Error()
   }
 
   const verified = await verify(user.hash, password)
   if (!verified) {
-    log.warn('login: bad password', { id: user.id })
+    log.warn({ id: user.id }, 'login: bad password')
     throw new Error()
   }
-  log.info('login: authorised', { id: user.id })
+  log.info({ id: user.id }, 'login: authorised')
   return user
 }
 
@@ -68,7 +68,7 @@ const createAndStoreLoginTokens = async (user: User) => {
     iss: issuer,
   }
   const jwt = await sign(jwtPayload, jwtSecret, jwtAlgo)
-  log.debug('generated JWT', jwtPayload)
+  log.debug(jwtPayload, 'generated JWT')
 
   const refreshPayload: refreshUser = {
     sub: user.id,
@@ -77,7 +77,7 @@ const createAndStoreLoginTokens = async (user: User) => {
     exp: Date.now() + refreshExpiry,
   }
   const refreshToken = await sign(refreshPayload, jwtSecret, jwtAlgo)
-  log.debug('generated refresh token', refreshPayload)
+  log.debug(refreshPayload, 'generated refresh token')
 
   const userData = Object.assign({}, user)
   userData.hash = null

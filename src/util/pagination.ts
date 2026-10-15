@@ -83,7 +83,7 @@ const pageOptions = (query: any): prismaPagination => {
     return {}
   }
   const parsed = result.data
-  log.debug('parsed query string for pageOptions', parsed)
+  log.debug(parsed, 'parsed query string for pageOptions')
   const options: prismaPagination = {}
   options.skip = (parsed.page - 1) * parsed.size
   options.take = parsed.size
