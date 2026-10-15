@@ -13,7 +13,6 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
       "@util": ["./src/util/mod.ts"],
       "@const": ["./const/mod.ts"],
