@@ -5,7 +5,7 @@ generator client {
   provider        = "prisma-client"
   previewFeatures = ["relationJoins", "partialIndexes"]
   output          = "./generated"
-  runtime         = "deno"
+  runtime         = "nodejs"
 }
 
 datasource db {

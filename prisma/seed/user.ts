@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from '@mod/db'
-import { faker as _faker } from '@faker'
+import { faker as _faker } from '@faker-js/faker'
 import { hashPassword } from '@util'
 import { Seeder } from './index.ts'
 

@@ -1,8 +1,8 @@
 // file: validator-wrapper.ts
-import { ZodSchema } from '@zod'
-import type { ValidationTargets } from '@hono'
+import { ZodSchema } from 'zod'
+import type { ValidationTargets } from 'hono'
 import { validator } from 'hono-openapi'
-import { HTTPException } from '@hono/http-exception'
+import { HTTPException } from 'hono/http-exception'
 
 export const validate = <
   T extends ZodSchema,

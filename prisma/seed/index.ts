@@ -1,11 +1,11 @@
-import '@std/dotenv/load'
+import 'dotenv/config'
 import { getDB, PrismaClient } from '@mod/db'
 import { countrySeeder } from './country.ts'
 import { roleSeeder } from './role.ts'
 import { userSeeder } from './user.ts'
 
 type AppEnv = 'dev' | 'test' | 'ci' | 'staging' | 'uat' | 'sandbox' | 'prod'
-const env = Deno.env.get('APP_ENV') as AppEnv
+const env = process.env['APP_ENV'] as AppEnv
 
 export interface Seeder {
   name: string
@@ -31,8 +31,8 @@ export async function runSeeder(
   }
 }
 
-Deno.env.set('LOG_DB_QUERIES', 'false')
-Deno.env.set('LOG_DB_INFO', 'false')
+process.env['LOG_DB_QUERIES'] = 'false'
+process.env['LOG_DB_INFO'] = 'false'
 const db = getDB()
 console.log(`begin seeding...`)
 
@@ -43,7 +43,7 @@ await runSeeder(userSeeder, env, db)
 console.log(`seeding finished.`)
 await db.$disconnect().then(() => {
   console.log('Disconnected from database.')
-  Deno.exit(0)
+  process.exit(0)
 }).catch((err) => {
   console.error('Error disconnecting from database:', err)
 })

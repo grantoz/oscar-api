@@ -1,6 +1,5 @@
-// import { load } from "@std/dotenv";
-import '@std/dotenv/load'
-import { assert, assertEquals, assertExists } from '@std/assert'
+import 'dotenv/config'
+import { assert, assertEquals, assertExists } from '@/util/assert.ts'
 import { before, describe, it } from 'node:test'
 import { KyInstance } from 'ky'
 import {

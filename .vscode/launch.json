@@ -5,36 +5,33 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "attachSimplePort": 9229,
-      "cwd": "${workspaceFolder}",
-      "env": {},
       "name": "Debug Server",
-      // "program": "${workspaceFolder}/src/main.ts",
+      "type": "node",
       "request": "launch",
-      "runtimeExecutable": "deno",
-      "runtimeArgs": [
-        "task",
-        "dev:test:inspect"
-      ],
-      "type": "node"
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/src/main.ts",
+      "runtimeArgs": ["--import", "tsx"],
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
-      "attachSimplePort": 9229,
-      "console": "integratedTerminal", // WE NEED THIS otherwise we don't get the output
-      // "cwd": "${workspaceFolder}",
-      "env": {},
       "name": "Debug Tests",
-      "program": "${file}", // THIS was required, not the above, otherwise it never finished
+      "type": "node",
       "request": "launch",
-      // "program": "${workspaceFolder}/main.ts", /* disabled specific entrypoint */
-      "runtimeExecutable": "deno", /* modified: using deno process name from my PATH */
+      "cwd": "${workspaceFolder}",
       "runtimeArgs": [
-        "test",
-        "-A",
-        "--env-file=.env.test",
+        "--import",
+        "tsx",
+        "--test",
+        "--test-force-exit",
+        "--test-concurrency=1",
         "--inspect-brk"
       ],
-      "type": "node"
+      "program": "${file}",
+      "envFile": "${workspaceFolder}/.env.test",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

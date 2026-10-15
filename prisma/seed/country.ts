@@ -1,13 +1,18 @@
 import { Prisma, PrismaClient } from '@mod/db'
-import { parse } from '@std/csv'
+import { parse } from 'csv-parse/sync'
+import { readFileSync } from 'node:fs'
 import { Seeder } from './index.ts'
 
-const text = Deno.readTextFileSync(Deno.cwd() + '/prisma/seed/countries.csv')
+const text = readFileSync(
+  process.cwd() + '/prisma/seed/countries.csv',
+  'utf8',
+)
 
 const csvData = parse(text, {
-  skipFirstRow: true,
-  strip: true,
-})
+  columns: true,
+  skip_empty_lines: true,
+  trim: true,
+}) as Record<string, string>[]
 
 const countryData: Prisma.CountryCreateInput[] = csvData.map((row) => ({
   id: row.id,

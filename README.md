@@ -1,26 +1,46 @@
 # Project Oscar API
 
+> Migrated from Deno to Node. The app, tests and tooling now run on Node
+> (targeting Node 26) with npm. See `AGENTS.md` for details.
+
 ## Setup
 
 - [Clone the related infrastructure repo](https://github.com/grantoz/oscar-infra) and follow the setup instructions
-- [Ensure you have the latest Deno installed](https://docs.deno.com/runtime/getting_started/installation/)
+- [Install Node 26](https://nodejs.org/) (nvm: `nvm install 26`)
 - Clone this repo
-- Run `deno task setup:all` - creates .env file with defaults, sets up and seeds database, generates prisma client
-- Run `deno task dev` - start service
+- Run `npm install`
+- Run `npm run setup:all` - creates `.env` file with defaults, sets up and seeds database, generates prisma client
+- Run `npm run dev` - start service
 
 ## Testing
 
-You'll need to use `.env.test` for testing. The easiest way to do this is with a shell alias for `deno task`, e.g:
+Tests are HTTP integration tests and need a Postgres database, a Redis server
+and a running app server. They use `.env.test` (test DB name is the dev DB name
+with a `_test` suffix, and `PORT=8001`).
+
+First time, create the test env file and set up the test DB:
 
 ```sh
-alias dtt='env $(grep -v "^#" .env.test | xargs) deno task'
+npm run setup:env -- --test   # writes .env.test (or copy env/.env.dev -> .env.test)
+node --env-file=.env.test cli/alter_db.js --drop --create
+node --env-file=.env.test --import tsx prisma/seed/index.ts
 ```
 
-First time, you'll need to set up the test env and DB: `dtt setup:all`
+> `prisma migrate` reads `DATABASE_URL` from the environment; export the test
+> values (e.g. `env $(grep -v '^#' .env.test | xargs) npx prisma migrate dev`)
+> before applying migrations to the test DB.
 
-Ensure there's an instance of the app server running in test mode: `dtt dev`
+Ensure there's an instance of the app server running against `.env.test`:
 
-You can then run the tests: `dtt test`
+```sh
+node --env-file=.env.test --import tsx src/main.ts
+```
+
+You can then run the tests:
+
+```sh
+npm test
+```
 
 ## Inspiration
 
@@ -32,7 +52,7 @@ You can then run the tests: `dtt test`
 
 - JWT issuance and middleware
 - JWT refresh token and flow
-- Deno KV session validation and easy invalidation
+- Redis (node-redis) session validation and easy invalidation
 - Pagination (10, 25, 50, 100)
 - DB setup and migration CLI tools
 - Easy project setup
@@ -51,7 +71,7 @@ You can then run the tests: `dtt test`
 - View models (AKA transformers / presenters) - perhaps class based with
   declarative properties e.g. `publicFields`, map transform field:function
 - ACL system for API components
-- Queue for async I/O (probably using Deno KV Queue)
+- Queue for async I/O (probably using Redis)
 - OAuth2.0
 - CI testing
 - Postmark integration

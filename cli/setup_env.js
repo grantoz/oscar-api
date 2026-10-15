@@ -1,8 +1,11 @@
-import { encodeBase64 } from '@std/encoding/base64'
+import { readFile, writeFile } from 'node:fs/promises'
+import { createInterface } from 'node:readline/promises'
 
-const test = Deno.args.includes('--test')
+const args = process.argv.slice(2)
+const test = args.includes('--test')
 const outFileName = test ? '.env.test' : '.env'
-const jwtSecret = encodeBase64(crypto.getRandomValues(new Uint8Array(64)))
+const jwtSecret = Buffer.from(crypto.getRandomValues(new Uint8Array(64)))
+  .toString('base64')
 
 const LINE = /^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/
 
@@ -37,11 +40,17 @@ function rewriteLine(line) {
   return override ? `${key}=${override(value)}` : line
 }
 
-if (confirm(`Please confirm creating a new copy of ${outFileName}`)) {
+const rl = createInterface({ input: process.stdin, output: process.stdout })
+const confirmed = await rl.question(
+  `Please confirm creating a new copy of ${outFileName} [y/N] `,
+)
+rl.close()
+
+if (/^y(es)?$/i.test(confirmed.trim())) {
   console.log(`Creating new copy of ${outFileName}`)
-  const src = await Deno.readTextFile('env/.env.dev')
+  const src = await readFile('env/.env.dev', 'utf8')
   const out = src.split(/\r?\n/).map(rewriteLine).join('\n')
-  await Deno.writeTextFile(outFileName, out.endsWith('\n') ? out : `${out}\n`)
+  await writeFile(outFileName, out.endsWith('\n') ? out : `${out}\n`)
 } else {
   console.log(`Will not create new ${outFileName}`)
 }

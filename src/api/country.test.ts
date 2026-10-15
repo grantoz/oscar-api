@@ -1,10 +1,10 @@
-import '@std/dotenv/load'
-import { assert, assertEquals } from '@std/assert'
+import 'dotenv/config'
+import { assert, assertEquals } from '@/util/assert.ts'
 import { before, describe, it } from 'node:test'
 import ky, { KyInstance } from 'ky'
 import { asSuper } from '../util/test.ts'
 
-const port = Deno.env.get('PORT') ?? 8001
+const port = process.env['PORT'] ?? 8001
 
 interface ApiEnvelope<T> {
   data: T

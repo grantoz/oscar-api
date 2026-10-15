@@ -2,7 +2,7 @@ import { Prisma } from '../../prisma/generated/client.ts'
 import type { PrismaClient } from '../../prisma/generated/client.ts'
 import { metrics } from '@opentelemetry/api'
 
-const serviceName = Deno.env.get('OTEL_SERVICE_NAME') || 'app'
+const serviceName = process.env['OTEL_SERVICE_NAME'] || 'app'
 
 const meter = metrics.getMeter(serviceName, '1.0.0')
 

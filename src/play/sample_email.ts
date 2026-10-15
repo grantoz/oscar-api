@@ -1,4 +1,4 @@
-import '@std/dotenv/load'
+import 'dotenv/config'
 import { sendTestEmail } from './send_test_email.js'
 
 sendTestEmail()

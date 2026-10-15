@@ -13,10 +13,10 @@ const LOG_LEVELS: { [key: string]: number } = {
 }
 
 // --- Environment Variables ---
-const LOG_LEVEL = Deno.env.get('LOG_LEVEL')?.toUpperCase() ?? 'INFO'
-const JSON_FORMAT = Deno.env.get('LOG_FORMAT')?.toUpperCase() === 'JSON'
-const OTEL_DENO = Deno.env.get('OTEL_DENO') === 'true'
-const LOG_COLORS = !OTEL_DENO && Deno.env.get('LOG_COLORS') === 'true'
+const LOG_LEVEL = process.env['LOG_LEVEL']?.toUpperCase() ?? 'INFO'
+const JSON_FORMAT = process.env['LOG_FORMAT']?.toUpperCase() === 'JSON'
+const OTEL_DENO = process.env['OTEL_DENO'] === 'true'
+const LOG_COLORS = !OTEL_DENO && process.env['LOG_COLORS'] === 'true'
 
 // --- Configuration Resolution ---
 const MIN_LEVEL = LOG_LEVELS[LOG_LEVEL] ?? LOG_LEVELS.INFO

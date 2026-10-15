@@ -1,4 +1,4 @@
-import '@std/dotenv/load'
+import 'dotenv/config'
 import { createEmailPayload, sendTestEmail } from './util/mail.ts'
 
 const payload = createEmailPayload({

@@ -1,9 +1,10 @@
-import { assertEquals } from '@std/assert'
+import { test } from 'node:test'
+import { assertEquals } from '@/util/assert.ts'
 import { kv } from './kv.ts'
 
 const suffix = crypto.randomUUID()
 
-Deno.test('kv adapter: object roundtrip', async () => {
+test('kv adapter: object roundtrip', async () => {
   const key = ['verify', 8000, suffix]
   await kv.set(key, { id: suffix, nested: { ok: true } })
   const res = await kv.get<{ id: string; nested: { ok: boolean } }>(key)
@@ -12,12 +13,12 @@ Deno.test('kv adapter: object roundtrip', async () => {
   await kv.delete(key)
 })
 
-Deno.test('kv adapter: missing key returns null', async () => {
+test('kv adapter: missing key returns null', async () => {
   const res = await kv.get(['verify', 8000, 'does-not-exist'])
   assertEquals(res.value, null)
 })
 
-Deno.test('kv adapter: delete removes value', async () => {
+test('kv adapter: delete removes value', async () => {
   const key = ['verify', 8000, suffix]
   await kv.set(key, { id: suffix })
   await kv.delete(key)
@@ -25,7 +26,7 @@ Deno.test('kv adapter: delete removes value', async () => {
   assertEquals(res.value, null)
 })
 
-Deno.test('kv adapter: Date values survive roundtrip', async () => {
+test('kv adapter: Date values survive roundtrip', async () => {
   const key = ['verify', 8000, suffix]
   const now = new Date()
   await kv.set(key, { nested: { at: now }, plain: 'not-a-date' })
@@ -36,7 +37,7 @@ Deno.test('kv adapter: Date values survive roundtrip', async () => {
   await kv.delete(key)
 })
 
-Deno.test('kv adapter: BigInt values survive roundtrip', async () => {
+test('kv adapter: BigInt values survive roundtrip', async () => {
   const key = ['verify', 8000, suffix]
   await kv.set(key, { n: 42n })
   const res = await kv.get<{ n: bigint }>(key)
@@ -45,7 +46,7 @@ Deno.test('kv adapter: BigInt values survive roundtrip', async () => {
   await kv.delete(key)
 })
 
-Deno.test('kv adapter: expireIn sets a TTL', async () => {
+test('kv adapter: expireIn sets a TTL', async () => {
   const key = ['verify', 8000, suffix]
   await kv.set(key, { id: suffix }, { expireIn: 300 })
   const present = await kv.get(key)
@@ -55,7 +56,7 @@ Deno.test('kv adapter: expireIn sets a TTL', async () => {
   assertEquals(gone.value, null)
 })
 
-Deno.test('kv adapter: array keys are distinct', async () => {
+test('kv adapter: array keys are distinct', async () => {
   const a = ['verify', 8000, suffix, 'a']
   const b = ['verify', 8000, suffix, 'b']
   await kv.set(a, { v: 1 })

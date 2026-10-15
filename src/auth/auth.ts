@@ -1,21 +1,21 @@
-import { Context, Hono } from '@hono'
-import { verify } from '@hono/jwt'
+import { Context, Hono } from 'hono'
+import { verify } from 'hono/jwt'
 import { db, User } from '@mod/db'
 import { createAndStoreLoginTokens, deleteLoginTokens, kv, log } from '@util'
-import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa'
+import type { SignatureAlgorithm } from 'hono/utils/jwt/jwa'
 import { authoriseLogin } from '@/util/auth.ts'
 import { validateJwtMiddleware } from '@middleware'
 import { jwtUser } from './types.ts'
-import { z } from '@zod'
+import { z } from 'zod'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
 
-// import { HTTPException } from '@hono/http-exception'
-import { deleteCookie, getCookie, setCookie } from '@hono/cookie'
+// import { HTTPException } from 'hono/http-exception'
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 
-const jwtAlgo = Deno.env.get('JWT_ALGORITHM') as SignatureAlgorithm
-const jwtSecret = Deno.env.get('JWT_SECRET') as string
-const refreshCookieExpiry = parseInt(Deno.env.get('REFRESH_EXPIRY') || '604800') // default to 1 week in s
-const port = parseInt(Deno.env.get('PORT') || '8000')
+const jwtAlgo = process.env['JWT_ALGORITHM'] as SignatureAlgorithm
+const jwtSecret = process.env['JWT_SECRET'] as string
+const refreshCookieExpiry = parseInt(process.env['REFRESH_EXPIRY'] || '604800') // default to 1 week in s
+const port = parseInt(process.env['PORT'] || '8000')
 
 // grant_type: This parameter must be set to refresh_token.
 // refresh_token: This parameter contains the actual refresh token value previously issued by the authorization server.

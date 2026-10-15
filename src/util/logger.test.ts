@@ -1,12 +1,13 @@
-import { assertEquals } from '@std/assert'
+import { test } from 'node:test'
+import { assertEquals } from '@/util/assert.ts'
 import { getActorId, runWithActor } from './actorContext.ts'
 import { withActorId } from './logger.ts'
 
-Deno.test('actorContext::getActorId returns undefined outside a runWithActor scope', () => {
+test('actorContext::getActorId returns undefined outside a runWithActor scope', () => {
   assertEquals(getActorId(), undefined)
 })
 
-Deno.test('actorContext::runWithActor scopes the actor id', () => {
+test('actorContext::runWithActor scopes the actor id', () => {
   assertEquals(getActorId(), undefined)
   runWithActor('actor-1', () => {
     assertEquals(getActorId(), 'actor-1')
@@ -14,7 +15,7 @@ Deno.test('actorContext::runWithActor scopes the actor id', () => {
   assertEquals(getActorId(), undefined)
 })
 
-Deno.test('actorContext::runWithActor restores prior actor id when nested', () => {
+test('actorContext::runWithActor restores prior actor id when nested', () => {
   runWithActor('outer', () => {
     runWithActor('inner', () => {
       assertEquals(getActorId(), 'inner')
@@ -24,7 +25,7 @@ Deno.test('actorContext::runWithActor restores prior actor id when nested', () =
   assertEquals(getActorId(), undefined)
 })
 
-Deno.test('logger::withActorId adds actorId to object log args', () => {
+test('logger::withActorId adds actorId to object log args', () => {
   const args = runWithActor(
     'actor-2',
     () => withActorId<Record<string, unknown>>([{ email: 'a@b.c' }]),
@@ -32,7 +33,7 @@ Deno.test('logger::withActorId adds actorId to object log args', () => {
   assertEquals(args, [{ email: 'a@b.c', actorId: 'actor-2' }])
 })
 
-Deno.test('logger::withActorId leaves existing actorId untouched', () => {
+test('logger::withActorId leaves existing actorId untouched', () => {
   const args = runWithActor(
     'actor-2',
     () =>
@@ -41,12 +42,12 @@ Deno.test('logger::withActorId leaves existing actorId untouched', () => {
   assertEquals(args, [{ actorId: 'explicit', foo: 1 }])
 })
 
-Deno.test('logger::withActorId leaves non-object args untouched', () => {
+test('logger::withActorId leaves non-object args untouched', () => {
   const args = runWithActor('actor-2', () => withActorId(['str', 42, [1, 2]]))
   assertEquals(args, ['str', 42, [1, 2]])
 })
 
-Deno.test('logger::withActorId returns args unchanged with no actor in scope', () => {
+test('logger::withActorId returns args unchanged with no actor in scope', () => {
   const args = [{ foo: 'bar' }]
   assertEquals(withActorId(args), args)
 })

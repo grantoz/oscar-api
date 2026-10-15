@@ -1,9 +1,9 @@
-// import { etag } from '@hono/etag'
+// import { etag } from 'hono/etag'
 import { requestLogMiddleware, validateJwtMiddleware } from '@middleware'
 import { country } from './country.ts'
 import { post } from './post.ts'
 import { user } from './user.ts'
-import { Hono } from '@hono'
+import { Hono } from 'hono'
 export const api = new Hono()
   .use(validateJwtMiddleware)
   .use(requestLogMiddleware)

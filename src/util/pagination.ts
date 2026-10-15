@@ -1,4 +1,4 @@
-import { z } from '@zod'
+import { z } from 'zod'
 import { log } from '@util'
 import type { DescribeRouteOptions } from 'hono-openapi'
 

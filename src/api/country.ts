@@ -1,8 +1,8 @@
-import { Context, Hono } from '@hono'
+import { Context, Hono } from 'hono'
 import { db } from '@mod/db'
 import { meta, pageOptions, pagination, paginationParams } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
-import { z } from '@zod'
+import { z } from 'zod'
 import { log } from '@util'
 // TODO use this as part of validation for get/:id
 // import { countryCodes } from 'util/country.ts'

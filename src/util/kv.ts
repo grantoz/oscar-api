@@ -5,8 +5,8 @@ import { log } from './logger.ts'
 // migration. This module keeps the small Deno KV surface used across the app
 // (`get`/`set`/`delete`/`close` over array keys) so callers do not change, but
 // every key/value now lives in Redis.
-const redisUrl = Deno.env.get('REDIS_URL') || 'redis://localhost:6379'
-const keyPrefix = Deno.env.get('REDIS_KEY_PREFIX') || 'oscar'
+const redisUrl = process.env['REDIS_URL'] || 'redis://localhost:6379'
+const keyPrefix = process.env['REDIS_KEY_PREFIX'] || 'oscar'
 
 type KvKeyPart = string | number | bigint | boolean
 type KvKey = readonly KvKeyPart[]

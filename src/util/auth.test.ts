@@ -1,17 +1,18 @@
-import '@std/dotenv/load'
+import { test } from 'node:test'
+import 'dotenv/config'
 import {
   authoriseLogin,
   createAndStoreLoginTokens,
   deleteLoginTokens,
 } from './auth.ts'
-import { assert, assertEquals, assertExists, assertRejects } from '@std/assert'
+import { assert, assertEquals, assertExists, assertRejects } from '@/util/assert.ts'
 import { kv } from './kv.ts'
 import { testUsers } from './test.ts'
 
 const { superUser } = testUsers
-const port = parseInt(Deno.env.get('PORT') || '8000')
+const port = parseInt(process.env['PORT'] || '8000')
 
-Deno.test('authoriseLogin fails with bad email', function () {
+test('authoriseLogin fails with bad email', function () {
   assertRejects(
     async () => await authoriseLogin('x@x.x', superUser.pass),
     Error, // Expected error class (optional, but good practice)
@@ -19,7 +20,7 @@ Deno.test('authoriseLogin fails with bad email', function () {
   )
 })
 
-Deno.test('authoriseLogin fails with bad password', function () {
+test('authoriseLogin fails with bad password', function () {
   assertRejects(
     async () => await authoriseLogin(superUser.email, 'x'),
     Error, // Expected error class (optional, but good practice)
@@ -27,7 +28,7 @@ Deno.test('authoriseLogin fails with bad password', function () {
   )
 })
 
-Deno.test('authoriseLogin succeeds with valid email and password and returns User instance', async function () {
+test('authoriseLogin succeeds with valid email and password and returns User instance', async function () {
   const user = await authoriseLogin(superUser.email, superUser.pass)
   // Check that the object exists
   assertExists(user)
@@ -44,7 +45,7 @@ Deno.test('authoriseLogin succeeds with valid email and password and returns Use
   // await db.$disconnect()
 })
 
-Deno.test('createAndStoreLoginTokens creates login and refresh tokens in kv', async function () {
+test('createAndStoreLoginTokens creates login and refresh tokens in kv', async function () {
   const user = await authoriseLogin(superUser.email, superUser.pass)
 
   const tokens = await createAndStoreLoginTokens(user)
@@ -63,7 +64,7 @@ Deno.test('createAndStoreLoginTokens creates login and refresh tokens in kv', as
   assertEquals((refresh.value as { id: string }).id, user.id)
 })
 
-Deno.test('deleteLoginTokens removes login and refresh tokens from kv', async function () {
+test('deleteLoginTokens removes login and refresh tokens from kv', async function () {
   const user = await authoriseLogin(superUser.email, superUser.pass)
 
   await createAndStoreLoginTokens(user)

@@ -1,7 +1,8 @@
+import { test } from 'node:test'
 import { pageOptions, prismaPagination } from '@/util/pagination.ts'
-import { assertEquals } from '@std/assert'
+import { assertEquals } from '@/util/assert.ts'
 
-Deno.test('parses pager params', () => {
+test('parses pager params', () => {
   // note, queries are all string-based
   const pagerParams1 = {
     page: '1',

@@ -1,15 +1,15 @@
-import { Context, Hono } from '@hono'
+import { Context, Hono } from 'hono'
 import { db, Prisma, User } from '@mod/db'
 import { log, meta, pageOptions, pagination, paginationParams } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
-import { z } from '@zod'
+import { z } from 'zod'
 import { USER_ROLES, UserRole } from '@const'
 import { hashPassword } from '@/util/user.ts'
 import { userView } from '@/view/user.ts'
 import { canCreateUser, canPatchUser } from './userAuthz.ts'
 import { getLastModified, setLastModified } from '@/util/lastModified.ts'
 import { validate } from '@util'
-import { etag } from '@hono/etag'
+import { etag } from 'hono/etag'
 
 // TODO add email verification, phone verification etc
 // TODO add role based access control, admin user etc

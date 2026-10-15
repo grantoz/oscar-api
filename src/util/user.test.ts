@@ -1,17 +1,18 @@
-import '@std/dotenv/load'
+import { test } from 'node:test'
+import 'dotenv/config'
 import { db } from '@mod/db'
-import { hash, Variant, verify, Version } from '@felix/argon2'
-import { assertEquals } from '@std/assert'
+import { Algorithm, hash, verify, Version } from '@node-rs/argon2'
+import { assertEquals } from '@/util/assert.ts'
 import { hashPassword } from './user.ts'
 
-Deno.test('generate salt and hashed password', async function () {
+test('generate salt and hashed password', async function () {
   const password = 'password123'
   const hash = await hashPassword(password)
   const isValid = await verify(hash, password)
   assertEquals(isValid, true)
 })
 
-Deno.test('find seeded users', async function () {
+test('find seeded users', async function () {
   const allUsers = await db.user.findMany({
     include: {
       posts: true,
@@ -26,26 +27,21 @@ export const testArgon2 = async () => {
   const encoder = new TextEncoder()
   const password = 'this-could_be/your-password'
   const secret = encoder.encode('my-super-secret')
-  const data = {
-    hashedAt: Date.now(),
-    requestId: crypto.randomUUID(),
-  }
 
   const hashed = await hash(password, {
     secret,
-    variant: Variant.Argon2id,
-    version: Version.V13,
+    algorithm: Algorithm.Argon2id,
+    version: Version.V0x13,
     memoryCost: 8192,
     timeCost: 10,
-    lanes: 4,
-    hashLength: 32,
-    data,
+    parallelism: 4,
+    outputLen: 32,
   })
 
-  return await verify(hashed, password, secret, data)
+  return await verify(hashed, password, { secret })
 }
 
-Deno.test('test argon2 hash', async function () {
+test('test argon2 hash', async function () {
   const result = await testArgon2()
   assertEquals(result, true)
 })

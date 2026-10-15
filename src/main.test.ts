@@ -1,7 +1,8 @@
-import { assert, assertEquals, assertExists } from '@std/assert'
+import { test } from 'node:test'
+import { assert, assertEquals, assertExists } from '@/util/assert.ts'
 import ky from 'ky'
 
-const port = Deno.env.get('PORT') ?? 8001
+const port = process.env['PORT'] ?? 8001
 const openApiUri = `http://localhost:${port}/openapi`
 
 interface OpenApiOperation {
@@ -28,14 +29,14 @@ const fetchSpec = async (): Promise<OpenApiDocument> => {
   return await resp.json() as OpenApiDocument
 }
 
-Deno.test('GET /openapi should return an OpenAPI 3 document', async () => {
+test('GET /openapi should return an OpenAPI 3 document', async () => {
   const spec = await fetchSpec()
   assert(spec.openapi.startsWith('3.'))
   assertEquals(spec.info.title, 'Oscar API')
   assertEquals(spec.info.version, '1.0.0')
 })
 
-Deno.test('GET /openapi should document the auth routes', async () => {
+test('GET /openapi should document the auth routes', async () => {
   const spec = await fetchSpec()
   for (const path of ['/auth/login', '/auth/refresh', '/auth/logout']) {
     const operation = spec.paths[path]?.post
@@ -44,19 +45,21 @@ Deno.test('GET /openapi should document the auth routes', async () => {
   }
 })
 
-Deno.test('GET /openapi should describe the auth responses', async () => {
+test('GET /openapi should describe the auth responses', async () => {
   const spec = await fetchSpec()
   const login = spec.paths['/auth/login']?.post
-  assertExists(login?.responses)
+  assertExists(login)
+  assertExists(login.responses)
   assertExists(login.responses['200'])
   assertExists(login.responses['401'])
 
   const logout = spec.paths['/auth/logout']?.post
-  assertExists(logout?.responses)
+  assertExists(logout)
+  assertExists(logout.responses)
   assertExists(logout.responses['200'])
 })
 
-Deno.test('GET /openapi should document the refresh request body', async () => {
+test('GET /openapi should document the refresh request body', async () => {
   const spec = await fetchSpec()
   const body = spec.paths['/auth/refresh']?.post.requestBody
   const schema = body?.content?.['application/json']?.schema
@@ -67,7 +70,7 @@ Deno.test('GET /openapi should document the refresh request body', async () => {
   assertExists(properties['client_id'])
 })
 
-Deno.test('GET /openapi should document the api routes with bearer security', async () => {
+test('GET /openapi should document the api routes with bearer security', async () => {
   const spec = await fetchSpec()
   const paths = [
     '/api/user',
@@ -86,7 +89,7 @@ Deno.test('GET /openapi should document the api routes with bearer security', as
   assertExists(spec.components?.securitySchemes?.bearerAuth)
 })
 
-Deno.test('GET /openapi should document api path params and request bodies', async () => {
+test('GET /openapi should document api path params and request bodies', async () => {
   const spec = await fetchSpec()
 
   const idParam = spec.paths['/api/user/{id}']?.get.parameters?.find((p) =>

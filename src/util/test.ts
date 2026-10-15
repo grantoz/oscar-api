@@ -1,6 +1,5 @@
-import { encodeBase64 } from '@std/encoding/base64'
 import { verifyAndDecodeJwt } from '@/middleware/jwt.ts'
-import { assert } from '@std/assert'
+import { assert } from '@/util/assert.ts'
 import ky, { type KyInstance, KyResponse } from 'ky'
 import { type SeededUser, seededUsers } from '../../prisma/seed/user.ts'
 
@@ -8,7 +7,7 @@ import { type SeededUser, seededUsers } from '../../prisma/seed/user.ts'
  * Test utilities
  */
 
-const port = Deno.env.get('PORT') || 8001 // test port
+const port = process.env['PORT'] || 8001 // test port
 
 interface loginOutput {
   token: string
@@ -66,7 +65,7 @@ const loginApi = async (
   setTestUserId: (id: string) => void,
   setRefreshToken: (cookie: string) => void,
 ): Promise<KyInstance> => {
-  const auth = encodeBase64(user.email + ':' + user.pass)
+  const auth = Buffer.from(user.email + ':' + user.pass).toString('base64')
   const resp = await ky.post(`${authUri}/login`, {
     headers: {
       Authorization: 'Basic ' + auth,

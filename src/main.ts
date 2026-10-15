@@ -1,7 +1,8 @@
 // note, always load dotenv first so that other imports in the dependency graph can use it
-import '@std/dotenv/load'
-import { Context, Hono } from '@hono'
-import { logger } from '@hono/logger'
+import 'dotenv/config'
+import { Context, Hono } from 'hono'
+import { logger } from 'hono/logger'
+import { serve } from '@hono/node-server'
 import { openAPIRouteHandler } from 'hono-openapi'
 import { db } from '@mod/db'
 import { api } from './api/mod.ts' // api  routes
@@ -9,7 +10,7 @@ import { auth } from './auth/mod.ts' // auth routes
 import { kv, log } from '@util'
 import process from 'node:process'
 
-process.env.TZ = Deno.env.get('TZ')
+process.env.TZ = process.env['TZ']
 
 const app = new Hono()
 app.use(logger())
@@ -71,36 +72,37 @@ const start = async () => {
     return this.toString()
   }
 
-  const port = parseInt(Deno.env.get('PORT') || '8000')
+  const port = parseInt(process.env['PORT'] || '8000')
   log.info(`Starting server on port ${port}...`)
 
   try {
-    // note - use DENO_SERVE_AUTOMATIC_COMPRESSION=1
-    Deno.serve({ port }, app.fetch)
+    serve({ fetch: app.fetch, port }, (info) => {
+      log.info(`Server listening on port ${info.port}`)
+    })
   } catch (err) {
     log.error('start: error', { err })
     await db.$disconnect()
-    Deno.exit(1)
+    process.exit(1)
   }
 }
 
 const exit = async (status: number) => {
   await db.$disconnect()
   await kv.close()
-  Deno.exit(status)
+  process.exit(status)
 }
 
-globalThis.addEventListener('unhandledRejection', async (err) => {
+process.on('unhandledRejection', async (err) => {
   log.error('unhandledRejection', { err })
   await exit(1)
 })
 
-Deno.addSignalListener('SIGINT', async () => {
+process.on('SIGINT', async () => {
   log.info('Received SIGINT, stopping.')
   await exit(0)
 })
 
-Deno.addSignalListener('SIGTERM', async () => {
+process.on('SIGTERM', async () => {
   log.info('Received SIGTERM, stopping.')
   await exit(0)
 })

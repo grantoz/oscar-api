@@ -1,6 +1,6 @@
 import { kv, log } from '@util'
 
-const port = parseInt(Deno.env.get('PORT') ?? '8000')
+const port = parseInt(process.env['PORT'] ?? '8000')
 
 const formatLastModified = (date: Date): string => {
   return date.toUTCString()

@@ -1,15 +1,16 @@
-import '@std/dotenv/load'
-import { Hono } from '@hono'
-import { sign } from '@hono/jwt'
-import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa'
-import { assertEquals, assertStringIncludes } from '@std/assert'
+import { test } from 'node:test'
+import 'dotenv/config'
+import { Hono } from 'hono'
+import { sign } from 'hono/jwt'
+import type { SignatureAlgorithm } from 'hono/utils/jwt/jwa'
+import { assertEquals, assertStringIncludes } from '@/util/assert.ts'
 import { kv } from '@util'
 import { validateJwtMiddleware } from './jwt.ts'
 
-const jwtAlgo = Deno.env.get('JWT_ALGORITHM') as SignatureAlgorithm
-const jwtSecret = Deno.env.get('JWT_SECRET') as string
-const issuer = Deno.env.get('JWT_ISSUER') || 'oscar'
-const port = parseInt(Deno.env.get('PORT') || '8000')
+const jwtAlgo = process.env['JWT_ALGORITHM'] as SignatureAlgorithm
+const jwtSecret = process.env['JWT_SECRET'] as string
+const issuer = process.env['JWT_ISSUER'] || 'oscar'
+const port = parseInt(process.env['PORT'] || '8000')
 
 const makeToken = (sub: string) => {
   return sign(
@@ -48,7 +49,7 @@ const clearKv = async (sub: string) => {
   await kv.delete(['refresh', port, sub])
 }
 
-Deno.test('jwt middleware allows request when login token is in KV', async () => {
+test('jwt middleware allows request when login token is in KV', async () => {
   const sub = crypto.randomUUID()
   await setKv(sub, { login: true, refresh: true })
   try {
@@ -65,7 +66,7 @@ Deno.test('jwt middleware allows request when login token is in KV', async () =>
   }
 })
 
-Deno.test('jwt middleware allows request when login present but refresh missing', async () => {
+test('jwt middleware allows request when login present but refresh missing', async () => {
   const sub = crypto.randomUUID()
   await setKv(sub, { login: true, refresh: false })
   try {
@@ -80,7 +81,7 @@ Deno.test('jwt middleware allows request when login present but refresh missing'
   }
 })
 
-Deno.test('jwt middleware returns token_invalidated when login missing but refresh present', async () => {
+test('jwt middleware returns token_invalidated when login missing but refresh present', async () => {
   const sub = crypto.randomUUID()
   await clearKv(sub)
   await setKv(sub, { login: false, refresh: true })
@@ -103,7 +104,7 @@ Deno.test('jwt middleware returns token_invalidated when login missing but refre
   }
 })
 
-Deno.test('jwt middleware returns unauthorized with login_url when both tokens missing', async () => {
+test('jwt middleware returns unauthorized with login_url when both tokens missing', async () => {
   const sub = crypto.randomUUID()
   await clearKv(sub)
   try {

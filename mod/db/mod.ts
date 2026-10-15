@@ -3,30 +3,30 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { withCrudMetrics } from './crudMetrics.ts'
 
 const getDB = (): PrismaClient => {
-  const dbUrl: string = Deno.env.get('DATABASE_URL') || ''
+  const dbUrl: string = process.env['DATABASE_URL'] || ''
 
   // TODO: observability, metrics (DONE: logging)
   // https://www.prisma.io/docs/orm/prisma-client/observability-and-logging
 
   if (!dbUrl) {
     console.error('DATABASE_URL environment variable is not set')
-    Deno.exit(1)
+    process.exit(1)
   }
 
   const log: Prisma.LogDefinition[] = [
     { emit: 'stdout', level: 'warn' },
     { emit: 'stdout', level: 'error' },
   ]
-  if (Deno.env.get('LOG_DB_QUERIES') === 'true') {
+  if (process.env['LOG_DB_QUERIES'] === 'true') {
     log.push({ emit: 'stdout', level: 'query' })
   }
-  if (Deno.env.get('LOG_DB_INFO') === 'true') {
+  if (process.env['LOG_DB_INFO'] === 'true') {
     log.push({ emit: 'stdout', level: 'info' })
   }
 
   const adapter: PrismaPg = new PrismaPg({ connectionString: dbUrl! })
 
-  if (Deno.env.get('DB_METRICS') === 'true') {
+  if (process.env['DB_METRICS'] === 'true') {
     return withCrudMetrics(
       new PrismaClient({
         adapter,

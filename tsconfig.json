@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["esnext"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@util": ["./src/util/mod.ts"],
+      "@const": ["./const/mod.ts"],
+      "@middleware": ["./src/middleware/mod.ts"],
+      "@mod/db": ["./mod/db/mod.ts"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "mod/**/*.ts",
+    "const/**/*.ts",
+    "prisma/**/*.ts",
+    "prisma.config.ts",
+    "cli/**/*.js"
+  ],
+  "exclude": ["node_modules", "prisma/generated", "prisma/zod"]
+}

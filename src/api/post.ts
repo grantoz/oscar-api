@@ -1,8 +1,8 @@
-import { Context, Hono } from '@hono'
+import { Context, Hono } from 'hono'
 import { db, Post, User } from '@mod/db'
 import { log, meta, pageOptions, pagination, paginationParams } from '@util'
 import { describeRoute, resolver, validator as zValidator } from 'hono-openapi'
-import { z } from '@zod'
+import { z } from 'zod'
 
 const uuidIdSchema = z.object({
   id: z.uuidv7(),

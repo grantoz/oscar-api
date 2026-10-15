@@ -1,4 +1,4 @@
-import { Context } from '@hono'
+import { Context } from 'hono'
 import { log } from '@/util/logger.ts'
 
 const mutatingMethods = new Set(['POST', 'PATCH'])

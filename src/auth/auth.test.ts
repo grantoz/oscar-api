@@ -1,13 +1,14 @@
-import { assert, assertEquals, assertGreater } from '@std/assert'
+import { test } from 'node:test'
+import { assert, assertEquals, assertGreater } from '@/util/assert.ts'
 import ky from 'ky'
-import { encodeBase64 } from '@std/encoding/base64'
+const encodeBase64 = (value: string) => Buffer.from(value).toString('base64')
 import { verifyAndDecodeJwt } from '@middleware'
 import { testUsers } from '@/util/test.ts'
-const port = Deno.env.get('PORT') ?? 8001
+const port = process.env['PORT'] ?? 8001
 
 const { superUser } = testUsers
 
-Deno.test.ignore('should get JSON using ky', async () => {
+test.skip('should get JSON using ky', async () => {
   type postComment = {
     userId: number
     id: number
@@ -22,7 +23,7 @@ Deno.test.ignore('should get JSON using ky', async () => {
   console.log(data)
 })
 
-Deno.test('should log not super user in with bad password', async () => {
+test('should log not super user in with bad password', async () => {
   const auth = encodeBase64(superUser.email + ':' + 'bogus')
   await ky.post(`http://localhost:${port}/auth/login`, {
     headers: {
@@ -35,7 +36,7 @@ Deno.test('should log not super user in with bad password', async () => {
   })
 })
 
-Deno.test('should log not super user in with bad email', async () => {
+test('should log not super user in with bad email', async () => {
   const auth = encodeBase64('bogus@foo.com' + ':' + superUser.pass)
   const resp = await ky.post(`http://localhost:${port}/auth/login`, {
     headers: {
@@ -51,7 +52,7 @@ interface tokenResponse {
   token: string
 }
 
-Deno.test('should log super user in and be returned a JWT and refreshToken', async () => {
+test('should log super user in and be returned a JWT and refreshToken', async () => {
   const auth = encodeBase64(superUser.email + ':' + superUser.pass)
   const resp = await ky.post(`http://localhost:${port}/auth/login`, {
     headers: {
@@ -76,7 +77,7 @@ const loginAsSuper = async (): Promise<string> => {
   return json.token
 }
 
-Deno.test('should reject logout without a valid bearer token', async () => {
+test('should reject logout without a valid bearer token', async () => {
   const resp = await ky.post(`http://localhost:${port}/auth/logout`, {
     throwHttpErrors: false,
   })
@@ -84,7 +85,7 @@ Deno.test('should reject logout without a valid bearer token', async () => {
   assertEquals(401, resp.status)
 })
 
-Deno.test('should log out, clear the refresh cookie and revoke the token', async () => {
+test('should log out, clear the refresh cookie and revoke the token', async () => {
   const token = await loginAsSuper()
 
   const resp = await ky.post(`http://localhost:${port}/auth/logout`, {

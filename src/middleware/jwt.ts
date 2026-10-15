@@ -1,12 +1,12 @@
-import { Context } from '@hono'
+import { Context } from 'hono'
 import { actorStorage, kv, log } from '@util'
-import type { SignatureAlgorithm } from '@hono/utils/jwt/jwa'
-import { verify } from '@hono/jwt'
+import type { SignatureAlgorithm } from 'hono/utils/jwt/jwa'
+import { verify } from 'hono/jwt'
 import { jwtUser } from '@/auth/types.ts'
 
-const jwtAlgo = Deno.env.get('JWT_ALGORITHM') as SignatureAlgorithm
-const jwtSecret = Deno.env.get('JWT_SECRET') as string
-const port = parseInt(Deno.env.get('PORT') || '8000')
+const jwtAlgo = process.env['JWT_ALGORITHM'] as SignatureAlgorithm
+const jwtSecret = process.env['JWT_SECRET'] as string
+const port = parseInt(process.env['PORT'] || '8000')
 
 // TODO remove login token from KV on user update
 // this will force revalidation using refresh token

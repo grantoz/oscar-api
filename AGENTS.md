@@ -1,109 +1,126 @@
 # AGENTS.md
 
-## Migration: Deno -> Node (in progress)
+## Migration: Deno -> Node (core migration complete)
 
-This project is being migrated off Deno because Deno is being abandoned. The
-target runtime is Node. The migration is incremental; do not assume the whole
-app runs on Node yet.
+This project was migrated off Deno to Node. The app, tests and CLI now run on
+**Node 26** with **npm** and TypeScript executed via **tsx** (type-stripping
+loader; `tsconfig.json` `paths` resolve the `@util`/`@mod/db`/... aliases).
 
-Progress so far:
+What changed:
 
-- **Deno KV -> Redis (node-redis)**: `src/util/kv.ts` no longer uses
-  `Deno.openKv`. It now wraps the `redis` npm client and keeps the small Deno KV
-  surface used by callers (`kv.get`/`kv.set`/`kv.delete`/`kv.close` over array
-  keys) so no caller changes were needed. See "Environment / config" for the
-  Redis connection settings.
+- **Runtime**: `Deno.serve` -> `@hono/node-server`; `Deno.env` -> `process.env`;
+  `Deno.addSignalListener` -> `process.on('SIGINT'|'SIGTERM')`; `Deno.exit` ->
+  `process.exit`; `Deno.args` -> `process.argv`; `Deno.*File(Read|Write)` ->
+  `node:fs`.
+- **Deno KV -> Redis (node-redis)**: `src/util/kv.ts` wraps the `redis` npm
+  client behind a small Deno-KV-shaped API (`kv.get`/`set`/`delete`/`close` over
+  array keys).
+- **Deps**: JSR/Deno imports replaced with npm equivalents — `@std/assert` ->
+  `@/util/assert.ts` (thin `node:assert` shim), `@std/csv` -> `csv-parse`,
+  `@std/encoding/base64` -> `Buffer`, `@felix/argon2` -> `@node-rs/argon2`,
+  `@faker` -> `@faker-js/faker`, `@db/postgres` -> `pg`, `@hono/*` -> `hono/*`,
+  `@zod` -> `zod`, `@std/dotenv/load` -> `dotenv/config`.
+- **Prisma**: generated client `runtime = "nodejs"` (was `"deno"`).
+- **Tests**: `Deno.test` -> `node:test`.
+- `deno.jsonc`, `deno.lock` and the `mod/db` Deno workspace file were removed.
 
-Remaining Deno-specific pieces (not yet migrated): the `deno` tasks/imports in
-`deno.jsonc`, `Deno.serve` / `Deno.env` / `Deno.addSignalListener` in
-`src/main.ts`, `deno test` integration tests, JSR imports (`@std/*`,
-`@felix/argon2`), and the Deno-flavoured Prisma client (`runtime = "deno"`).
+Known follow-ups (not yet done):
+
+- **OpenTelemetry** is not wired on Node: `OTEL_DENO`/`@opentelemetry/api`
+  metric calls are no-ops without an SDK provider. Add `@opentelemetry/sdk-node`
+  + auto-instrumentations to restore DB/HTTP metrics and traces.
+- **Formatting/linting**: `deno fmt`/`deno lint` were the only formatter/linter;
+  none is configured now. Follow the existing style (no semicolons, single
+  quotes, 2-space indent) or add Prettier + ESLint.
 
 ## Stack
 
-- **Deno** runtime (not Node). Run everything via `deno task ...`, not npm.
-  `package.json` pins the npm deps resolved through `nodeModulesDir: auto`
-  (Prisma, `redis`, `ky`, ...).
-- **Hono** web framework; **Prisma** ORM (Postgres); **Zod** validation;
-  **Redis** (node-redis) for sessions/refresh tokens and last-modified tracking.
-- Prisma client is generated ESM-first with `runtime = "deno"`,
+- **Node 26** runtime. Run everything via `npm run ...`. TypeScript is executed
+  directly by `tsx` (`node --import tsx ...`); there is no build step.
+- **Hono** web framework (`@hono/node-server` for the HTTP server); **Prisma**
+  ORM (Postgres) with `@prisma/adapter-pg`; **Zod** validation; **Redis**
+  (node-redis) for sessions/refresh tokens and last-modified tracking.
+- Prisma client is generated ESM-first with `runtime = "nodejs"`,
   `engineType = "client"` (no Rust engine), output to `prisma/generated/`. It is
-  consumed via the `@mod/db` workspace package (`mod/db/mod.ts`), which exports
-  `db`, `Prisma`, `getDB`.
+  imported directly (`mod/db/mod.ts`), which exports `db`, `Prisma`, `getDB`.
 
-## Import aliases (defined in `deno.jsonc` `imports`)
+## Import aliases (defined in `tsconfig.json` `paths`)
 
 - `@util` -> `./src/util/mod.ts`
+- `@const` -> `./const/mod.ts`
+- `@middleware` -> `./src/middleware/mod.ts`
+- `@mod/db` -> `./mod/db/mod.ts`
 - `@/` -> `./src/`
-- `@mod/db` -> workspace package `mod/db`
+
+These resolve at runtime through `tsx` and for type-checking through `tsc`.
 
 ## Commands
 
-- `deno task setup:all` — full first-time setup: writes `.env` (from
+- `npm run setup:all` — full first-time setup: writes `.env` (from
   `env/.env.dev`, with a random `JWT_SECRET`), generates the Prisma client,
   creates + migrates + seeds the DB.
-- `deno task dev` — run server on `PORT` (default 8000). `deno task dev:otel`
-  enables OpenTelemetry.
-- `deno task db:generate` — regenerate the Prisma client after editing
-  `prisma/schema.prisma`. (Runs via Node/npm; the stray `node --help` in the
-  task is a PATH check.)
-- `deno task db:new` / `db:new:seed` — **destructive**: drop + recreate +
+- `npm run dev` — run server on `PORT` (default 8000), watch mode.
+  `npm start` runs without watch.
+- `npm run typecheck` — `tsc --noEmit`.
+- `npm test` — run the `node:test` suite (see Testing).
+- `npm run db:generate` — regenerate the Prisma client after editing
+  `prisma/schema.prisma`.
+- `npm run db:new` / `db:new:seed` — **destructive**: drop + recreate +
   migrate (and seed) the dev DB. Prompts for confirmation.
-- `deno task db:migrate` — `prisma migrate dev` against `.env`.
+- `npm run db:migrate` — `prisma migrate dev` against `.env`.
 
 ## Environment / config
 
-- `main.ts` must `import '@std/dotenv/load'` first so the whole dependency graph
-  sees env vars. Tasks also pass `--env-file`.
-- `DATABASE_URL` is required (Prisma exits if unset). A Redis client is
-  connected at import time in `src/util/kv.ts`, using `REDIS_URL` (default
+- Env is loaded with `node --env-file=.env` (npm scripts) plus `dotenv/config`
+  imported for safety; `dotenv` does not override already-set vars, so
+  `--env-file=.env.test` wins during tests.
+- `DATABASE_URL` is required (Prisma exits if unset). A Redis client connects at
+  import time in `src/util/kv.ts`, using `REDIS_URL` (default
   `redis://localhost:6379`) and an optional `REDIS_KEY_PREFIX` (default
   `oscar`) for namespacing keys.
-- `deno.jsonc` `unstable: ["otel"]` — required at runtime.
+- Redis is required at runtime (sessions/refresh tokens, last-modified).
 
 ## Testing (integration tests — not self-contained)
 
-There are no test-specific tasks. Derive the underlying commands from the
-`deno.jsonc` tasks and point them at the test env with `--env-file=.env.test`
-(e.g. `deno task dev` becomes
-`deno run -A --env-file=.env.test src/main.ts`).
+Tests use `node:test` and hit a running server on `PORT=8001` via `ky`. They
+will fail unless:
 
-Tests are **HTTP integration tests** that hit a running server on `PORT=8001`
-via `ky`. They will fail unless:
-
-1. The test DB exists and is seeded (derived from `db:new:seed`):
-   `deno run -A --env-file=.env.test cli/alter_db.js --drop --create && deno run -A --env-file=.env.test npm:prisma migrate dev && deno run -A --env-file=.env.test ./prisma/seed/index.ts`.
-   This is **destructive** (drops + recreates + migrates + seeds). Test DB name
-   is the dev DB name + `_test` suffix.
+1. The test DB exists and is seeded (see README). Test DB name is the dev DB
+   name + `_test` suffix.
 2. A Redis server is running (see `REDIS_URL`, default `redis://localhost:6379`).
    Test and dev keys are separated by the port embedded in each key.
-3. The server is running against `.env.test` in a separate terminal:
-   `deno run -A --env-file=.env.test src/main.ts` (add `--watch` to reload on
-   change, as `dev` does).
+3. The server is running against `.env.test`:
+   `node --env-file=.env.test --import tsx src/main.ts`.
 
-Then run the suite (this is what `deno task test` runs):
+Then run the suite:
 
 ```
-deno test -A --env-file=.env.test --trace-leaks src/
+npm test
 ```
 
-`--env-file=.env.test` is applied before modules load, and `.env` loaded by
-`@std/dotenv/load` does not override already-set vars, so the test values win.
+The script runs `node --env-file=.env.test --import tsx --test
+--test-force-exit --test-concurrency=1 'src/**/*.test.ts'`. Notes:
+
+- `--test-force-exit` is required because the Redis client/Prisma keep the event
+  loop alive; without it the runner hangs after the tests pass.
+- `--test-concurrency=1` runs test **files** serially. The tests are stateful
+  (shared seeded users / logout invalidates sessions), so parallel files
+  interfere.
+- Test helpers live in `src/util/test.ts` (`asSuper`, `asAdmin`, `asStaff`,
+  `asUser`, `testUsers`). Pure unit tests (e.g. `src/util/lastModified.test.ts`)
+  don't need the server; `src/util/kv.test.ts` needs Redis only.
 
 Seeded test credentials (`prisma/seed/user.ts`): `super@grantoz.io` /
-`superPass2025$`, `admin@grantoz.io` / `adminPass2025$`, etc. Test helpers live
-in `src/util/test.ts` (`asSuper`, `asAdmin`, `testUsers`). Pure unit tests (e.g.
-`src/util/lastModified.test.ts`) don't need the server; `src/util/kv.test.ts`
-exercises the Redis-backed KV adapter directly and so needs a running Redis, but
-not the server or DB.
+`superPass2025$`, `admin@grantoz.io` / `adminPass2025$`, etc.
 
 ## Style
 
-- `deno fmt` config: no semicolons, single quotes, 2-space indent.
-- `deno lint` excludes `prisma/generated/**` and `prisma/zod/**`.
-- No dedicated typecheck task; Deno type-checks during `deno test` / `deno run`.
+- No semicolons, single quotes, 2-space indent (carried over from `deno fmt`).
+- No formatter/linter is wired up yet (see follow-ups).
 
 ## Notes
 
 - Seeding randomizes the four seeded-user passwords when `APP_ENV` is
   `prod`/`uat`/`sandbox` (prints the super password once).
+- `BigInt.prototype.toJSON` is patched in `src/main.ts` so Prisma BigInt fields
+  serialize as strings.

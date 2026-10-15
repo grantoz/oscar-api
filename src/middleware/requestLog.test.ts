@@ -1,5 +1,6 @@
-import { Hono } from '@hono'
-import { assertEquals } from '@std/assert'
+import { test } from 'node:test'
+import { Hono } from 'hono'
+import { assertEquals } from '@/util/assert.ts'
 import { log } from '@/util/logger.ts'
 import {
   entityFromPath,
@@ -7,7 +8,7 @@ import {
   requestLogMiddleware,
 } from './requestLog.ts'
 
-Deno.test('entityFromPath maps /api resource paths to allow-listed entities', () => {
+test('entityFromPath maps /api resource paths to allow-listed entities', () => {
   assertEquals(entityFromPath('/api/user'), 'user')
   assertEquals(
     entityFromPath('/api/user/019af282-f8ac-75b9-b193-fd4827821889'),
@@ -18,14 +19,14 @@ Deno.test('entityFromPath maps /api resource paths to allow-listed entities', ()
   assertEquals(entityFromPath('/api/post/'), 'post')
 })
 
-Deno.test('entityFromPath ignores entities not on the allow-list', () => {
+test('entityFromPath ignores entities not on the allow-list', () => {
   assertEquals(entityFromPath('/api/country'), undefined)
   assertEquals(entityFromPath('/api/auth/login'), undefined)
   assertEquals(entityFromPath('/'), undefined)
   assertEquals(entityFromPath('/api'), undefined)
 })
 
-Deno.test('redactPayload replaces listed fields without mutating the original', () => {
+test('redactPayload replaces listed fields without mutating the original', () => {
   const payload = {
     email: 'a@b.c',
     password: 'secret',
@@ -41,7 +42,7 @@ Deno.test('redactPayload replaces listed fields without mutating the original', 
   assertEquals(payload.passwordConfirm, 'secret')
 })
 
-Deno.test('redactPayload clones payload when there is nothing to redact', () => {
+test('redactPayload clones payload when there is nothing to redact', () => {
   const payload = { title: 'hello' }
   const redacted = redactPayload(payload, undefined)
   assertEquals(redacted, { title: 'hello' })
@@ -67,7 +68,7 @@ const logApp = () => {
   return app
 }
 
-Deno.test('requestLogMiddleware logs POST user with redacted secrets', async () => {
+test('requestLogMiddleware logs POST user with redacted secrets', async () => {
   await withLogSpy(async (calls) => {
     const app = logApp()
     let received: Record<string, unknown> | undefined
@@ -104,7 +105,7 @@ Deno.test('requestLogMiddleware logs POST user with redacted secrets', async () 
   })
 })
 
-Deno.test('requestLogMiddleware logs PATCH post payload without redaction', async () => {
+test('requestLogMiddleware logs PATCH post payload without redaction', async () => {
   await withLogSpy(async (calls) => {
     const app = logApp()
     app.patch('/api/post', (c) => c.json({ ok: true }))
@@ -122,7 +123,7 @@ Deno.test('requestLogMiddleware logs PATCH post payload without redaction', asyn
   })
 })
 
-Deno.test('requestLogMiddleware does not log GET or allow-listed-excluded entities', async () => {
+test('requestLogMiddleware does not log GET or allow-listed-excluded entities', async () => {
   await withLogSpy(async (calls) => {
     const app = logApp()
     app.get('/api/user', (c) => c.json({ ok: true }))
