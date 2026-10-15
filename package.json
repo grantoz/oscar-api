@@ -7,6 +7,10 @@
     "dev": "node --env-file=.env --import tsx --watch src/main.ts",
     "start": "node --env-file=.env --import tsx src/main.ts",
     "test": "node --env-file=.env.test --import tsx --test --test-force-exit --test-concurrency=1 'src/**/*.test.ts'",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
     "db:create": "node --env-file=.env cli/alter_db.js --create",
     "db:drop": "node --env-file=.env cli/alter_db.js --drop",
@@ -38,6 +42,8 @@
   "devDependencies": {
     "@types/node": "^26.6.5",
     "@types/pg": "^8.11.10",
+    "oxfmt": "^0.73.0",
+    "oxlint": "^1.88.0",
     "prisma": "^7.9.1",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"

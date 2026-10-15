@@ -29,9 +29,11 @@ Known follow-ups (not yet done):
 - **OpenTelemetry** is not wired on Node: `OTEL_DENO`/`@opentelemetry/api`
   metric calls are no-ops without an SDK provider. Add `@opentelemetry/sdk-node`
   + auto-instrumentations to restore DB/HTTP metrics and traces.
-- **Formatting/linting**: `deno fmt`/`deno lint` were the only formatter/linter;
-  none is configured now. Follow the existing style (no semicolons, single
-  quotes, 2-space indent) or add Prettier + ESLint.
+- **Linting/formatting**: `oxlint` (`.oxlintrc.json`) and `oxfmt`
+  (`.oxfmtrc.json`) are wired up — `npm run lint` / `npm run lint:fix` and
+  `npm run format` / `npm run format:check`. CI runs oxlint via
+  `oxc-project/oxlint-action`. Style: no semicolons, single quotes, 2-space
+  indent.
 
 ## Stack
 
@@ -62,6 +64,10 @@ These resolve at runtime through `tsx` and for type-checking through `tsc`.
 - `npm run dev` — run server on `PORT` (default 8000), watch mode.
   `npm start` runs without watch.
 - `npm run typecheck` — `tsc --noEmit`.
+- `npm run lint` — `oxlint` (config in `.oxlintrc.json`; `npm run lint:fix`
+  applies fixes).
+- `npm run format` — `oxfmt` (config in `.oxfmtrc.json`; `npm run format:check`
+  checks without writing).
 - `npm test` — run the `node:test` suite (see Testing).
 - `npm run db:generate` — regenerate the Prisma client after editing
   `prisma/schema.prisma`.
@@ -116,7 +122,7 @@ Seeded test credentials (`prisma/seed/user.ts`): `super@grantoz.io` /
 ## Style
 
 - No semicolons, single quotes, 2-space indent (carried over from `deno fmt`).
-- No formatter/linter is wired up yet (see follow-ups).
+- `oxlint` (`npm run lint`) and `oxfmt` (`npm run format`) are wired up.
 
 ## Notes
 

@@ -7,6 +7,16 @@ on:
     branches: [main]
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run oxlint
+        uses: oxc-project/oxlint-action@v2
+
   test:
     runs-on: ubuntu-latest
 
