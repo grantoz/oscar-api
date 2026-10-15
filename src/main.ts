@@ -75,7 +75,7 @@ const start = async () => {
   log.info(`Starting server on port ${port}...`)
 
   try {
-    // console.log(app.routes)
+    // note - use DENO_SERVE_AUTOMATIC_COMPRESSION=1
     Deno.serve({ port }, app.fetch)
   } catch (err) {
     log.error('start: error', { err })

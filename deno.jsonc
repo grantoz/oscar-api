@@ -18,7 +18,7 @@
 
     "test": "deno test -A --env-file=.env.test --trace-leaks src/"
   },
-  "unstable": ["kv", "otel"],
+  "unstable": ["otel"],
   "imports": {
     "@db/postgres": "jsr:@db/postgres@^0.19.5",
     "@felix/argon2": "jsr:@felix/argon2@^3.0.6",

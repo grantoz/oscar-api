@@ -45,6 +45,7 @@
     "npm:path-to-regexp@6.2.1": "6.2.1",
     "npm:prisma@*": "7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8",
     "npm:prisma@^7.9.1": "7.9.1_@types+react@19.2.18_react@19.2.8_react-dom@19.2.8",
+    "npm:redis@^6.3.0": "6.3.0_@opentelemetry+api@1.9.1",
     "npm:zod@4.4.3": "4.4.3"
   },
   "jsr": {
@@ -396,6 +397,39 @@
       ],
       "optionalPeers": [
         "@types/react"
+      ]
+    },
+    "@redis/bloom@6.3.0_@redis+client@6.3.0_@opentelemetry+api@1.9.1": {
+      "integrity": "sha512-NQ5poYpZr0jv6zazN1cy6JY5kIipKFZ3R9GTL4kOUTX3a9YAfY29U8bsE4lWhVQEM+G4V0BXVC57mubIdDijeA==",
+      "dependencies": [
+        "@redis/client"
+      ]
+    },
+    "@redis/client@6.3.0_@opentelemetry+api@1.9.1": {
+      "integrity": "sha512-fHrjwGCBvAANGi+TuRuwKi83sIOzgHr8eh+Uf48w3fSX7Hhrz174NrWqfJhAC2vnN0d/tfaZpdr6+o6JC3QHwg==",
+      "dependencies": [
+        "@opentelemetry/api"
+      ],
+      "optionalPeers": [
+        "@opentelemetry/api"
+      ]
+    },
+    "@redis/json@6.3.0_@redis+client@6.3.0_@opentelemetry+api@1.9.1": {
+      "integrity": "sha512-yt6vRfPBXtW/3qm53cF81TSQpLMjWdW4/2E9WQ2GgbvsKkuCKCFQIcMiKlil1ZMnezK+IQuS795xKU5psbaegw==",
+      "dependencies": [
+        "@redis/client"
+      ]
+    },
+    "@redis/search@6.3.0_@redis+client@6.3.0_@opentelemetry+api@1.9.1": {
+      "integrity": "sha512-RPXAZmKjZZG7Tm7m1w9keFdXzbL91PiSHQBfQRe9xwW40jNsTRbG0FwhIz4QlHPU4gKDAsCy8IQHj4yZl4H9rw==",
+      "dependencies": [
+        "@redis/client"
+      ]
+    },
+    "@redis/time-series@6.3.0_@redis+client@6.3.0_@opentelemetry+api@1.9.1": {
+      "integrity": "sha512-+fJOB8mN1z5WRakCJNh5lVdz1KqvHGSOistsKeitD24QsCtPwyRQXWC0iq6T/i/ubLE/YcguZqPm8F598MKk4A==",
+      "dependencies": [
+        "@redis/client"
       ]
     },
     "@standard-community/standard-json@0.3.6_@standard-schema+spec@1.1.0_@types+json-schema@7.0.15_zod@4.4.3": {
@@ -1026,6 +1060,16 @@
     },
     "readdirp@5.1.1": {
       "integrity": "sha512-Kko+Y5XQ6fM+Ce3dq3m9YGxnacYZYl9cA1wZjaF3Vbry2L3i1qVg8+CAgNPsXRArPMUMCaOR7oa9Nqntc43JKA=="
+    },
+    "redis@6.3.0_@opentelemetry+api@1.9.1": {
+      "integrity": "sha512-XFQbPie1lGpKeUZ8ySYY43yLnQy/iIQtHNvIr/1XdaABpb96rUSdm3Mfl+98FEVbv9ZJIzINMno5s0Nh8E5LEw==",
+      "dependencies": [
+        "@redis/bloom",
+        "@redis/client",
+        "@redis/json",
+        "@redis/search",
+        "@redis/time-series"
+      ]
     },
     "remeda@2.33.4": {
       "integrity": "sha512-ygHswjlc/opg2VrtiYvUOPLjxjtdKvjGz1/plDhkG66hjNjFr1xmfrs2ClNFo/E6TyUFiwYNh53bKV26oBoMGQ=="
@@ -1733,7 +1777,8 @@
         "npm:@prisma/client@^7.9.1",
         "npm:hono-openapi@^1.3.2",
         "npm:ky@^2.0.2",
-        "npm:prisma@^7.9.1"
+        "npm:prisma@^7.9.1",
+        "npm:redis@^6.3.0"
       ]
     }
   }
