@@ -1,5 +1,7 @@
 // note, always load dotenv first so that other imports in the dependency graph can use it
 import 'dotenv/config'
+// must be imported before the CJS deps it instruments (pg, redis, pino)
+import './instrumentation.ts'
 import { Context, Hono } from 'hono'
 import { logger } from 'hono/logger'
 import { serve } from '@hono/node-server'
@@ -7,13 +9,18 @@ import { openAPIRouteHandler } from 'hono-openapi'
 import { db } from '@mod/db'
 import { api } from './api/mod.ts' // api  routes
 import { auth } from './auth/mod.ts' // auth routes
-import { kv, log, pinoLogger } from '@util'
+import { flushLogs, kv, log } from '@util'
+import { httpInstrumentationMiddleware } from '@hono/otel'
+import { shutdownOtel, USE_OTEL } from './instrumentation.ts'
 import process from 'node:process'
 
 process.env.TZ = 'UTC'
 
 const app = new Hono()
 app.use(logger())
+// @hono/node-server is ESM, so node:http cannot be auto-instrumented; the
+// Hono middleware provides the HTTP server spans/metrics instead.
+if (USE_OTEL) app.use('*', httpInstrumentationMiddleware())
 // TODO start api, queue or event
 // TODO app secret and storage
 // TODO validate app config / env vars
@@ -113,7 +120,9 @@ const exit = async (status: number) => {
     log.error({ err }, 'shutdown: failed to close kv')
   }
 
-  pinoLogger.flush()
+  await shutdownOtel()
+
+  await flushLogs()
   clearTimeout(forceExit)
   process.exit(status)
 }

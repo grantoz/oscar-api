@@ -24,7 +24,7 @@ const overrides = {
     LOG_COLORS: () => 'false',
     LOG_DB_QUERIES: () => 'false',
     LOG_DB_INFO: () => 'false',
-    OTEL_DENO: () => 'false',
+    USE_OTEL: () => 'false',
     OTEL_RESOURCE_ATTRIBUTES: () => 'env=test',
     OTEL_SERVICE_NAME: (v) => `${v}_test`,
     PORT: () => '8001',

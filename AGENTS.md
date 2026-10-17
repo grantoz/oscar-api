@@ -26,9 +26,6 @@ What changed:
 
 Known follow-ups (not yet done):
 
-- **OpenTelemetry** is not wired on Node: `OTEL_DENO`/`@opentelemetry/api`
-  metric calls are no-ops without an SDK provider. Add `@opentelemetry/sdk-node`
-  + auto-instrumentations to restore DB/HTTP metrics and traces.
 - **Linting/formatting**: `oxlint` (`.oxlintrc.json`) and `oxfmt`
   (`.oxfmtrc.json`) are wired up — `npm run lint` / `npm run lint:fix` and
   `npm run format` / `npm run format:check`. CI runs oxlint via
@@ -133,6 +130,27 @@ Seeded test credentials (`prisma/seed/user.ts`): `super@grantoz.io` /
 - Sensitive fields (`password`/`*Confirm`, `token`, `authorization`) are redacted
   via pino `redact`, in addition to the `requestLog` payload redaction.
 - `log.flush()` is called on shutdown in `src/main.ts`.
+
+## Observability (OpenTelemetry)
+
+- Enabled per-process with `USE_OTEL=true` (renamed from the Deno `OTEL_DENO`).
+  `src/instrumentation.ts` starts the SDK and is imported **first** in
+  `src/main.ts`; `shutdownOtel()` flushes it in `exit()`.
+- Packages: `@opentelemetry/sdk-node` (SDK + exporters + env-based config),
+  `@opentelemetry/auto-instrumentations-node` (traces/metrics for `pg`, redis,
+  dns, net, pino, undici, ...), and `@hono/otel` (HTTP server spans/metrics).
+- **Why `@hono/otel`**: `@hono/node-server` is ESM, so it imports `node:http`
+  through the ESM loader and `@opentelemetry/instrumentation-http` cannot patch
+  it. The Hono middleware (`httpInstrumentationMiddleware()`) provides the HTTP
+  server spans (`http.route`, `http.response.status_code`) and the
+  `http.server.request.duration` metric instead.
+- Configuration is standard OTEL env: `OTEL_EXPORTER_OTLP_ENDPOINT` /
+  `OTEL_EXPORTER_OTLP_*_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`,
+  `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_METRIC_EXPORT_INTERVAL`.
+  For local output use `OTEL_TRACES_EXPORTER=console` /
+  `OTEL_METRICS_EXPORTER=console` (or `none`).
+- The custom DB metrics in `mod/db/crudMetrics.ts` are gated by `DB_METRICS`
+  and are no-ops on the API layer unless the SDK is running (`USE_OTEL=true`).
 
 ## Style
 

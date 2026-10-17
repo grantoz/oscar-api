@@ -42,6 +42,61 @@ You can then run the tests:
 npm test
 ```
 
+## Logging
+
+Structured logging is provided by `pino` (`src/util/logger.ts`, exported as
+`log`). Use the standard pino call convention:
+
+```ts
+log.info({ field: value }, 'message')
+log.error({ err }, 'message')
+log.info('message')
+```
+
+Configuration (environment variables):
+
+| Variable             | Default | Description                                                       |
+| -------------------- | ------- | ----------------------------------------------------------------- |
+| `LOG_LEVEL`          | `info`  | pino level (`trace`…`fatal`, `silent`).                           |
+| `LOG_FORMAT`         | —       | Set to `JSON` for newline-delimited JSON output (deployed envs).  |
+| `LOG_COLORS`         | —       | `true` colorizes the `pino-pretty` output used in local dev.      |
+
+Outside `LOG_FORMAT=JSON`, output is pretty-printed for local development; with
+`LOG_FORMAT=JSON` it is raw JSON on stdout. Sensitive fields (`password` /
+`*Confirm`, `token`, `authorization`) are redacted, and the request-scoped
+`actorId` (from the JWT `sub`) is attached to every record via
+`AsyncLocalStorage`.
+
+## Observability (OpenTelemetry)
+
+Telemetry is enabled per-process with `USE_OTEL=true` (off by default in
+`.env.test`). `src/instrumentation.ts` starts the OpenTelemetry SDK and is
+imported **first** in `src/main.ts`, before the CJS dependencies it instruments.
+
+- **Traces / metrics**: auto-instrumentation for `pg`, redis, dns, net, undici,
+  etc. HTTP server spans and the `http.server.request.duration` metric come from
+  the `@hono/otel` middleware rather than `instrumentation-http`, because
+  `@hono/node-server` is ESM and `node:http` cannot be patched.
+- **Logs**: pino records are forwarded to an OTLP logs collector through
+  `pino-opentelemetry-transport` (a pino transport worker); normal stdout
+  logging is preserved. `@opentelemetry/instrumentation-pino` is bundled with the
+  auto-instrumentations but does **not** forward these logs, since it only
+  patches the CJS `require('pino')` path, not this project's ESM import.
+  Records are flushed on shutdown via `flushLogs()` in `src/main.ts`.
+- **DB metrics**: the custom metrics in `mod/db/crudMetrics.ts` are gated by
+  `DB_METRICS` and are no-ops unless the SDK is running.
+
+Configuration uses standard OTEL environment variables, e.g.
+`OTEL_EXPORTER_OTLP_ENDPOINT` (or the per-signal `OTEL_EXPORTER_OTLP_*_ENDPOINT`
+variants), `OTEL_EXPORTER_OTLP_PROTOCOL`,
+`OTEL_EXPORTER_OTLP_LOGS_PROTOCOL`, `OTEL_SERVICE_NAME`,
+`OTEL_RESOURCE_ATTRIBUTES` and `OTEL_METRIC_EXPORT_INTERVAL`. For a local smoke
+test without a collector, set `OTEL_TRACES_EXPORTER=console`,
+`OTEL_METRICS_EXPORTER=console` and/or `OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=console`.
+
+> OTLP log records currently carry no trace correlation (`traceId`/`spanId`);
+> log↔trace linking is a known follow-up.
+
 ## Inspiration
 
 - [Why](./doc/why.md)
@@ -61,6 +116,7 @@ npm test
 - Only emit etag for GET-type routes
 - Per-env seeding (TODO improve)
 - Hono / Zod OpenApi generation
+- Structured logging (pino) and OpenTelemetry traces, metrics and logs
 
 **TODO:**
 
